@@ -59,7 +59,7 @@ function wait(ms: number, signal: AbortSignal) {
 /** Deterministic orchestration step used until real handlers are registered. */
 const defaultHandler: NodeHandler = async ({ node, signal }) => {
   if (node.kind === "delay") {
-    const seconds = Number(node.params?.seconds ?? 0);
+    const seconds = Number(node.params?.['seconds'] ?? 0);
     await wait(Math.min(Math.max(seconds, 0), 30) * 1000, signal);
     return {};
   }
@@ -142,8 +142,8 @@ class ExecutionEngine {
     }
     const index = this.queue.findIndex((item) => item.execution.id === executionId);
     if (index >= 0) {
-      const [item] = this.queue.splice(index, 1);
-      void this.finish(item, "cancelled", "Cancelled before start");
+      const item = this.queue.splice(index, 1)[0];
+      if (item) void this.finish(item, "cancelled", "Cancelled before start");
       return true;
     }
     return false;
@@ -283,7 +283,7 @@ class ExecutionEngine {
         warnings,
         finished_at: new Date().toISOString(),
         duration_ms: durationMs ?? null,
-        progress: status === "completed" ? 100 : undefined,
+        ...(status === "completed" ? { progress: 100 } : {}),
       })
       .catch(() => undefined);
 
