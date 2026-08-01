@@ -42,10 +42,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const workspaces = useMemo(() => data ?? [], [data]);
 
   useEffect(() => {
-    if (!workspaces.length) return;
+    const first = workspaces[0];
+    if (!first) return;
     const stored = window.localStorage.getItem(STORAGE_KEY);
     const valid = workspaces.find((workspace) => workspace.id === (activeId ?? stored));
-    setActiveId((valid ?? workspaces[0]).id);
+    setActiveId((valid ?? first).id);
   }, [workspaces, activeId]);
 
   const value = useMemo<WorkspaceContextValue>(() => {
