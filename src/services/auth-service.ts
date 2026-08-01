@@ -20,7 +20,7 @@ export const authService = {
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: fullName ? { full_name: fullName } : undefined,
+        data: { full_name: fullName ?? "" },
       },
     });
     if (error) throw error;
