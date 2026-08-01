@@ -1,4 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Bell,
@@ -7,6 +8,7 @@ import {
   Globe,
   LogOut,
   Moon,
+  Plus,
   Search,
   Settings,
   Sun,
@@ -24,9 +26,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { CreateWorkspaceWizard } from "@/components/workspace/create-workspace-wizard";
 import { useProfile } from "@/hooks/use-profile";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
@@ -34,6 +44,7 @@ import { useTheme } from "@/lib/theme";
 import { useWorkspace } from "@/lib/workspace";
 
 export function TopBar() {
+  const [createOpen, setCreateOpen] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { theme, toggleTheme } = useTheme();
