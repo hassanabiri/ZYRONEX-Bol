@@ -83,11 +83,34 @@ export function TopBar() {
             <DropdownMenuItem disabled>{t("No workspaces available")}</DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => setCreateOpen(true)}>
+            <Plus className="me-2 size-4" /> {t("Create workspace")}
+          </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => navigate({ to: "/workspace" })}>
             {t("Workspace settings")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t("Create workspace")}</DialogTitle>
+            <DialogDescription>
+              {t("Workspaces isolate your agents, knowledge, members and billing.")}
+            </DialogDescription>
+          </DialogHeader>
+          <CreateWorkspaceWizard
+            onCancel={() => setCreateOpen(false)}
+            onCreated={(workspaceId) => {
+              setCreateOpen(false);
+              setActiveWorkspaceId(workspaceId);
+              navigate({ to: "/dashboard" });
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
 
       <div className="relative ml-auto hidden w-full max-w-sm md:block">
         <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
