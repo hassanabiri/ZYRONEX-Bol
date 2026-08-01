@@ -178,7 +178,7 @@ export const workerService = {
       workspace_id: worker.workspace_id,
       version: next,
       label: label ?? `Version ${next}`,
-      snapshot: toDefinition(worker) as unknown as Record<string, unknown>,
+      snapshot: JSON.parse(JSON.stringify(toDefinition(worker))),
       created_by: actorId ?? null,
     });
     if (error) throw error;
