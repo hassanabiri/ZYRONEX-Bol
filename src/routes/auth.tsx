@@ -168,6 +168,14 @@ function AuthPage() {
                   />
                 </div>
 
+                {mode === "signin" && (
+                  <div className="flex justify-end">
+                    <Button asChild variant="link" size="sm" className="h-auto p-0 text-xs">
+                      <Link to="/forgot-password">{t("Forgot password?")}</Link>
+                    </Button>
+                  </div>
+                )}
+
                 <Button type="submit" className="w-full" disabled={submitting}>
                   {submitting
                     ? t("Please wait…")
