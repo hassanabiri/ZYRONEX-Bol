@@ -157,8 +157,6 @@ const ar: Record<string, string> = {
   "Team Members": "أعضاء الفريق",
   "API Usage": "استخدام الواجهة البرمجية",
   "Monthly Requests": "الطلبات الشهرية",
-  "Recent Activity": "النشاط الأخير",
-  "No activity recorded": "لا يوجد نشاط مسجل",
   "Quick Actions": "إجراءات سريعة",
   "Jump straight into the most common workspace tasks.": "ابدأ مباشرة بأكثر المهام استخداماً.",
   "Create AI Worker": "إنشاء عامل ذكي",
@@ -176,7 +174,6 @@ const ar: Record<string, string> = {
   General: "عام",
   Branding: "الهوية البصرية",
   "Core identity of this workspace.": "الهوية الأساسية لمساحة العمل.",
-  "Workspace name": "اسم مساحة العمل",
   "Subscription plan": "خطة الاشتراك",
   "Logo URL": "رابط الشعار",
   "Brand color": "لون الهوية",
@@ -241,9 +238,6 @@ const ar: Record<string, string> = {
   administration: "الإدارة",
 
   // Wizard
-  "Create workspace": "إنشاء مساحة عمل",
-  "Create your first workspace": "أنشئ مساحة عملك الأولى",
-  "Workspace created": "تم إنشاء مساحة العمل",
   "Ready to create": "جاهز للإنشاء",
   Logo: "الشعار",
 };
