@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Globe } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -8,9 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
+import { authService } from "@/services/auth-service";
+import { profileService } from "@/services/profile-service";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -50,22 +51,14 @@ function AuthPage() {
     setSubmitting(true);
     try {
       if (mode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        const data = await authService.signIn(email, password);
+        if (data.user) {
+          void profileService.touchLastLogin(data.user.id).catch(() => undefined);
+        }
         navigate({ to: "/dashboard", replace: true });
       } else {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: { full_name: fullName },
-          },
-        });
-        if (error) throw error;
-        if (data.session) {
-          navigate({ to: "/dashboard", replace: true });
-        } else {
+        const data = await authService.signUp(email, password, fullName);
+        if (!data.session) {
           toast.success(t("Check your inbox to confirm your email address."));
         }
       }
@@ -172,6 +165,14 @@ function AuthPage() {
                     autoComplete={mode === "signin" ? "current-password" : "new-password"}
                   />
                 </div>
+
+                {mode === "signin" && (
+                  <div className="flex justify-end">
+                    <Button asChild variant="link" size="sm" className="h-auto p-0 text-xs">
+                      <Link to="/forgot-password">{t("Forgot password?")}</Link>
+                    </Button>
+                  </div>
+                )}
 
                 <Button type="submit" className="w-full" disabled={submitting}>
                   {submitting

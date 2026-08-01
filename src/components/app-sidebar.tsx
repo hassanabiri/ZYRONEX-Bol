@@ -69,7 +69,7 @@ export function AppSidebar() {
           <div className="rounded-lg border bg-surface px-3 py-2.5">
             <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{t("Plan")}</p>
             <p className="mt-0.5 truncate text-sm font-medium capitalize">
-              {activeWorkspace?.plan ?? "—"}
+              {activeWorkspace?.subscription_plan ?? "—"}
             </p>
           </div>
         )}

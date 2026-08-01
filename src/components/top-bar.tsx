@@ -13,7 +13,7 @@ import {
   User,
 } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useProfile } from "@/hooks/use-profile";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
@@ -37,11 +38,10 @@ export function TopBar() {
   const queryClient = useQueryClient();
   const { theme, toggleTheme } = useTheme();
   const { t, language, setLanguage } = useI18n();
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
+  const { fullName, email, avatarUrl, initials } = useProfile();
   const { workspaces, activeWorkspace, setActiveWorkspaceId } = useWorkspace();
 
-  const email = user?.email ?? "";
-  const initials = email.slice(0, 2).toUpperCase() || "ZX";
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -150,6 +150,7 @@ export function TopBar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="ml-1 h-9 gap-2 px-1.5">
               <Avatar className="size-7">
+                {avatarUrl && <AvatarImage src={avatarUrl} alt={fullName || email} />}
                 <AvatarFallback className="bg-surface text-[11px] font-semibold">
                   {initials}
                 </AvatarFallback>
@@ -158,7 +159,7 @@ export function TopBar() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-60">
             <DropdownMenuLabel className="flex flex-col gap-0.5">
-              <span className="text-sm font-medium">{t("Signed in")}</span>
+              <span className="text-sm font-medium">{fullName || t("Signed in")}</span>
               <span className="truncate text-xs font-normal text-muted-foreground">{email}</span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

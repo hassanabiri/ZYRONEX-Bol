@@ -1,21 +1,21 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { workspaceService } from "@/services/workspace-service";
+import type { Workspace } from "@/services/types";
 
-export type Workspace = {
-  id: string;
-  name: string;
-  slug: string;
-  plan: string;
-};
+export type { Workspace };
 
 type WorkspaceContextValue = {
   workspaces: Workspace[];
   activeWorkspace: Workspace | null;
   setActiveWorkspaceId: (id: string) => void;
   isLoading: boolean;
+  isFetching: boolean;
+  isLoaded: boolean;
+  refresh: () => void;
 };
 
 const STORAGE_KEY = "zyronex.workspace";
@@ -24,22 +24,36 @@ const WorkspaceContext = createContext<WorkspaceContextValue | undefined>(undefi
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ["workspaces", user?.id],
     enabled: Boolean(user?.id),
-    queryFn: async (): Promise<Workspace[]> => {
-      const { data, error } = await supabase
-        .from("workspaces")
-        .select("id, name, slug, plan")
-        .order("created_at", { ascending: true });
-      if (error) throw error;
-      return data ?? [];
-    },
+    queryFn: () => workspaceService.list(),
+    refetchOnMount: "always",
+    staleTime: 0,
   });
 
   const workspaces = useMemo(() => data ?? [], [data]);
+
+  // Realtime: keep the workspace list in sync across sessions.
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel("workspaces-sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: "workspaces" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["workspaces", user.id] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "workspace_members" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["workspaces", user.id] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, queryClient]);
 
   useEffect(() => {
     const first = workspaces[0];
@@ -55,12 +69,17 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       workspaces,
       activeWorkspace,
       isLoading,
+      isFetching,
+      isLoaded: data !== undefined,
       setActiveWorkspaceId: (id: string) => {
         window.localStorage.setItem(STORAGE_KEY, id);
         setActiveId(id);
       },
+      refresh: () => {
+        queryClient.invalidateQueries({ queryKey: ["workspaces", user?.id] });
+      },
     };
-  }, [workspaces, activeId, isLoading]);
+  }, [workspaces, activeId, isLoading, isFetching, data, queryClient, user?.id]);
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 }
