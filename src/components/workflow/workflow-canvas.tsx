@@ -44,15 +44,15 @@ function toFlow(graph: WorkflowGraph, invalidIds: string[], stepStatus: Record<s
       label: node.label,
       paramSummary: summarize(node),
       invalid: invalidIds.includes(node.id),
-      runStatus: stepStatus[node.id],
-    } satisfies BaseNodeData,
+      ...(stepStatus[node.id] ? { runStatus: stepStatus[node.id] } : {}),
+    } as unknown as Record<string, unknown>,
   }));
   const edges: Edge[] = graph.edges.map((edge) => ({
     id: edge.id,
     source: edge.source,
     target: edge.target,
-    sourceHandle: edge.sourceHandle ?? undefined,
-    label: edge.sourceHandle && edge.sourceHandle !== "out" ? edge.sourceHandle : undefined,
+    sourceHandle: edge.sourceHandle ?? null,
+    ...(edge.sourceHandle && edge.sourceHandle !== "out" ? { label: edge.sourceHandle } : {}),
     animated: stepStatus[edge.target] === "running",
   }));
   return { nodes, edges };
@@ -96,10 +96,10 @@ function CanvasInner({
       setFlowState((current) => {
         const next = toFlow(value, invalidIds, stepStatus);
         return {
-          nodes: next.nodes.map((node) => ({
-            ...node,
-            selected: current.nodes.find((existing) => existing.id === node.id)?.selected,
-          })),
+          nodes: next.nodes.map((node) => {
+            const selected = current.nodes.find((existing) => existing.id === node.id)?.selected;
+            return selected === undefined ? node : { ...node, selected };
+          }),
           edges: next.edges,
         };
       });
@@ -224,7 +224,7 @@ function CanvasInner({
   );
 
   const selectedNodes = useMemo(
-    () => nodes.map((node) => ({ ...node, selected: node.id === selectedId ? true : node.selected })),
+    () => nodes.map((node) => (node.id === selectedId ? { ...node, selected: true } : node)),
     [nodes, selectedId],
   );
 
