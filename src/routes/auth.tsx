@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Globe } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -9,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -32,6 +34,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const { session } = useAuth();
+  const { t, language, setLanguage } = useI18n();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -63,11 +66,11 @@ function AuthPage() {
         if (data.session) {
           navigate({ to: "/dashboard", replace: true });
         } else {
-          toast.success("Check your inbox to confirm your email address.");
+          toast.success(t("Check your inbox to confirm your email address."));
         }
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Authentication failed");
+      toast.error(error instanceof Error ? error.message : t("Authentication failed"));
     } finally {
       setSubmitting(false);
     }
@@ -84,11 +87,12 @@ function AuthPage() {
         </div>
         <div className="max-w-md space-y-5">
           <h2 className="font-display text-4xl font-semibold leading-tight">
-            The operating platform for <span className="brand-text">AI agents</span>.
+            {t("The operating platform for")} <span className="brand-text">{t("AI agents")}</span>.
           </h2>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            Build, orchestrate, govern and scale autonomous agents across every workspace — with
-            enterprise-grade access control, observability and cost management.
+            {t(
+              "Build, orchestrate, govern and scale autonomous agents across every workspace — with enterprise-grade access control, observability and cost management.",
+            )}
           </p>
         </div>
         <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
@@ -96,7 +100,16 @@ function AuthPage() {
         </p>
       </section>
 
-      <section className="flex items-center justify-center px-5 py-12">
+      <section className="relative flex items-center justify-center px-5 py-12">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute end-4 top-4 gap-2"
+          onClick={() => setLanguage(language === "ar" ? "en" : "ar")}
+        >
+          <Globe className="size-4" />
+          {language === "ar" ? "English" : "العربية"}
+        </Button>
         <Card className="w-full max-w-md panel-shadow">
           <CardHeader className="space-y-2">
             <div className="flex items-center gap-2.5 lg:hidden">
@@ -106,24 +119,24 @@ function AuthPage() {
               <span className="font-display text-sm font-semibold tracking-[0.22em]">ZYRONEX</span>
             </div>
             <CardTitle className="text-xl">
-              {mode === "signin" ? "Sign in to your workspace" : "Create your account"}
+              {mode === "signin" ? t("Sign in to your workspace") : t("Create your account")}
             </CardTitle>
             <CardDescription>
               {mode === "signin"
-                ? "Enter your credentials to access the platform."
-                : "A personal workspace is provisioned automatically."}
+                ? t("Enter your credentials to access the platform.")
+                : t("A personal workspace is provisioned automatically.")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs value={mode} onValueChange={(value) => setMode(value as "signin" | "signup")}>
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign in</TabsTrigger>
-                <TabsTrigger value="signup">Register</TabsTrigger>
+                <TabsTrigger value="signin">{t("Sign in")}</TabsTrigger>
+                <TabsTrigger value="signup">{t("Register")}</TabsTrigger>
               </TabsList>
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 <TabsContent value="signup" className="m-0 space-y-2">
-                  <Label htmlFor="fullName">Full name</Label>
+                  <Label htmlFor="fullName">{t("Full name")}</Label>
                   <Input
                     id="fullName"
                     value={fullName}
@@ -134,7 +147,7 @@ function AuthPage() {
                 </TabsContent>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Work email</Label>
+                  <Label htmlFor="email">{t("Work email")}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -147,7 +160,7 @@ function AuthPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t("Password")}</Label>
                   <Input
                     id="password"
                     type="password"
@@ -162,10 +175,10 @@ function AuthPage() {
 
                 <Button type="submit" className="w-full" disabled={submitting}>
                   {submitting
-                    ? "Please wait…"
+                    ? t("Please wait…")
                     : mode === "signin"
-                      ? "Sign in"
-                      : "Create account"}
+                      ? t("Sign in")
+                      : t("Create account")}
                 </Button>
               </form>
             </Tabs>
