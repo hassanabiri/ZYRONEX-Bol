@@ -37,7 +37,9 @@ export const navSections: NavSection[] = [
   {
     label: "Build",
     items: [
+      { title: "AI Workers", to: "/workers", icon: Bot },
       { title: "Agents", to: "/agents", icon: Bot },
+
       { title: "Workflow", to: "/workflow", icon: Workflow },
       { title: "Knowledge", to: "/knowledge", icon: BookOpen },
       { title: "Memory", to: "/memory", icon: Brain },
