@@ -39,32 +39,32 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
 });
 
-type MetricCard = {
-  title: string;
-  icon: LucideIcon;
-  value: string;
-  caption: string;
-  status?: string;
-};
-
-const metrics: MetricCard[] = [
-  {
-    title: "Workspace Status",
-    icon: Building2,
-    value: "Operational",
-    caption: "All workspace services reachable",
-    status: "Healthy",
-  },
-  { title: "Agents", icon: Bot, value: "—", caption: "No agents provisioned yet" },
-  { title: "Resources", icon: Server, value: "—", caption: "Compute and runtime pools" },
-  { title: "Integrations", icon: Plug, value: "—", caption: "Connected external systems" },
-  { title: "Knowledge", icon: BookOpen, value: "—", caption: "Indexed knowledge sources" },
-  { title: "Voice", icon: AudioLines, value: "—", caption: "Voice channels configured" },
-  { title: "Billing", icon: CreditCard, value: "—", caption: "Current cycle consumption" },
-];
-
-export default function DashboardPage() {
+function DashboardPage() {
   const { activeWorkspace } = useWorkspace();
+
+  type MetricCard = {
+    title: string;
+    icon: LucideIcon;
+    value: string;
+    caption: string;
+    status?: string;
+  };
+
+  const metrics: MetricCard[] = [
+    {
+      title: "Workspace Status",
+      icon: Building2,
+      value: "Operational",
+      caption: "All workspace services reachable",
+      status: "Healthy",
+    },
+    { title: "Agents", icon: Bot, value: "—", caption: "No agents provisioned yet" },
+    { title: "Resources", icon: Server, value: "—", caption: "Compute and runtime pools" },
+    { title: "Integrations", icon: Plug, value: "—", caption: "Connected external systems" },
+    { title: "Knowledge", icon: BookOpen, value: "—", caption: "Indexed knowledge sources" },
+    { title: "Voice", icon: AudioLines, value: "—", caption: "Voice channels configured" },
+    { title: "Billing", icon: CreditCard, value: "—", caption: "Current cycle consumption" },
+  ];
 
   return (
     <div className="space-y-8">
