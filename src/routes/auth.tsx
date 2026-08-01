@@ -58,9 +58,7 @@ function AuthPage() {
         navigate({ to: "/dashboard", replace: true });
       } else {
         const data = await authService.signUp(email, password, fullName);
-        if (data.session) {
-          navigate({ to: "/onboarding", replace: true });
-        } else {
+        if (!data.session) {
           toast.success(t("Check your inbox to confirm your email address."));
         }
       }
