@@ -13,6 +13,7 @@ type WorkspaceContextValue = {
   activeWorkspace: Workspace | null;
   setActiveWorkspaceId: (id: string) => void;
   isLoading: boolean;
+  isFetching: boolean;
   refresh: () => void;
 };
 
@@ -25,7 +26,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ["workspaces", user?.id],
     enabled: Boolean(user?.id),
     queryFn: () => workspaceService.list(),
@@ -65,6 +66,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       workspaces,
       activeWorkspace,
       isLoading,
+      isFetching,
       setActiveWorkspaceId: (id: string) => {
         window.localStorage.setItem(STORAGE_KEY, id);
         setActiveId(id);
@@ -73,7 +75,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         queryClient.invalidateQueries({ queryKey: ["workspaces", user?.id] });
       },
     };
-  }, [workspaces, activeId, isLoading, queryClient, user?.id]);
+  }, [workspaces, activeId, isLoading, isFetching, queryClient, user?.id]);
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 }

@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Building2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -31,7 +32,8 @@ export const Route = createFileRoute("/onboarding")({
 });
 
 function OnboardingPage() {
-  const { session, loading } = useAuth();
+  const { session, loading, user } = useAuth();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { t } = useI18n();
   const [name, setName] = useState("");
@@ -47,6 +49,7 @@ function OnboardingPage() {
     setSubmitting(true);
     try {
       await workspaceService.create(name, slug);
+      await queryClient.refetchQueries({ queryKey: ["workspaces", user?.id] });
       toast.success(t("Workspace created"));
       navigate({ to: "/dashboard", replace: true });
     } catch (error) {
