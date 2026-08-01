@@ -78,7 +78,7 @@ function DashboardPage() {
         actions={
           <>
             <Badge variant="outline" className="capitalize">
-              {activeWorkspace?.plan ?? "free"} {t("plan")}
+              {activeWorkspace?.subscription_plan ?? "free"} {t("plan")}
             </Badge>
             <Button variant="outline" size="sm">
               {t("Configure workspace")}
