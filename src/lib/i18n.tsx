@@ -155,8 +155,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 
+const fallbackI18n: I18nContextValue = {
+  language: "en",
+  dir: "ltr",
+  setLanguage: () => {},
+  t: (text: string) => text,
+};
+
 export function useI18n() {
-  const context = useContext(I18nContext);
-  if (!context) throw new Error("useI18n must be used within I18nProvider");
-  return context;
+  return useContext(I18nContext) ?? fallbackI18n;
 }
