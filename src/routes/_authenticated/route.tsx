@@ -25,7 +25,6 @@ function WorkspaceGate({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("GATE", isLoaded, isFetching, workspaces.length);
     if (isLoaded && !isFetching && workspaces.length === 0)
       navigate({ to: "/onboarding", replace: true });
   }, [isLoaded, isFetching, workspaces, navigate]);
