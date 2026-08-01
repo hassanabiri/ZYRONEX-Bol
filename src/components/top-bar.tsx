@@ -1,4 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Bell,
@@ -7,6 +8,7 @@ import {
   Globe,
   LogOut,
   Moon,
+  Plus,
   Search,
   Settings,
   Sun,
@@ -24,9 +26,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { CreateWorkspaceWizard } from "@/components/workspace/create-workspace-wizard";
 import { useProfile } from "@/hooks/use-profile";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
@@ -34,6 +44,7 @@ import { useTheme } from "@/lib/theme";
 import { useWorkspace } from "@/lib/workspace";
 
 export function TopBar() {
+  const [createOpen, setCreateOpen] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { theme, toggleTheme } = useTheme();
@@ -83,11 +94,34 @@ export function TopBar() {
             <DropdownMenuItem disabled>{t("No workspaces available")}</DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => setCreateOpen(true)}>
+            <Plus className="me-2 size-4" /> {t("Create workspace")}
+          </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => navigate({ to: "/workspace" })}>
             {t("Workspace settings")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t("Create workspace")}</DialogTitle>
+            <DialogDescription>
+              {t("Workspaces isolate your agents, knowledge, members and billing.")}
+            </DialogDescription>
+          </DialogHeader>
+          <CreateWorkspaceWizard
+            onCancel={() => setCreateOpen(false)}
+            onCreated={(workspaceId) => {
+              setCreateOpen(false);
+              setActiveWorkspaceId(workspaceId);
+              navigate({ to: "/dashboard" });
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
 
       <div className="relative ml-auto hidden w-full max-w-sm md:block">
         <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
