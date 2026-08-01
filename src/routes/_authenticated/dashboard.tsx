@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useI18n } from "@/lib/i18n";
 import { useWorkspace } from "@/lib/workspace";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -41,6 +42,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 function DashboardPage() {
   const { activeWorkspace } = useWorkspace();
+  const { t } = useI18n();
 
   type MetricCard = {
     title: string;
@@ -69,15 +71,17 @@ function DashboardPage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title={activeWorkspace?.name ?? "Workspace"}
-        description="Operational overview of your agent estate. Modules are scaffolded and awaiting configuration."
+        title={activeWorkspace?.name ?? t("Workspace")}
+        description={t(
+          "Operational overview of your agent estate. Modules are scaffolded and awaiting configuration.",
+        )}
         actions={
           <>
             <Badge variant="outline" className="capitalize">
-              {activeWorkspace?.plan ?? "free"} plan
+              {activeWorkspace?.plan ?? "free"} {t("plan")}
             </Badge>
             <Button variant="outline" size="sm">
-              Configure workspace
+              {t("Configure workspace")}
             </Button>
           </>
         }
@@ -88,16 +92,16 @@ function DashboardPage() {
           <Card key={metric.title} className="panel-shadow">
             <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                {metric.title}
+                {t(metric.title)}
               </CardTitle>
               <metric.icon className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-2">
-              <p className="font-display text-2xl font-semibold">{metric.value}</p>
-              <p className="text-xs text-muted-foreground">{metric.caption}</p>
+              <p className="font-display text-2xl font-semibold">{t(metric.value)}</p>
+              <p className="text-xs text-muted-foreground">{t(metric.caption)}</p>
               {metric.status && (
                 <Badge variant="secondary" className="mt-1 text-[11px]">
-                  {metric.status}
+                  {t(metric.status)}
                 </Badge>
               )}
             </CardContent>
@@ -109,16 +113,18 @@ function DashboardPage() {
         <Card className="panel-shadow lg:col-span-2">
           <CardHeader className="flex-row items-center justify-between space-y-0">
             <div className="space-y-1">
-              <CardTitle className="text-base">Recent Activity</CardTitle>
-              <CardDescription>Audit trail across agents, workflows and members.</CardDescription>
+              <CardTitle className="text-base">{t("Recent Activity")}</CardTitle>
+              <CardDescription>{t("Audit trail across agents, workflows and members.")}</CardDescription>
             </div>
             <Activity className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="flex h-52 flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-center">
-              <p className="text-sm font-medium">No activity recorded</p>
+              <p className="text-sm font-medium">{t("No activity recorded")}</p>
               <p className="max-w-xs text-xs text-muted-foreground">
-                Events will appear here once agents and workflows are running in this workspace.
+                {t(
+                  "Events will appear here once agents and workflows are running in this workspace.",
+                )}
               </p>
             </div>
           </CardContent>
@@ -127,7 +133,7 @@ function DashboardPage() {
         <div className="space-y-4">
           <Card className="panel-shadow">
             <CardHeader className="flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base">System Health</CardTitle>
+              <CardTitle className="text-base">{t("System Health")}</CardTitle>
               <HeartPulse className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-3">
@@ -135,10 +141,10 @@ function DashboardPage() {
                 <div key={service}>
                   {index > 0 && <Separator className="mb-3" />}
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">{service}</span>
+                    <span className="text-muted-foreground">{t(service)}</span>
                     <span className="flex items-center gap-2 font-medium">
                       <span className="size-1.5 rounded-full bg-success" />
-                      Nominal
+                      {t("Nominal")}
                     </span>
                   </div>
                 </div>
@@ -148,12 +154,12 @@ function DashboardPage() {
 
           <Card className="panel-shadow">
             <CardHeader className="flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base">Notifications</CardTitle>
+              <CardTitle className="text-base">{t("Notifications")}</CardTitle>
               <Bell className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <p className="rounded-lg border border-dashed px-3 py-6 text-center text-xs text-muted-foreground">
-                You're all caught up.
+                {t("You're all caught up.")}
               </p>
             </CardContent>
           </Card>

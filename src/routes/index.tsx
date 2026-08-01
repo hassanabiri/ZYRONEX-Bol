@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import { useAuth } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   ssr: false,
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/")({
 function IndexRedirect() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   useEffect(() => {
     if (loading) return;
@@ -37,7 +39,7 @@ function IndexRedirect() {
         <span className="brand-gradient flex size-10 animate-pulse items-center justify-center rounded-xl font-display font-bold text-primary-foreground">
           Z
         </span>
-        <p className="text-sm text-muted-foreground">Loading ZYRONEX…</p>
+        <p className="text-sm text-muted-foreground">{t("Loading ZYRONEX…")}</p>
       </div>
     </div>
   );

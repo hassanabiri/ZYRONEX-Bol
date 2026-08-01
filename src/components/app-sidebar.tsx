@@ -13,6 +13,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useI18n } from "@/lib/i18n";
 import { navSections } from "@/lib/navigation";
 import { useWorkspace } from "@/lib/workspace";
 
@@ -21,9 +22,10 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (router) => router.location.pathname });
   const { activeWorkspace } = useWorkspace();
+  const { t, dir } = useI18n();
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
+    <Sidebar collapsible="icon" side={dir === "rtl" ? "right" : "left"} className="border-r">
       <SidebarHeader className="h-16 justify-center px-3">
         <Link to="/dashboard" className="flex items-center gap-2.5 overflow-hidden">
           <span className="brand-gradient flex size-8 shrink-0 items-center justify-center rounded-lg font-display text-sm font-bold text-primary-foreground">
@@ -32,7 +34,7 @@ export function AppSidebar() {
           {!collapsed && (
             <span className="flex flex-col leading-none">
               <span className="font-display text-sm font-semibold tracking-[0.18em]">ZYRONEX</span>
-              <span className="mt-1 text-[11px] text-muted-foreground">Agent Operating Platform</span>
+              <span className="mt-1 text-[11px] text-muted-foreground">{t("Agent Operating Platform")}</span>
             </span>
           )}
         </Link>
@@ -42,16 +44,16 @@ export function AppSidebar() {
         {navSections.map((section) => (
           <SidebarGroup key={section.label}>
             <SidebarGroupLabel className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-              {section.label}
+              {t(section.label)}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {section.items.map((item) => (
                   <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton asChild isActive={pathname === item.to} tooltip={item.title}>
+                    <SidebarMenuButton asChild isActive={pathname === item.to} tooltip={t(item.title)}>
                       <Link to={item.to} className="flex items-center gap-2.5">
                         <item.icon className="size-4 shrink-0" />
-                        <span className="truncate">{item.title}</span>
+                        <span className="truncate">{t(item.title)}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -65,7 +67,7 @@ export function AppSidebar() {
       <SidebarFooter className="px-3 pb-4">
         {!collapsed && (
           <div className="rounded-lg border bg-surface px-3 py-2.5">
-            <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Plan</p>
+            <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{t("Plan")}</p>
             <p className="mt-0.5 truncate text-sm font-medium capitalize">
               {activeWorkspace?.plan ?? "—"}
             </p>

@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useI18n } from "@/lib/i18n";
 
 export type ModuleCapability = {
   title: string;
@@ -21,12 +22,14 @@ export function ModulePage({
   icon: LucideIcon;
   capabilities: ModuleCapability[];
 }) {
+  const { t } = useI18n();
+
   return (
     <div className="space-y-8">
       <PageHeader
-        title={title}
-        description={description}
-        actions={<Badge variant="outline">Not configured</Badge>}
+        title={t(title)}
+        description={t(description)}
+        actions={<Badge variant="outline">{t("Not configured")}</Badge>}
       />
 
       <Card className="border-dashed">
@@ -35,10 +38,11 @@ export function ModulePage({
             <Icon className="size-5" />
           </span>
           <div className="space-y-1">
-            <CardTitle className="text-base">Module scaffold ready</CardTitle>
+            <CardTitle className="text-base">{t("Module scaffold ready")}</CardTitle>
             <CardDescription>
-              Structure, routing and access control are in place. Implementation lands in a later
-              phase.
+              {t(
+                "Structure, routing and access control are in place. Implementation lands in a later phase.",
+              )}
             </CardDescription>
           </div>
         </CardHeader>
@@ -52,8 +56,8 @@ export function ModulePage({
                 <capability.icon className="size-4" />
               </span>
               <div className="space-y-1">
-                <CardTitle className="text-sm font-semibold">{capability.title}</CardTitle>
-                <CardDescription className="text-sm">{capability.description}</CardDescription>
+                <CardTitle className="text-sm font-semibold">{t(capability.title)}</CardTitle>
+                <CardDescription className="text-sm">{t(capability.description)}</CardDescription>
               </div>
             </CardHeader>
             <CardContent>
