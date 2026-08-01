@@ -49,7 +49,8 @@ function OnboardingPage() {
     setSubmitting(true);
     try {
       await workspaceService.create(name, slug);
-      await queryClient.refetchQueries({ queryKey: ["workspaces", user?.id] });
+      // Drop the cached (empty) list so the workspace gate waits for a fresh read
+      queryClient.removeQueries({ queryKey: ["workspaces", user?.id] });
       toast.success(t("Workspace created"));
       navigate({ to: "/dashboard", replace: true });
     } catch (error) {
