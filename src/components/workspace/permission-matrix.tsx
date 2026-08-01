@@ -22,7 +22,7 @@ import { useI18n } from "@/lib/i18n";
 import { permissionModule } from "@/services/role-service";
 
 /** Permission matrix: permissions grouped by module, toggled per custom role. */
-export function PermissionMatrix({ workspaceId }: { workspaceId?: string }) {
+export function PermissionMatrix({ workspaceId }: { workspaceId: string | undefined }) {
   const { t } = useI18n();
   const { data: roles, isLoading } = useWorkspaceRoles(workspaceId);
   const { data: permissions } = usePermissions();

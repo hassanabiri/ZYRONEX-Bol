@@ -47,7 +47,7 @@ function errorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
-export function TeamManagement({ workspaceId }: { workspaceId?: string }) {
+export function TeamManagement({ workspaceId }: { workspaceId: string | undefined }) {
   const { t } = useI18n();
   const { user } = useAuth();
   const { data: members, isLoading } = useTeamMembers(workspaceId);

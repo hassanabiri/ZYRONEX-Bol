@@ -23,7 +23,7 @@ export const workspaceKeys = {
   permissions: () => ["permissions"] as const,
 };
 
-export function useWorkspaceSettings(workspaceId?: string) {
+export function useWorkspaceSettings(workspaceId: string | undefined) {
   return useQuery({
     queryKey: workspaceKeys.settings(workspaceId ?? "none"),
     enabled: Boolean(workspaceId),
@@ -31,7 +31,7 @@ export function useWorkspaceSettings(workspaceId?: string) {
   });
 }
 
-export function useTeamMembers(workspaceId?: string) {
+export function useTeamMembers(workspaceId: string | undefined) {
   return useQuery({
     queryKey: workspaceKeys.members(workspaceId ?? "none"),
     enabled: Boolean(workspaceId),
@@ -39,7 +39,7 @@ export function useTeamMembers(workspaceId?: string) {
   });
 }
 
-export function useInvitations(workspaceId?: string) {
+export function useInvitations(workspaceId: string | undefined) {
   return useQuery({
     queryKey: workspaceKeys.invitations(workspaceId ?? "none"),
     enabled: Boolean(workspaceId),
@@ -47,7 +47,7 @@ export function useInvitations(workspaceId?: string) {
   });
 }
 
-export function useWorkspaceRoles(workspaceId?: string) {
+export function useWorkspaceRoles(workspaceId: string | undefined) {
   return useQuery({
     queryKey: workspaceKeys.roles(workspaceId ?? "none"),
     enabled: Boolean(workspaceId),
@@ -63,7 +63,7 @@ export function usePermissions() {
   });
 }
 
-export function useWorkspaceMutations(workspaceId?: string) {
+export function useWorkspaceMutations(workspaceId: string | undefined) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const id = workspaceId ?? "";

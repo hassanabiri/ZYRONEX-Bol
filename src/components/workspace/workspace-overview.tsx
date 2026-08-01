@@ -20,7 +20,7 @@ import { useI18n } from "@/lib/i18n";
  * Workspace overview metrics. Values other than team size stay at zero until the
  * corresponding module is implemented — nothing here is simulated.
  */
-export function WorkspaceOverview({ workspaceId }: { workspaceId?: string }) {
+export function WorkspaceOverview({ workspaceId }: { workspaceId: string | undefined }) {
   const { t } = useI18n();
   const { data: members } = useTeamMembers(workspaceId);
 

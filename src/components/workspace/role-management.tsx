@@ -37,7 +37,7 @@ type Draft = {
 
 const emptyDraft: Draft = { name: "", description: "", permissionKeys: [] };
 
-export function RoleManagement({ workspaceId }: { workspaceId?: string }) {
+export function RoleManagement({ workspaceId }: { workspaceId: string | undefined }) {
   const { t } = useI18n();
   const { data: roles, isLoading } = useWorkspaceRoles(workspaceId);
   const { data: permissions } = usePermissions();
