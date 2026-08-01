@@ -14,6 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_workers: {
+        Row: {
+          avatar_url: string | null
+          color: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          icon: string
+          id: string
+          language: string
+          model: string | null
+          name: string
+          provider: string
+          purpose: string
+          region: string
+          status: Database["public"]["Enums"]["worker_status"]
+          tags: string[]
+          timezone: string
+          type: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          color?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string
+          id?: string
+          language?: string
+          model?: string | null
+          name: string
+          provider?: string
+          purpose?: string
+          region?: string
+          status?: Database["public"]["Enums"]["worker_status"]
+          tags?: string[]
+          timezone?: string
+          type?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          color?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string
+          id?: string
+          language?: string
+          model?: string | null
+          name?: string
+          provider?: string
+          purpose?: string
+          region?: string
+          status?: Database["public"]["Enums"]["worker_status"]
+          tags?: string[]
+          timezone?: string
+          type?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_workers_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_roles: {
         Row: {
           created_at: string
@@ -160,6 +234,141 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      worker_activity: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          detail: string | null
+          id: string
+          worker_id: string
+          workspace_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          worker_id: string
+          workspace_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          worker_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_activity_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "ai_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_activity_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_notes: {
+        Row: {
+          author_id: string | null
+          body: string
+          created_at: string
+          id: string
+          worker_id: string
+          workspace_id: string
+        }
+        Insert: {
+          author_id?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          worker_id: string
+          workspace_id: string
+        }
+        Update: {
+          author_id?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          worker_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_notes_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "ai_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_notes_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string | null
+          snapshot: Json
+          version: number
+          worker_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+          snapshot?: Json
+          version?: number
+          worker_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+          snapshot?: Json
+          version?: number
+          worker_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_versions_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "ai_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_versions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workspace_invitations: {
         Row: {
@@ -426,6 +635,7 @@ export type Database = {
       }
     }
     Enums: {
+      worker_status: "draft" | "active" | "paused" | "archived"
       workspace_role: "owner" | "admin" | "member" | "viewer"
     }
     CompositeTypes: {
@@ -554,6 +764,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      worker_status: ["draft", "active", "paused", "archived"],
       workspace_role: ["owner", "admin", "member", "viewer"],
     },
   },
