@@ -14,21 +14,100 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          detail: string | null
+          entity_id: string | null
+          entity_type: string
+          execution_id: string | null
+          id: string
+          result: string
+          worker_id: string | null
+          workflow_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          detail?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          execution_id?: string | null
+          id?: string
+          result?: string
+          worker_id?: string | null
+          workflow_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          detail?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          execution_id?: string | null
+          id?: string
+          result?: string
+          worker_id?: string | null
+          workflow_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_log_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_log_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "ai_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_log_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_log_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_workers: {
         Row: {
           avatar_url: string | null
           color: string
+          concurrency_limit: number
           created_at: string
           created_by: string | null
           description: string | null
+          execution_mode: string
+          execution_timeout_seconds: number
           icon: string
           id: string
           language: string
           model: string | null
           name: string
+          priority: number
           provider: string
           purpose: string
           region: string
+          retry_count: number
           status: Database["public"]["Enums"]["worker_status"]
           tags: string[]
           timezone: string
@@ -39,17 +118,22 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           color?: string
+          concurrency_limit?: number
           created_at?: string
           created_by?: string | null
           description?: string | null
+          execution_mode?: string
+          execution_timeout_seconds?: number
           icon?: string
           id?: string
           language?: string
           model?: string | null
           name: string
+          priority?: number
           provider?: string
           purpose?: string
           region?: string
+          retry_count?: number
           status?: Database["public"]["Enums"]["worker_status"]
           tags?: string[]
           timezone?: string
@@ -60,17 +144,22 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           color?: string
+          concurrency_limit?: number
           created_at?: string
           created_by?: string | null
           description?: string | null
+          execution_mode?: string
+          execution_timeout_seconds?: number
           icon?: string
           id?: string
           language?: string
           model?: string | null
           name?: string
+          priority?: number
           provider?: string
           purpose?: string
           region?: string
+          retry_count?: number
           status?: Database["public"]["Enums"]["worker_status"]
           tags?: string[]
           timezone?: string
@@ -81,6 +170,175 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "ai_workers_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      execution_steps: {
+        Row: {
+          attempt: number
+          created_at: string
+          duration_ms: number | null
+          error: string | null
+          execution_id: string
+          finished_at: string | null
+          id: string
+          label: string | null
+          node_id: string
+          node_type: string
+          output: Json | null
+          seq: number
+          started_at: string | null
+          status: Database["public"]["Enums"]["execution_status"]
+          workspace_id: string
+        }
+        Insert: {
+          attempt?: number
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          execution_id: string
+          finished_at?: string | null
+          id?: string
+          label?: string | null
+          node_id: string
+          node_type: string
+          output?: Json | null
+          seq?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["execution_status"]
+          workspace_id: string
+        }
+        Update: {
+          attempt?: number
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          execution_id?: string
+          finished_at?: string | null
+          id?: string
+          label?: string | null
+          node_id?: string
+          node_type?: string
+          output?: Json | null
+          seq?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["execution_status"]
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "execution_steps_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "execution_steps_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      executions: {
+        Row: {
+          attempt: number
+          created_at: string
+          created_by: string | null
+          duration_ms: number | null
+          error: string | null
+          finished_at: string | null
+          id: string
+          input: Json
+          max_attempts: number
+          output: Json | null
+          priority: number
+          progress: number
+          queued_at: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["execution_status"]
+          timeout_seconds: number
+          trigger: string
+          updated_at: string
+          warnings: string[]
+          worker_id: string | null
+          workflow_id: string | null
+          workflow_version: number | null
+          workspace_id: string
+        }
+        Insert: {
+          attempt?: number
+          created_at?: string
+          created_by?: string | null
+          duration_ms?: number | null
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          input?: Json
+          max_attempts?: number
+          output?: Json | null
+          priority?: number
+          progress?: number
+          queued_at?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["execution_status"]
+          timeout_seconds?: number
+          trigger?: string
+          updated_at?: string
+          warnings?: string[]
+          worker_id?: string | null
+          workflow_id?: string | null
+          workflow_version?: number | null
+          workspace_id: string
+        }
+        Update: {
+          attempt?: number
+          created_at?: string
+          created_by?: string | null
+          duration_ms?: number | null
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          input?: Json
+          max_attempts?: number
+          output?: Json | null
+          priority?: number
+          progress?: number
+          queued_at?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["execution_status"]
+          timeout_seconds?: number
+          trigger?: string
+          updated_at?: string
+          warnings?: string[]
+          worker_id?: string | null
+          workflow_id?: string | null
+          workflow_version?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "executions_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "ai_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "executions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "executions_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -370,6 +628,153 @@ export type Database = {
           },
         ]
       }
+      workflow_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string | null
+          snapshot: Json
+          version: number
+          workflow_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+          snapshot: Json
+          version: number
+          workflow_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+          snapshot?: Json
+          version?: number
+          workflow_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_versions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_versions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_workers: {
+        Row: {
+          created_at: string
+          id: string
+          worker_id: string
+          workflow_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          worker_id: string
+          workflow_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          worker_id?: string
+          workflow_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_workers_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "ai_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_workers_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_workers_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflows: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          graph: Json
+          id: string
+          name: string
+          published_at: string | null
+          status: Database["public"]["Enums"]["workflow_status"]
+          tags: string[]
+          updated_at: string
+          version: number
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          graph?: Json
+          id?: string
+          name: string
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["workflow_status"]
+          tags?: string[]
+          updated_at?: string
+          version?: number
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          graph?: Json
+          id?: string
+          name?: string
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["workflow_status"]
+          tags?: string[]
+          updated_at?: string
+          version?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflows_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspace_invitations: {
         Row: {
           created_at: string
@@ -635,7 +1040,16 @@ export type Database = {
       }
     }
     Enums: {
+      execution_status:
+        | "waiting"
+        | "queued"
+        | "running"
+        | "completed"
+        | "failed"
+        | "cancelled"
+        | "retrying"
       worker_status: "draft" | "active" | "paused" | "archived"
+      workflow_status: "draft" | "published" | "paused" | "archived"
       workspace_role: "owner" | "admin" | "member" | "viewer"
     }
     CompositeTypes: {
@@ -764,7 +1178,17 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      execution_status: [
+        "waiting",
+        "queued",
+        "running",
+        "completed",
+        "failed",
+        "cancelled",
+        "retrying",
+      ],
       worker_status: ["draft", "active", "paused", "archived"],
+      workflow_status: ["draft", "published", "paused", "archived"],
       workspace_role: ["owner", "admin", "member", "viewer"],
     },
   },
