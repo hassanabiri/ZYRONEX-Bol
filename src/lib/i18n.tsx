@@ -251,11 +251,9 @@ const ar: Record<string, string> = {
   "Draft Workers": "المسودات",
   "Archived Workers": "المؤرشفون",
   "Create Worker": "إنشاء عامل",
-  "Create AI Worker": "إنشاء عامل ذكي",
   "Five short steps to define a new worker for this workspace.":
     "خمس خطوات قصيرة لتعريف عامل جديد في مساحة العمل.",
   "Search workers…": "ابحث عن العاملين…",
-  "All statuses": "كل الحالات",
   "All types": "كل الأنواع",
   "Recently updated": "الأحدث تحديثاً",
   "Oldest first": "الأقدم أولاً",
@@ -311,7 +309,6 @@ const ar: Record<string, string> = {
   "Back to AI Workers": "العودة إلى العاملين الأذكياء",
   Summary: "الملخص",
   "Core definition of this worker.": "التعريف الأساسي لهذا العامل.",
-  Created: "تاريخ الإنشاء",
   Tags: "الوسوم",
   "Organize workers across teams and use cases.": "نظّم العاملين حسب الفرق وحالات الاستخدام.",
   "No tags yet": "لا توجد وسوم بعد",
@@ -325,11 +322,7 @@ const ar: Record<string, string> = {
   "Document decisions, prompts to revisit and open questions about this worker.":
     "وثّق القرارات والأسئلة المفتوحة حول هذا العامل.",
   Configuration: "الإعدادات",
-  Knowledge: "المعرفة",
-  Memory: "الذاكرة",
   Tools: "الأدوات",
-  Integrations: "التكاملات",
-  Voice: "الصوت",
   Activity: "النشاط",
   Versions: "الإصدارات",
   "Save Version": "حفظ إصدار",
@@ -337,7 +330,6 @@ const ar: Record<string, string> = {
   "No versions saved": "لا توجد إصدارات محفوظة",
   "Snapshot the current configuration so you can compare and restore it later.":
     "احفظ نسخة من الإعدادات الحالية لمقارنتها أو استعادتها لاحقاً.",
-  "No activity recorded": "لا يوجد نشاط مسجّل",
   "Every change to this worker is captured here as an auditable timeline.":
     "كل تغيير على هذا العامل يُسجَّل هنا ضمن سجل زمني قابل للتدقيق.",
   "No AI workers yet": "لا يوجد عاملون أذكياء بعد",
