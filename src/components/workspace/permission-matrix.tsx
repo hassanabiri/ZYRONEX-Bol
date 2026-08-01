@@ -31,7 +31,9 @@ export function PermissionMatrix({ workspaceId }: { workspaceId?: string }) {
 
   useEffect(() => {
     if (!roles?.length) return;
-    setRoleId((current) => (current && roles.some((role) => role.id === current) ? current : roles[0].id));
+    setRoleId((current) =>
+      current && roles.some((role) => role.id === current) ? current : (roles[0]?.id ?? null),
+    );
   }, [roles]);
 
   const activeRole = roles?.find((role) => role.id === roleId) ?? null;
@@ -64,7 +66,7 @@ export function PermissionMatrix({ workspaceId }: { workspaceId?: string }) {
           <CardDescription>{t("Enable or disable permissions per module.")}</CardDescription>
         </div>
         {roles?.length ? (
-          <Select value={roleId ?? undefined} onValueChange={setRoleId}>
+          <Select value={roleId ?? ""} onValueChange={(value) => setRoleId(value)}>
             <SelectTrigger className="sm:w-56">
               <SelectValue placeholder={t("Select role")} />
             </SelectTrigger>
