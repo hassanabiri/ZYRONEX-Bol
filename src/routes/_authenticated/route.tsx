@@ -21,13 +21,13 @@ function Loader() {
 }
 
 function WorkspaceGate({ children }: { children: React.ReactNode }) {
-  const { workspaces, isLoading, isFetching } = useWorkspace();
+  const { workspaces, isFetching, isLoaded } = useWorkspace();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading && !isFetching && workspaces.length === 0)
+    if (isLoaded && !isFetching && workspaces.length === 0)
       navigate({ to: "/onboarding", replace: true });
-  }, [isLoading, isFetching, workspaces, navigate]);
+  }, [isLoaded, isFetching, workspaces, navigate]);
 
   if (workspaces.length === 0) return <Loader />;
   return <>{children}</>;
