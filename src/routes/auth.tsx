@@ -50,21 +50,15 @@ function AuthPage() {
     setSubmitting(true);
     try {
       if (mode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        const data = await authService.signIn(email, password);
+        if (data.user) {
+          void profileService.touchLastLogin(data.user.id).catch(() => undefined);
+        }
         navigate({ to: "/dashboard", replace: true });
       } else {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: { full_name: fullName },
-          },
-        });
-        if (error) throw error;
+        const data = await authService.signUp(email, password, fullName);
         if (data.session) {
-          navigate({ to: "/dashboard", replace: true });
+          navigate({ to: "/onboarding", replace: true });
         } else {
           toast.success(t("Check your inbox to confirm your email address."));
         }
