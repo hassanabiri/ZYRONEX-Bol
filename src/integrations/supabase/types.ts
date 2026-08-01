@@ -14,27 +14,150 @@ export type Database = {
   }
   public: {
     Tables: {
+      member_roles: {
+        Row: {
+          created_at: string
+          id: string
+          member_id: string
+          role_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          member_id: string
+          role_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          member_id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_roles_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permissions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          key: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          key: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          key?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
+          email: string | null
           full_name: string | null
           id: string
+          last_login: string | null
+          status: string
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id: string
+          last_login?: string | null
+          status?: string
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
+          last_login?: string | null
+          status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission_id: string
+          role_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission_id: string
+          role_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission_id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
         }
         Relationships: []
       }
@@ -43,6 +166,8 @@ export type Database = {
           created_at: string
           id: string
           role: Database["public"]["Enums"]["workspace_role"]
+          role_id: string | null
+          status: string
           user_id: string
           workspace_id: string
         }
@@ -50,6 +175,8 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["workspace_role"]
+          role_id?: string | null
+          status?: string
           user_id: string
           workspace_id: string
         }
@@ -57,10 +184,19 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["workspace_role"]
+          role_id?: string | null
+          status?: string
           user_id?: string
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "workspace_members_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "workspace_members_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -73,29 +209,35 @@ export type Database = {
       workspaces: {
         Row: {
           created_at: string
-          created_by: string
           id: string
+          logo: string | null
           name: string
-          plan: string
+          owner_user_id: string
           slug: string
+          status: string
+          subscription_plan: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          created_by: string
           id?: string
+          logo?: string | null
           name: string
-          plan?: string
+          owner_user_id: string
           slug: string
+          status?: string
+          subscription_plan?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          created_by?: string
           id?: string
+          logo?: string | null
           name?: string
-          plan?: string
+          owner_user_id?: string
           slug?: string
+          status?: string
+          subscription_plan?: string
           updated_at?: string
         }
         Relationships: []
@@ -105,6 +247,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_workspace: {
+        Args: { _name: string; _slug: string }
+        Returns: string
+      }
       has_workspace_role: {
         Args: {
           _roles: Database["public"]["Enums"]["workspace_role"][]
@@ -117,6 +263,7 @@ export type Database = {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
       }
+      member_workspace: { Args: { _member_id: string }; Returns: string }
     }
     Enums: {
       workspace_role: "owner" | "admin" | "member" | "viewer"
