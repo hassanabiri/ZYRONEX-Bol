@@ -420,6 +420,10 @@ export type Database = {
         Returns: boolean
       }
       member_workspace: { Args: { _member_id: string }; Returns: string }
+      shares_workspace: {
+        Args: { _other_user_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       workspace_role: "owner" | "admin" | "member" | "viewer"
