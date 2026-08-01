@@ -78,7 +78,7 @@ export function NodeInspector({
             )}
             {param.type === "select" && (
               <Select
-                disabled={readOnly}
+                disabled={Boolean(readOnly)}
                 value={String(value ?? "")}
                 onValueChange={(next) => setParam(param.key, next)}
               >
