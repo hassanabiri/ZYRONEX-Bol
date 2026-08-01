@@ -31,6 +31,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     queryKey: ["workspaces", user?.id],
     enabled: Boolean(user?.id),
     queryFn: () => workspaceService.list(),
+    refetchOnMount: "always",
+    staleTime: 0,
   });
 
   const workspaces = useMemo(() => data ?? [], [data]);
