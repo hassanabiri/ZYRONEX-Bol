@@ -517,3 +517,19 @@ export const API_SCOPES = [
 ] as const;
 
 export const CONFLICT_STRATEGIES = ["source_wins", "target_wins", "newest_wins", "manual"] as const;
+
+/** Platform events a webhook endpoint can subscribe to. */
+export const WEBHOOK_EVENTS: string[] = [
+  "execution.queued",
+  "execution.started",
+  "execution.completed",
+  "execution.failed",
+  "workflow.published",
+  "worker.created",
+  "worker.updated",
+  "knowledge.document.indexed",
+  "integration.connected",
+  "integration.failed",
+  "sync.completed",
+  "sync.failed",
+];

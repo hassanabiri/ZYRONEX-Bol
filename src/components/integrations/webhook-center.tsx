@@ -49,7 +49,7 @@ export function WebhookCenter({ workspaceId }: { workspaceId: string | undefined
 
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [direction, setDirection] = useState<"inbound" | "outbound">("outbound");
+  const [direction, setDirection] = useState<"incoming" | "outgoing">("outgoing");
   const [url, setUrl] = useState("");
   const [events, setEvents] = useState<string[]>([]);
   const [secret, setSecret] = useState<string | null>(null);
@@ -72,7 +72,7 @@ export function WebhookCenter({ workspaceId }: { workspaceId: string | undefined
       mutations.createWebhook.mutateAsync({
         name: name.trim(),
         direction,
-        url: direction === "outbound" ? url.trim() : null,
+        url: direction === "outgoing" ? url.trim() : null,
         events,
       }),
     );
@@ -136,13 +136,13 @@ export function WebhookCenter({ workspaceId }: { workspaceId: string | undefined
                       </TableCell>
                       <TableCell>
                         <Switch
-                          checked={endpoint.active}
+                          checked={endpoint.enabled}
                           onCheckedChange={(checked) =>
                             void run(
                               "Webhook updated",
                               mutations.updateWebhook.mutateAsync({
                                 endpointId: endpoint.id,
-                                patch: { active: checked },
+                                patch: { enabled: checked },
                               }),
                             )
                           }
@@ -209,7 +209,7 @@ export function WebhookCenter({ workspaceId }: { workspaceId: string | undefined
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant={delivery.success ? "default" : "destructive"}>
-                  {delivery.response_status ?? (delivery.success ? "ok" : "failed")}
+                  {delivery.status_code ?? (delivery.success ? "ok" : "failed")}
                 </Badge>
                 {!delivery.success && (
                   <Button
@@ -245,18 +245,18 @@ export function WebhookCenter({ workspaceId }: { workspaceId: string | undefined
               <Label>{t("Direction")}</Label>
               <Select
                 value={direction}
-                onValueChange={(value) => setDirection(value as "inbound" | "outbound")}
+                onValueChange={(value) => setDirection(value as "incoming" | "outgoing")}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="inbound">{t("Inbound")}</SelectItem>
-                  <SelectItem value="outbound">{t("Outbound")}</SelectItem>
+                  <SelectItem value="incoming">{t("Inbound")}</SelectItem>
+                  <SelectItem value="outgoing">{t("Outbound")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            {direction === "outbound" && (
+            {direction === "outgoing" && (
               <div className="space-y-2">
                 <Label htmlFor="hook-url">{t("Target URL")}</Label>
                 <Input
@@ -270,7 +270,7 @@ export function WebhookCenter({ workspaceId }: { workspaceId: string | undefined
             <div className="space-y-2">
               <Label>{t("Events")}</Label>
               <div className="grid max-h-48 gap-1.5 overflow-y-auto rounded-md border p-2">
-                {WEBHOOK_EVENTS.map((event) => (
+                {WEBHOOK_EVENTS.map((event: string) => (
                   <label key={event} className="flex items-center gap-2 text-xs">
                     <input
                       type="checkbox"
