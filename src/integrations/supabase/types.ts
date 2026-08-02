@@ -192,6 +192,68 @@ export type Database = {
           },
         ]
       }
+      api_keys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          environment: string
+          expires_at: string | null
+          id: string
+          key_hash: string
+          last_used_at: string | null
+          name: string
+          prefix: string
+          revoked_at: string | null
+          rotated_at: string | null
+          scopes: string[]
+          updated_at: string
+          usage_count: number
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          environment?: string
+          expires_at?: string | null
+          id?: string
+          key_hash: string
+          last_used_at?: string | null
+          name: string
+          prefix: string
+          revoked_at?: string | null
+          rotated_at?: string | null
+          scopes?: string[]
+          updated_at?: string
+          usage_count?: number
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          environment?: string
+          expires_at?: string | null
+          id?: string
+          key_hash?: string
+          last_used_at?: string | null
+          name?: string
+          prefix?: string
+          revoked_at?: string | null
+          rotated_at?: string | null
+          scopes?: string[]
+          updated_at?: string
+          usage_count?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       execution_steps: {
         Row: {
           attempt: number
@@ -354,6 +416,287 @@ export type Database = {
           },
           {
             foreignKeyName: "executions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_credentials: {
+        Row: {
+          ciphertext: string
+          created_at: string
+          fingerprint: string
+          id: string
+          integration_id: string
+          rotated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          ciphertext: string
+          created_at?: string
+          fingerprint: string
+          id?: string
+          integration_id: string
+          rotated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          ciphertext?: string
+          created_at?: string
+          fingerprint?: string
+          id?: string
+          integration_id?: string
+          rotated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_credentials_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: true
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "integration_credentials_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_logs: {
+        Row: {
+          actor_id: string | null
+          attempt: number
+          created_at: string
+          endpoint: string | null
+          id: string
+          integration_id: string | null
+          kind: Database["public"]["Enums"]["integration_log_kind"]
+          latency_ms: number | null
+          message: string | null
+          method: string | null
+          payload: Json | null
+          status_code: number | null
+          workspace_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          attempt?: number
+          created_at?: string
+          endpoint?: string | null
+          id?: string
+          integration_id?: string | null
+          kind: Database["public"]["Enums"]["integration_log_kind"]
+          latency_ms?: number | null
+          message?: string | null
+          method?: string | null
+          payload?: Json | null
+          status_code?: number | null
+          workspace_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          attempt?: number
+          created_at?: string
+          endpoint?: string | null
+          id?: string
+          integration_id?: string | null
+          kind?: Database["public"]["Enums"]["integration_log_kind"]
+          latency_ms?: number | null
+          message?: string | null
+          method?: string | null
+          payload?: Json | null
+          status_code?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_logs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "integration_logs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_sync_runs: {
+        Row: {
+          attempt: number
+          conflict_strategy: string
+          conflicts: number
+          created_at: string
+          created_by: string | null
+          duration_ms: number | null
+          error: string | null
+          finished_at: string | null
+          id: string
+          integration_id: string
+          max_attempts: number
+          mode: Database["public"]["Enums"]["sync_mode"]
+          queued_at: string
+          records_processed: number
+          started_at: string | null
+          status: Database["public"]["Enums"]["sync_run_status"]
+          workspace_id: string
+        }
+        Insert: {
+          attempt?: number
+          conflict_strategy?: string
+          conflicts?: number
+          created_at?: string
+          created_by?: string | null
+          duration_ms?: number | null
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          integration_id: string
+          max_attempts?: number
+          mode?: Database["public"]["Enums"]["sync_mode"]
+          queued_at?: string
+          records_processed?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["sync_run_status"]
+          workspace_id: string
+        }
+        Update: {
+          attempt?: number
+          conflict_strategy?: string
+          conflicts?: number
+          created_at?: string
+          created_by?: string | null
+          duration_ms?: number | null
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          integration_id?: string
+          max_attempts?: number
+          mode?: Database["public"]["Enums"]["sync_mode"]
+          queued_at?: string
+          records_processed?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["sync_run_status"]
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_sync_runs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "integration_sync_runs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integrations: {
+        Row: {
+          auth_type: Database["public"]["Enums"]["integration_auth_type"]
+          avg_latency_ms: number
+          category: string
+          config: Json
+          created_at: string
+          created_by: string | null
+          credential_fingerprint: string | null
+          credential_updated_at: string | null
+          description: string | null
+          enabled: boolean
+          environment: string
+          error_count: number
+          expires_at: string | null
+          id: string
+          last_checked_at: string | null
+          last_error: string | null
+          last_sync_at: string | null
+          name: string
+          provider: string
+          request_count: number
+          scopes: string[]
+          status: Database["public"]["Enums"]["integration_status"]
+          sync_interval_minutes: number
+          sync_mode: Database["public"]["Enums"]["sync_mode"]
+          tags: string[]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          auth_type?: Database["public"]["Enums"]["integration_auth_type"]
+          avg_latency_ms?: number
+          category: string
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          credential_fingerprint?: string | null
+          credential_updated_at?: string | null
+          description?: string | null
+          enabled?: boolean
+          environment?: string
+          error_count?: number
+          expires_at?: string | null
+          id?: string
+          last_checked_at?: string | null
+          last_error?: string | null
+          last_sync_at?: string | null
+          name: string
+          provider: string
+          request_count?: number
+          scopes?: string[]
+          status?: Database["public"]["Enums"]["integration_status"]
+          sync_interval_minutes?: number
+          sync_mode?: Database["public"]["Enums"]["sync_mode"]
+          tags?: string[]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          auth_type?: Database["public"]["Enums"]["integration_auth_type"]
+          avg_latency_ms?: number
+          category?: string
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          credential_fingerprint?: string | null
+          credential_updated_at?: string | null
+          description?: string | null
+          enabled?: boolean
+          environment?: string
+          error_count?: number
+          expires_at?: string | null
+          id?: string
+          last_checked_at?: string | null
+          last_error?: string | null
+          last_sync_at?: string | null
+          name?: string
+          provider?: string
+          request_count?: number
+          scopes?: string[]
+          status?: Database["public"]["Enums"]["integration_status"]
+          sync_interval_minutes?: number
+          sync_mode?: Database["public"]["Enums"]["sync_mode"]
+          tags?: string[]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integrations_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -658,6 +1001,65 @@ export type Database = {
           },
           {
             foreignKeyName: "knowledge_folders_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_listings: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          install_count: number
+          manifest: Json
+          name: string
+          publisher: string
+          slug: string
+          status: Database["public"]["Enums"]["marketplace_listing_status"]
+          updated_at: string
+          version: string
+          workspace_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          install_count?: number
+          manifest?: Json
+          name: string
+          publisher: string
+          slug: string
+          status?: Database["public"]["Enums"]["marketplace_listing_status"]
+          updated_at?: string
+          version?: string
+          workspace_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          install_count?: number
+          manifest?: Json
+          name?: string
+          publisher?: string
+          slug?: string
+          status?: Database["public"]["Enums"]["marketplace_listing_status"]
+          updated_at?: string
+          version?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_listings_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -1213,6 +1615,141 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      webhook_deliveries: {
+        Row: {
+          attempt: number
+          created_at: string
+          direction: Database["public"]["Enums"]["webhook_direction"]
+          endpoint_id: string
+          error: string | null
+          event: string
+          id: string
+          latency_ms: number | null
+          payload: Json | null
+          signature_valid: boolean | null
+          status_code: number | null
+          success: boolean
+          workspace_id: string
+        }
+        Insert: {
+          attempt?: number
+          created_at?: string
+          direction: Database["public"]["Enums"]["webhook_direction"]
+          endpoint_id: string
+          error?: string | null
+          event: string
+          id?: string
+          latency_ms?: number | null
+          payload?: Json | null
+          signature_valid?: boolean | null
+          status_code?: number | null
+          success?: boolean
+          workspace_id: string
+        }
+        Update: {
+          attempt?: number
+          created_at?: string
+          direction?: Database["public"]["Enums"]["webhook_direction"]
+          endpoint_id?: string
+          error?: string | null
+          event?: string
+          id?: string
+          latency_ms?: number | null
+          payload?: Json | null
+          signature_valid?: boolean | null
+          status_code?: number | null
+          success?: boolean
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_deliveries_endpoint_id_fkey"
+            columns: ["endpoint_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_endpoints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_deliveries_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_endpoints: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          direction: Database["public"]["Enums"]["webhook_direction"]
+          enabled: boolean
+          events: string[]
+          id: string
+          integration_id: string | null
+          last_delivery_at: string | null
+          name: string
+          retry_limit: number
+          signing_secret_hint: string | null
+          slug: string
+          timeout_seconds: number
+          updated_at: string
+          url: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          direction?: Database["public"]["Enums"]["webhook_direction"]
+          enabled?: boolean
+          events?: string[]
+          id?: string
+          integration_id?: string | null
+          last_delivery_at?: string | null
+          name: string
+          retry_limit?: number
+          signing_secret_hint?: string | null
+          slug: string
+          timeout_seconds?: number
+          updated_at?: string
+          url?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          direction?: Database["public"]["Enums"]["webhook_direction"]
+          enabled?: boolean
+          events?: string[]
+          id?: string
+          integration_id?: string | null
+          last_delivery_at?: string | null
+          name?: string
+          retry_limit?: number
+          signing_secret_hint?: string | null
+          slug?: string
+          timeout_seconds?: number
+          updated_at?: string
+          url?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_endpoints_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_endpoints_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       worker_activity: {
         Row: {
@@ -1838,6 +2375,33 @@ export type Database = {
         | "failed"
         | "cancelled"
         | "retrying"
+      integration_auth_type:
+        | "oauth2"
+        | "api_key"
+        | "basic"
+        | "bearer"
+        | "webhook"
+        | "custom"
+        | "none"
+      integration_log_kind:
+        | "request"
+        | "response"
+        | "error"
+        | "retry"
+        | "auth"
+        | "connection"
+        | "sync"
+        | "webhook"
+      integration_status:
+        | "pending"
+        | "healthy"
+        | "warning"
+        | "disconnected"
+        | "expired"
+        | "auth_error"
+        | "rate_limited"
+        | "paused"
+        | "archived"
       knowledge_source:
         | "pdf"
         | "word"
@@ -1854,6 +2418,12 @@ export type Database = {
         | "notion"
         | "google_drive"
       knowledge_status: "draft" | "active" | "archived"
+      marketplace_listing_status:
+        | "draft"
+        | "submitted"
+        | "approved"
+        | "rejected"
+        | "published"
       memory_entry_status: "active" | "archived" | "expired"
       memory_event_type:
         | "created"
@@ -1866,6 +2436,15 @@ export type Database = {
         | "deleted"
       memory_layer: "short_term" | "long_term" | "session" | "persistent"
       prompt_scope: "workspace" | "worker" | "system" | "shared"
+      sync_mode: "manual" | "automatic" | "scheduled" | "realtime"
+      sync_run_status:
+        | "queued"
+        | "running"
+        | "completed"
+        | "failed"
+        | "conflict"
+        | "cancelled"
+      webhook_direction: "incoming" | "outgoing"
       worker_status: "draft" | "active" | "paused" | "archived"
       workflow_status: "draft" | "published" | "paused" | "archived"
       workspace_role: "owner" | "admin" | "member" | "viewer"
@@ -2017,6 +2596,36 @@ export const Constants = {
         "cancelled",
         "retrying",
       ],
+      integration_auth_type: [
+        "oauth2",
+        "api_key",
+        "basic",
+        "bearer",
+        "webhook",
+        "custom",
+        "none",
+      ],
+      integration_log_kind: [
+        "request",
+        "response",
+        "error",
+        "retry",
+        "auth",
+        "connection",
+        "sync",
+        "webhook",
+      ],
+      integration_status: [
+        "pending",
+        "healthy",
+        "warning",
+        "disconnected",
+        "expired",
+        "auth_error",
+        "rate_limited",
+        "paused",
+        "archived",
+      ],
       knowledge_source: [
         "pdf",
         "word",
@@ -2034,6 +2643,13 @@ export const Constants = {
         "google_drive",
       ],
       knowledge_status: ["draft", "active", "archived"],
+      marketplace_listing_status: [
+        "draft",
+        "submitted",
+        "approved",
+        "rejected",
+        "published",
+      ],
       memory_entry_status: ["active", "archived", "expired"],
       memory_event_type: [
         "created",
@@ -2047,6 +2663,16 @@ export const Constants = {
       ],
       memory_layer: ["short_term", "long_term", "session", "persistent"],
       prompt_scope: ["workspace", "worker", "system", "shared"],
+      sync_mode: ["manual", "automatic", "scheduled", "realtime"],
+      sync_run_status: [
+        "queued",
+        "running",
+        "completed",
+        "failed",
+        "conflict",
+        "cancelled",
+      ],
+      webhook_direction: ["incoming", "outgoing"],
       worker_status: ["draft", "active", "paused", "archived"],
       workflow_status: ["draft", "published", "paused", "archived"],
       workspace_role: ["owner", "admin", "member", "viewer"],
