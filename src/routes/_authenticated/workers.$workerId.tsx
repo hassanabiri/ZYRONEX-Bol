@@ -81,20 +81,7 @@ export const Route = createFileRoute("/_authenticated/workers/$workerId")({
 
 const PLACEHOLDER_TABS = [
   {
-    value: "knowledge",
-    label: "Knowledge",
-    icon: BookOpen,
-    title: "No knowledge sources linked",
-    description: "Attach documents and collections from the Knowledge Center once they are available.",
-  },
-  {
-    value: "memory",
-    label: "Memory",
-    icon: Brain,
-    title: "No memory stores linked",
-    description: "Short and long term memory policies for this worker will be configured here.",
-  },
-  {
+
     value: "tools",
     label: "Tools",
     icon: Wrench,
