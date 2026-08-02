@@ -37,7 +37,7 @@ export function MarketplacePanel({ workspaceId }: { workspaceId: string | undefi
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [publisher, setPublisher] = useState("");
-  const [category, setCategory] = useState(INTEGRATION_CATEGORIES[0]?.id ?? "custom");
+  const [category, setCategory] = useState<string>(INTEGRATION_CATEGORIES[0]?.id ?? "custom");
   const [description, setDescription] = useState("");
 
   async function run(label: string, action: Promise<unknown>) {
