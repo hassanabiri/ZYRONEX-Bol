@@ -98,7 +98,7 @@ export function UsageTracking({
                 <TableRow>
                   <TableHead>{t("Date")}</TableHead>
                   <TableHead>{t("Category")}</TableHead>
-                  <TableHead className="hidden md:table-cell">{t("Description")}</TableHead>
+                  <TableHead className="hidden md:table-cell">{t("Reference")}</TableHead>
                   <TableHead className="text-right">{t("Quantity")}</TableHead>
                   <TableHead className="hidden text-right lg:table-cell">{t("Unit cost")}</TableHead>
                   <TableHead className="text-right">{t("Total")}</TableHead>
