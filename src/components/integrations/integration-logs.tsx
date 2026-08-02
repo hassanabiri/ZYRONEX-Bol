@@ -45,7 +45,7 @@ export function IntegrationLogs({
     return logs.filter((log) => {
       if (kind !== "all" && log.kind !== kind) return false;
       if (!query) return true;
-      return log.message.toLowerCase().includes(query);
+      return (log.message ?? "").toLowerCase().includes(query);
     });
   }, [logs, kind, term]);
 
