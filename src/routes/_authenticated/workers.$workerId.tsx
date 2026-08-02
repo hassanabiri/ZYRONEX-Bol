@@ -25,6 +25,10 @@ import { toast } from "sonner";
 
 import { EmptyState } from "@/components/empty-state";
 import { WorkerAvatar } from "@/components/workers/worker-avatar";
+import {
+  WorkerKnowledgeTab,
+  WorkerMemoryTab,
+} from "@/components/workers/worker-knowledge-memory";
 import { downloadWorker } from "@/components/workers/workers-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
