@@ -1,5 +1,7 @@
 import {
+  Activity,
   LayoutDashboard,
+
   Building2,
   Bot,
   Workflow,
