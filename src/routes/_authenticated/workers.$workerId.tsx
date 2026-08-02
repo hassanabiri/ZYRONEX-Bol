@@ -221,6 +221,8 @@ function WorkerDetailRoute() {
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1">
           <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
           <TabsTrigger value="configuration">{t("Configuration")}</TabsTrigger>
+          <TabsTrigger value="knowledge">{t("Knowledge")}</TabsTrigger>
+          <TabsTrigger value="memory">{t("Memory")}</TabsTrigger>
           {PLACEHOLDER_TABS.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value}>
               {t(tab.label)}
@@ -238,11 +240,20 @@ function WorkerDetailRoute() {
           <ConfigurationTab worker={worker} />
         </TabsContent>
 
+        <TabsContent value="knowledge">
+          <WorkerKnowledgeTab worker={worker} />
+        </TabsContent>
+
+        <TabsContent value="memory">
+          <WorkerMemoryTab worker={worker} />
+        </TabsContent>
+
         {PLACEHOLDER_TABS.map((tab) => (
           <TabsContent key={tab.value} value={tab.value}>
             <EmptyState icon={tab.icon} title={tab.title} description={tab.description} />
           </TabsContent>
         ))}
+
 
         <TabsContent value="activity">
           <ActivityTab worker={worker} />
