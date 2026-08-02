@@ -114,7 +114,7 @@ export function UsageTracking({
                       {t(USAGE_CATEGORY_MAP.get(record.category)?.label ?? record.category)}
                     </TableCell>
                     <TableCell className="hidden max-w-64 truncate text-xs text-muted-foreground md:table-cell">
-                      {record.description ?? "—"}
+                      {record.reference_type ?? "—"}
                     </TableCell>
                     <TableCell className="text-right text-sm">
                       {Number(record.quantity).toLocaleString()} {record.unit}
