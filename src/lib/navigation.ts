@@ -41,6 +41,8 @@ export const navSections: NavSection[] = [
       { title: "Agents", to: "/agents", icon: Bot },
 
       { title: "Workflow", to: "/workflow", icon: Workflow },
+      { title: "Executions", to: "/executions", icon: Activity },
+
       { title: "Knowledge", to: "/knowledge", icon: BookOpen },
       { title: "Memory", to: "/memory", icon: Brain },
       { title: "Voice", to: "/voice", icon: AudioLines },

@@ -28,6 +28,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedVoiceRouteImport } from './routes/_authenticated/voice'
 import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated/workspace'
 import { Route as AuthenticatedExecutionsIndexRouteImport } from './routes/_authenticated/executions.index'
+import { Route as AuthenticatedExecutionsExecutionIdRouteImport } from './routes/_authenticated/executions.$executionId'
 import { Route as AuthenticatedWorkersIndexRouteImport } from './routes/_authenticated/workers.index'
 import { Route as AuthenticatedWorkersWorkerIdRouteImport } from './routes/_authenticated/workers.$workerId'
 import { Route as AuthenticatedWorkflowIndexRouteImport } from './routes/_authenticated/workflow.index'
@@ -130,6 +131,12 @@ const AuthenticatedExecutionsIndexRoute =
     path: '/executions/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedExecutionsExecutionIdRoute =
+  AuthenticatedExecutionsExecutionIdRouteImport.update({
+    id: '/executions/$executionId',
+    path: '/executions/$executionId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedWorkersIndexRoute =
   AuthenticatedWorkersIndexRouteImport.update({
     id: '/workers/',
@@ -173,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/voice': typeof AuthenticatedVoiceRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
+  '/executions/$executionId': typeof AuthenticatedExecutionsExecutionIdRoute
   '/workers/$workerId': typeof AuthenticatedWorkersWorkerIdRoute
   '/workflow/$workflowId': typeof AuthenticatedWorkflowWorkflowIdRoute
   '/executions/': typeof AuthenticatedExecutionsIndexRoute
@@ -197,6 +205,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/voice': typeof AuthenticatedVoiceRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
+  '/executions/$executionId': typeof AuthenticatedExecutionsExecutionIdRoute
   '/workers/$workerId': typeof AuthenticatedWorkersWorkerIdRoute
   '/workflow/$workflowId': typeof AuthenticatedWorkflowWorkflowIdRoute
   '/executions': typeof AuthenticatedExecutionsIndexRoute
@@ -223,6 +232,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/voice': typeof AuthenticatedVoiceRoute
   '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
+  '/_authenticated/executions/$executionId': typeof AuthenticatedExecutionsExecutionIdRoute
   '/_authenticated/workers/$workerId': typeof AuthenticatedWorkersWorkerIdRoute
   '/_authenticated/workflow/$workflowId': typeof AuthenticatedWorkflowWorkflowIdRoute
   '/_authenticated/executions/': typeof AuthenticatedExecutionsIndexRoute
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/voice'
     | '/workspace'
+    | '/executions/$executionId'
     | '/workers/$workerId'
     | '/workflow/$workflowId'
     | '/executions/'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/voice'
     | '/workspace'
+    | '/executions/$executionId'
     | '/workers/$workerId'
     | '/workflow/$workflowId'
     | '/executions'
@@ -298,6 +310,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/voice'
     | '/_authenticated/workspace'
+    | '/_authenticated/executions/$executionId'
     | '/_authenticated/workers/$workerId'
     | '/_authenticated/workflow/$workflowId'
     | '/_authenticated/executions/'
@@ -449,6 +462,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedExecutionsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/executions/$executionId': {
+      id: '/_authenticated/executions/$executionId'
+      path: '/executions/$executionId'
+      fullPath: '/executions/$executionId'
+      preLoaderRoute: typeof AuthenticatedExecutionsExecutionIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/workers/': {
       id: '/_authenticated/workers/'
       path: '/workers'
@@ -493,6 +513,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedVoiceRoute: typeof AuthenticatedVoiceRoute
   AuthenticatedWorkspaceRoute: typeof AuthenticatedWorkspaceRoute
+  AuthenticatedExecutionsExecutionIdRoute: typeof AuthenticatedExecutionsExecutionIdRoute
   AuthenticatedWorkersWorkerIdRoute: typeof AuthenticatedWorkersWorkerIdRoute
   AuthenticatedWorkflowWorkflowIdRoute: typeof AuthenticatedWorkflowWorkflowIdRoute
   AuthenticatedExecutionsIndexRoute: typeof AuthenticatedExecutionsIndexRoute
@@ -513,6 +534,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedVoiceRoute: AuthenticatedVoiceRoute,
   AuthenticatedWorkspaceRoute: AuthenticatedWorkspaceRoute,
+  AuthenticatedExecutionsExecutionIdRoute:
+    AuthenticatedExecutionsExecutionIdRoute,
   AuthenticatedWorkersWorkerIdRoute: AuthenticatedWorkersWorkerIdRoute,
   AuthenticatedWorkflowWorkflowIdRoute: AuthenticatedWorkflowWorkflowIdRoute,
   AuthenticatedExecutionsIndexRoute: AuthenticatedExecutionsIndexRoute,
