@@ -3,8 +3,6 @@ import {
   Activity,
   Archive,
   ArrowLeft,
-  BookOpen,
-  Brain,
   Copy,
   Download,
   GitBranch,
@@ -25,6 +23,10 @@ import { toast } from "sonner";
 
 import { EmptyState } from "@/components/empty-state";
 import { WorkerAvatar } from "@/components/workers/worker-avatar";
+import {
+  WorkerKnowledgeTab,
+  WorkerMemoryTab,
+} from "@/components/workers/worker-knowledge-memory";
 import { downloadWorker } from "@/components/workers/workers-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -81,20 +83,7 @@ export const Route = createFileRoute("/_authenticated/workers/$workerId")({
 
 const PLACEHOLDER_TABS = [
   {
-    value: "knowledge",
-    label: "Knowledge",
-    icon: BookOpen,
-    title: "No knowledge sources linked",
-    description: "Attach documents and collections from the Knowledge Center once they are available.",
-  },
-  {
-    value: "memory",
-    label: "Memory",
-    icon: Brain,
-    title: "No memory stores linked",
-    description: "Short and long term memory policies for this worker will be configured here.",
-  },
-  {
+
     value: "tools",
     label: "Tools",
     icon: Wrench,
@@ -234,6 +223,8 @@ function WorkerDetailRoute() {
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1">
           <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
           <TabsTrigger value="configuration">{t("Configuration")}</TabsTrigger>
+          <TabsTrigger value="knowledge">{t("Knowledge")}</TabsTrigger>
+          <TabsTrigger value="memory">{t("Memory")}</TabsTrigger>
           {PLACEHOLDER_TABS.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value}>
               {t(tab.label)}
@@ -251,11 +242,20 @@ function WorkerDetailRoute() {
           <ConfigurationTab worker={worker} />
         </TabsContent>
 
+        <TabsContent value="knowledge">
+          <WorkerKnowledgeTab worker={worker} />
+        </TabsContent>
+
+        <TabsContent value="memory">
+          <WorkerMemoryTab worker={worker} />
+        </TabsContent>
+
         {PLACEHOLDER_TABS.map((tab) => (
           <TabsContent key={tab.value} value={tab.value}>
             <EmptyState icon={tab.icon} title={tab.title} description={tab.description} />
           </TabsContent>
         ))}
+
 
         <TabsContent value="activity">
           <ActivityTab worker={worker} />
