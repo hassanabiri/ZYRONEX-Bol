@@ -40,7 +40,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useKnowledgeDocuments, useKnowledgeFolders, useKnowledgeMutations } from "@/hooks/use-knowledge";
+import {
+  useKnowledgeDocuments,
+  useKnowledgeFolders,
+  useKnowledgeMutations,
+} from "@/hooks/use-knowledge";
 import { useI18n } from "@/lib/i18n";
 import { humanize } from "@/lib/worker-options";
 import {
@@ -122,7 +126,8 @@ export function DocumentManager({
   }
 
   async function handleUpload(file: File) {
-    const isText = /^text\/|json|markdown|csv/.test(file.type) || /\.(txt|md|csv|json)$/i.test(file.name);
+    const isText =
+      /^text\/|json|markdown|csv/.test(file.type) || /\.(txt|md|csv|json)$/i.test(file.name);
     try {
       await createDocument.mutateAsync({
         knowledge_base_id: base.id,
@@ -305,7 +310,10 @@ export function DocumentManager({
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>{t("Source type")}</Label>
-                <Select value={source} onValueChange={(value) => setSource(value as KnowledgeSource)}>
+                <Select
+                  value={source}
+                  onValueChange={(value) => setSource(value as KnowledgeSource)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

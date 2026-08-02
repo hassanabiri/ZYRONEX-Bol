@@ -8,15 +8,9 @@ export type MemoryEvent = Tables<"memory_events">;
 export type MemoryLayer = Enums<"memory_layer">;
 export type MemoryEventType = Enums<"memory_event_type">;
 
-export type MemoryStoreInsert = Omit<
-  TablesInsert<"memory_stores">,
-  "workspace_id" | "created_by"
->;
+export type MemoryStoreInsert = Omit<TablesInsert<"memory_stores">, "workspace_id" | "created_by">;
 export type MemoryStorePatch = TablesUpdate<"memory_stores">;
-export type MemoryEntryInsert = Omit<
-  TablesInsert<"memory_entries">,
-  "workspace_id" | "created_by"
->;
+export type MemoryEntryInsert = Omit<TablesInsert<"memory_entries">, "workspace_id" | "created_by">;
 export type MemoryEntryPatch = TablesUpdate<"memory_entries">;
 
 export const MEMORY_LAYERS: { layer: MemoryLayer; label: string; description: string }[] = [
@@ -285,10 +279,7 @@ export const memoryService = {
   },
 
   /** Best-effort — the timeline must never break a memory operation. */
-  async logEvent(
-    workspaceId: string,
-    entry: Omit<TablesInsert<"memory_events">, "workspace_id">,
-  ) {
+  async logEvent(workspaceId: string, entry: Omit<TablesInsert<"memory_events">, "workspace_id">) {
     await supabase
       .from("memory_events")
       .insert({ ...entry, workspace_id: workspaceId })

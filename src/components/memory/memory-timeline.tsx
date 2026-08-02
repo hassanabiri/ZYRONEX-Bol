@@ -38,9 +38,7 @@ export function MemoryTimeline({ workspaceId }: { workspaceId: string | undefine
             <p className="mt-1 text-xs text-muted-foreground">
               {new Date(event.created_at).toLocaleString()}
             </p>
-            {event.detail && (
-              <p className="mt-1 text-xs text-muted-foreground">{event.detail}</p>
-            )}
+            {event.detail && <p className="mt-1 text-xs text-muted-foreground">{event.detail}</p>}
           </li>
         ))}
       </ul>

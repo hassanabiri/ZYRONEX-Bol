@@ -35,10 +35,7 @@ import {
 } from "@/hooks/use-knowledge";
 import { useI18n } from "@/lib/i18n";
 import { useWorkspace } from "@/lib/workspace";
-import {
-  KNOWLEDGE_CATEGORIES,
-  type KnowledgeBaseDefinition,
-} from "@/services/knowledge-service";
+import { KNOWLEDGE_CATEGORIES, type KnowledgeBaseDefinition } from "@/services/knowledge-service";
 
 export const Route = createFileRoute("/_authenticated/knowledge")({
   head: () => ({

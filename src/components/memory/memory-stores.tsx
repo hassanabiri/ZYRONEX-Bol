@@ -122,9 +122,7 @@ export function MemoryStores({ workspaceId }: { workspaceId: string | undefined 
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="truncate text-sm font-semibold">{store.name}</p>
                       <Badge variant="secondary">{t(layerLabel(store.layer))}</Badge>
-                      <Badge variant="outline">
-                        {worker ? worker.name : t("Workspace scope")}
-                      </Badge>
+                      <Badge variant="outline">{worker ? worker.name : t("Workspace scope")}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {used}/{store.max_items} {t("entries")} · {store.retention_days}{" "}
@@ -153,11 +151,7 @@ export function MemoryStores({ workspaceId }: { workspaceId: string | undefined 
                       <RefreshCw className="size-4" />
                       {t("Compact")}
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => resetStore.mutate(store)}
-                    >
+                    <Button size="sm" variant="ghost" onClick={() => resetStore.mutate(store)}>
                       {t("Reset")}
                     </Button>
                     <Button
@@ -265,10 +259,7 @@ export function MemoryEntries({ workspaceId }: { workspaceId: string | undefined
   const { t } = useI18n();
   const [storeId, setStoreId] = useState("all");
   const { data: stores } = useMemoryStores(workspaceId);
-  const { data: entries } = useMemoryEntries(
-    workspaceId,
-    storeId === "all" ? undefined : storeId,
-  );
+  const { data: entries } = useMemoryEntries(workspaceId, storeId === "all" ? undefined : storeId);
   const { createEntry, updateEntry, touchEntry, deleteEntry, expireStale } =
     useMemoryMutations(workspaceId);
 
@@ -307,11 +298,7 @@ export function MemoryEntries({ workspaceId }: { workspaceId: string | undefined
           >
             {t("Run retention")}
           </Button>
-          <Button
-            className="gap-2"
-            onClick={() => setOpen(true)}
-            disabled={!stores?.length}
-          >
+          <Button className="gap-2" onClick={() => setOpen(true)} disabled={!stores?.length}>
             <Plus className="size-4" />
             {t("Write memory")}
           </Button>

@@ -63,7 +63,10 @@ export function MemoryAnalytics({ workspaceId }: { workspaceId: string | undefin
                   </span>
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${percent}%` }} />
+                  <div
+                    className="h-full rounded-full bg-primary"
+                    style={{ width: `${percent}%` }}
+                  />
                 </div>
               </li>
             );

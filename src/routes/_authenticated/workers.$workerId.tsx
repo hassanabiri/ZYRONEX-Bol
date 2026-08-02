@@ -3,8 +3,6 @@ import {
   Activity,
   Archive,
   ArrowLeft,
-  BookOpen,
-  Brain,
   Copy,
   Download,
   GitBranch,

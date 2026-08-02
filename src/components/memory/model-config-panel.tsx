@@ -173,11 +173,7 @@ export function ModelConfigPanel({ workspaceId }: { workspaceId: string | undefi
               </div>
               <div className="space-y-2">
                 <Label htmlFor="config-model">{t("Model")}</Label>
-                <Input
-                  id="config-model"
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                />
+                <Input id="config-model" value={model} onChange={(e) => setModel(e.target.value)} />
               </div>
             </div>
             <div className="space-y-2">
@@ -209,9 +205,7 @@ export function ModelConfigPanel({ workspaceId }: { workspaceId: string | undefi
               />
             </div>
             <div className="space-y-2">
-              <Label>
-                top_p — {topP}
-              </Label>
+              <Label>top_p — {topP}</Label>
               <Slider
                 value={[topP]}
                 min={0}

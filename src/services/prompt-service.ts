@@ -9,10 +9,7 @@ export type PromptScope = Enums<"prompt_scope">;
 
 export type PromptInsert = Omit<TablesInsert<"prompts">, "workspace_id" | "created_by">;
 export type PromptPatch = TablesUpdate<"prompts">;
-export type ModelConfigInsert = Omit<
-  TablesInsert<"model_configs">,
-  "workspace_id" | "created_by"
->;
+export type ModelConfigInsert = Omit<TablesInsert<"model_configs">, "workspace_id" | "created_by">;
 export type ModelConfigPatch = TablesUpdate<"model_configs">;
 
 export const PROMPT_SCOPES: PromptScope[] = ["workspace", "worker", "system", "shared"];

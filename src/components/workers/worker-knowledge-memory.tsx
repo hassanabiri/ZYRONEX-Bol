@@ -184,9 +184,7 @@ export function WorkerMemoryTab({ worker }: { worker: Worker }) {
               type="number"
               min={1}
               defaultValue={worker.memory_retention_days}
-              onBlur={(event) =>
-                patch({ memory_retention_days: Number(event.target.value) || 1 })
-              }
+              onBlur={(event) => patch({ memory_retention_days: Number(event.target.value) || 1 })}
             />
           </div>
         </div>

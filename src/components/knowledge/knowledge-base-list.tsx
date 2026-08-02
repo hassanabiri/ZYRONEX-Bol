@@ -161,10 +161,7 @@ export function KnowledgeBaseList({
                       <MoreHorizontal className="size-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    onClick={(event) => event.stopPropagation()}
-                  >
+                  <DropdownMenuContent align="end" onClick={(event) => event.stopPropagation()}>
                     <DropdownMenuItem
                       onSelect={() => {
                         duplicateBase.mutate(base, {

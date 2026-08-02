@@ -192,11 +192,7 @@ export const knowledgeService = {
     definition: Partial<KnowledgeBaseDefinition> & { name: string },
     actorId?: string,
   ) {
-    return knowledgeService.createBase(
-      workspaceId,
-      { ...definition, status: "draft" },
-      actorId,
-    );
+    return knowledgeService.createBase(workspaceId, { ...definition, status: "draft" }, actorId);
   },
 
   // Versions ------------------------------------------------------------
@@ -336,7 +332,8 @@ export const knowledgeService = {
     return knowledgeService.updateDocument(document.id, {
       status: next,
       error: null,
-      chunk_count: next === "chunking" || next === "embedding_ready" ? chunks : document.chunk_count,
+      chunk_count:
+        next === "chunking" || next === "embedding_ready" ? chunks : document.chunk_count,
       indexed_at: next === "available" ? new Date().toISOString() : document.indexed_at,
     });
   },

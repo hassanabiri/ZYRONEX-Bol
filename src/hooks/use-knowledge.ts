@@ -71,11 +71,7 @@ export function useWorkerKnowledgeLinks(workspaceId: string | undefined) {
   });
 }
 
-export function useKnowledgeSearch(
-  workspaceId: string | undefined,
-  term: string,
-  baseId?: string,
-) {
+export function useKnowledgeSearch(workspaceId: string | undefined, term: string, baseId?: string) {
   const query = term.trim();
   return useQuery({
     queryKey: knowledgeKeys.search(workspaceId ?? "none", query, baseId),
@@ -98,8 +94,7 @@ export function useKnowledgeMutations(workspaceId: string | undefined) {
 
   return {
     createBase: useMutation({
-      mutationFn: (input: KnowledgeBaseInsert) =>
-        knowledgeService.createBase(id, input, user?.id),
+      mutationFn: (input: KnowledgeBaseInsert) => knowledgeService.createBase(id, input, user?.id),
       onSuccess: invalidateBases,
     }),
     updateBase: useMutation({
@@ -141,8 +136,7 @@ export function useKnowledgeMutations(workspaceId: string | undefined) {
         queryClient.invalidateQueries({ queryKey: knowledgeKeys.folders(vars.baseId) }),
     }),
     createDocument: useMutation({
-      mutationFn: (input: DocumentInsert) =>
-        knowledgeService.createDocument(id, input, user?.id),
+      mutationFn: (input: DocumentInsert) => knowledgeService.createDocument(id, input, user?.id),
       onSuccess: (data) => invalidateDocuments(data.knowledge_base_id),
     }),
     updateDocument: useMutation({
@@ -159,8 +153,7 @@ export function useKnowledgeMutations(workspaceId: string | undefined) {
       onSuccess: (data) => invalidateDocuments(data.knowledge_base_id),
     }),
     deleteDocument: useMutation({
-      mutationFn: (document: KnowledgeDocument) =>
-        knowledgeService.removeDocument(document.id),
+      mutationFn: (document: KnowledgeDocument) => knowledgeService.removeDocument(document.id),
       onSuccess: (_data, vars) => invalidateDocuments(vars.knowledge_base_id),
     }),
     snapshotDocument: useMutation({
