@@ -254,6 +254,180 @@ export type Database = {
           },
         ]
       }
+      billing_subscriptions: {
+        Row: {
+          amount: number
+          billing_cycle: string
+          cancel_at_period_end: boolean
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          current_period_end: string
+          current_period_start: string
+          id: string
+          metadata: Json
+          payment_provider: Database["public"]["Enums"]["payment_provider"]
+          plan: string
+          scope: Database["public"]["Enums"]["billing_scope"]
+          seats: number
+          status: Database["public"]["Enums"]["subscription_status"]
+          tax_rate: number
+          trial_ends_at: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          amount?: number
+          billing_cycle?: string
+          cancel_at_period_end?: boolean
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          current_period_end?: string
+          current_period_start?: string
+          id?: string
+          metadata?: Json
+          payment_provider?: Database["public"]["Enums"]["payment_provider"]
+          plan?: string
+          scope?: Database["public"]["Enums"]["billing_scope"]
+          seats?: number
+          status?: Database["public"]["Enums"]["subscription_status"]
+          tax_rate?: number
+          trial_ends_at?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          amount?: number
+          billing_cycle?: string
+          cancel_at_period_end?: boolean
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          current_period_end?: string
+          current_period_start?: string
+          id?: string
+          metadata?: Json
+          payment_provider?: Database["public"]["Enums"]["payment_provider"]
+          plan?: string
+          scope?: Database["public"]["Enums"]["billing_scope"]
+          seats?: number
+          status?: Database["public"]["Enums"]["subscription_status"]
+          tax_rate?: number
+          trial_ends_at?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_subscriptions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_balances: {
+        Row: {
+          created_at: string
+          credit_type: Database["public"]["Enums"]["credit_type"]
+          granted: number
+          id: string
+          reserved: number
+          resets_at: string | null
+          unit: string
+          updated_at: string
+          used: number
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          credit_type: Database["public"]["Enums"]["credit_type"]
+          granted?: number
+          id?: string
+          reserved?: number
+          resets_at?: string | null
+          unit?: string
+          updated_at?: string
+          used?: number
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          credit_type?: Database["public"]["Enums"]["credit_type"]
+          granted?: number
+          id?: string
+          reserved?: number
+          resets_at?: string | null
+          unit?: string
+          updated_at?: string
+          used?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_balances_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_transactions: {
+        Row: {
+          actor_id: string | null
+          amount: number
+          balance_after: number | null
+          created_at: string
+          credit_type: Database["public"]["Enums"]["credit_type"]
+          id: string
+          kind: Database["public"]["Enums"]["credit_txn_kind"]
+          reason: string | null
+          reference_id: string | null
+          reference_type: string | null
+          workspace_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          amount: number
+          balance_after?: number | null
+          created_at?: string
+          credit_type: Database["public"]["Enums"]["credit_type"]
+          id?: string
+          kind: Database["public"]["Enums"]["credit_txn_kind"]
+          reason?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          workspace_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          amount?: number
+          balance_after?: number | null
+          created_at?: string
+          credit_type?: Database["public"]["Enums"]["credit_type"]
+          id?: string
+          kind?: Database["public"]["Enums"]["credit_txn_kind"]
+          reason?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       execution_steps: {
         Row: {
           attempt: number
@@ -697,6 +871,144 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "integrations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_items: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["usage_category"] | null
+          created_at: string
+          description: string
+          id: string
+          invoice_id: string
+          quantity: number
+          unit_price: number
+          workspace_id: string
+        }
+        Insert: {
+          amount?: number
+          category?: Database["public"]["Enums"]["usage_category"] | null
+          created_at?: string
+          description: string
+          id?: string
+          invoice_id: string
+          quantity?: number
+          unit_price?: number
+          workspace_id: string
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["usage_category"] | null
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_id?: string
+          quantity?: number
+          unit_price?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          currency: string
+          due_at: string | null
+          id: string
+          issued_at: string | null
+          notes: string | null
+          number: string
+          paid_at: string | null
+          payment_provider: Database["public"]["Enums"]["payment_provider"]
+          period_end: string | null
+          period_start: string | null
+          scope: Database["public"]["Enums"]["billing_scope"]
+          status: Database["public"]["Enums"]["invoice_status"]
+          subscription_id: string | null
+          subtotal: number
+          tax_amount: number
+          tax_rate: number
+          total: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          due_at?: string | null
+          id?: string
+          issued_at?: string | null
+          notes?: string | null
+          number: string
+          paid_at?: string | null
+          payment_provider?: Database["public"]["Enums"]["payment_provider"]
+          period_end?: string | null
+          period_start?: string | null
+          scope?: Database["public"]["Enums"]["billing_scope"]
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subscription_id?: string | null
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          total?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          due_at?: string | null
+          id?: string
+          issued_at?: string | null
+          notes?: string | null
+          number?: string
+          paid_at?: string | null
+          payment_provider?: Database["public"]["Enums"]["payment_provider"]
+          period_end?: string | null
+          period_start?: string | null
+          scope?: Database["public"]["Enums"]["billing_scope"]
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subscription_id?: string | null
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          total?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "billing_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -1385,6 +1697,59 @@ export type Database = {
           },
         ]
       }
+      payment_methods: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          credential_fingerprint: string | null
+          fingerprint: string | null
+          id: string
+          is_default: boolean
+          label: string
+          metadata: Json
+          provider: Database["public"]["Enums"]["payment_provider"]
+          status: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          credential_fingerprint?: string | null
+          fingerprint?: string | null
+          id?: string
+          is_default?: boolean
+          label: string
+          metadata?: Json
+          provider: Database["public"]["Enums"]["payment_provider"]
+          status?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          credential_fingerprint?: string | null
+          fingerprint?: string | null
+          id?: string
+          is_default?: boolean
+          label?: string
+          metadata?: Json
+          provider?: Database["public"]["Enums"]["payment_provider"]
+          status?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_methods_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       permissions: {
         Row: {
           created_at: string
@@ -1615,6 +1980,428 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      usage_records: {
+        Row: {
+          category: Database["public"]["Enums"]["usage_category"]
+          created_at: string
+          credit_type: Database["public"]["Enums"]["credit_type"]
+          id: string
+          metadata: Json
+          occurred_on: string
+          quantity: number
+          reference_id: string | null
+          reference_type: string | null
+          total_cost: number
+          unit: string
+          unit_cost: number
+          worker_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["usage_category"]
+          created_at?: string
+          credit_type?: Database["public"]["Enums"]["credit_type"]
+          id?: string
+          metadata?: Json
+          occurred_on?: string
+          quantity?: number
+          reference_id?: string | null
+          reference_type?: string | null
+          total_cost?: number
+          unit?: string
+          unit_cost?: number
+          worker_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["usage_category"]
+          created_at?: string
+          credit_type?: Database["public"]["Enums"]["credit_type"]
+          id?: string
+          metadata?: Json
+          occurred_on?: string
+          quantity?: number
+          reference_id?: string | null
+          reference_type?: string | null
+          total_cost?: number
+          unit?: string
+          unit_cost?: number
+          worker_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_records_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "ai_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usage_records_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      voice_calls: {
+        Row: {
+          answered_at: string | null
+          cost: number
+          created_at: string
+          direction: Database["public"]["Enums"]["call_direction"]
+          duration_seconds: number
+          ended_at: string | null
+          error: string | null
+          from_number: string
+          id: string
+          metadata: Json
+          number_id: string | null
+          profile_id: string | null
+          provider_id: string | null
+          recording_path: string | null
+          result: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["call_status"]
+          to_number: string
+          transcript: string | null
+          worker_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          answered_at?: string | null
+          cost?: number
+          created_at?: string
+          direction: Database["public"]["Enums"]["call_direction"]
+          duration_seconds?: number
+          ended_at?: string | null
+          error?: string | null
+          from_number: string
+          id?: string
+          metadata?: Json
+          number_id?: string | null
+          profile_id?: string | null
+          provider_id?: string | null
+          recording_path?: string | null
+          result?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["call_status"]
+          to_number: string
+          transcript?: string | null
+          worker_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          answered_at?: string | null
+          cost?: number
+          created_at?: string
+          direction?: Database["public"]["Enums"]["call_direction"]
+          duration_seconds?: number
+          ended_at?: string | null
+          error?: string | null
+          from_number?: string
+          id?: string
+          metadata?: Json
+          number_id?: string | null
+          profile_id?: string | null
+          provider_id?: string | null
+          recording_path?: string | null
+          result?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["call_status"]
+          to_number?: string
+          transcript?: string | null
+          worker_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voice_calls_number_id_fkey"
+            columns: ["number_id"]
+            isOneToOne: false
+            referencedRelation: "voice_numbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "voice_calls_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "voice_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "voice_calls_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "voice_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "voice_calls_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "ai_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "voice_calls_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      voice_numbers: {
+        Row: {
+          capabilities: string[]
+          connected_at: string | null
+          country: string
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          monthly_cost: number
+          notes: string | null
+          number_type: Database["public"]["Enums"]["voice_number_type"]
+          phone_number: string
+          provider_id: string | null
+          status: Database["public"]["Enums"]["voice_number_status"]
+          tags: string[]
+          updated_at: string
+          verified_at: string | null
+          worker_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          capabilities?: string[]
+          connected_at?: string | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+          monthly_cost?: number
+          notes?: string | null
+          number_type?: Database["public"]["Enums"]["voice_number_type"]
+          phone_number: string
+          provider_id?: string | null
+          status?: Database["public"]["Enums"]["voice_number_status"]
+          tags?: string[]
+          updated_at?: string
+          verified_at?: string | null
+          worker_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          capabilities?: string[]
+          connected_at?: string | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          monthly_cost?: number
+          notes?: string | null
+          number_type?: Database["public"]["Enums"]["voice_number_type"]
+          phone_number?: string
+          provider_id?: string | null
+          status?: Database["public"]["Enums"]["voice_number_status"]
+          tags?: string[]
+          updated_at?: string
+          verified_at?: string | null
+          worker_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voice_numbers_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "voice_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "voice_numbers_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "ai_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "voice_numbers_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      voice_profiles: {
+        Row: {
+          accent: string
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          greeting: string | null
+          id: string
+          language: string
+          max_call_duration_seconds: number
+          name: string
+          number_id: string | null
+          recording_policy: string
+          silence_timeout_seconds: number
+          transfer_rules: Json
+          updated_at: string
+          voice: string
+          worker_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          accent?: string
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          greeting?: string | null
+          id?: string
+          language?: string
+          max_call_duration_seconds?: number
+          name: string
+          number_id?: string | null
+          recording_policy?: string
+          silence_timeout_seconds?: number
+          transfer_rules?: Json
+          updated_at?: string
+          voice?: string
+          worker_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          accent?: string
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          greeting?: string | null
+          id?: string
+          language?: string
+          max_call_duration_seconds?: number
+          name?: string
+          number_id?: string | null
+          recording_policy?: string
+          silence_timeout_seconds?: number
+          transfer_rules?: Json
+          updated_at?: string
+          voice?: string
+          worker_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voice_profiles_number_id_fkey"
+            columns: ["number_id"]
+            isOneToOne: false
+            referencedRelation: "voice_numbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "voice_profiles_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "ai_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "voice_profiles_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      voice_providers: {
+        Row: {
+          capabilities: string[]
+          config: Json
+          created_at: string
+          created_by: string | null
+          credential_fingerprint: string | null
+          credential_updated_at: string | null
+          description: string | null
+          enabled: boolean
+          id: string
+          integration_id: string | null
+          kind: Database["public"]["Enums"]["voice_provider_kind"]
+          last_checked_at: string | null
+          last_error: string | null
+          name: string
+          region: string
+          status: Database["public"]["Enums"]["voice_provider_status"]
+          tags: string[]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          capabilities?: string[]
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          credential_fingerprint?: string | null
+          credential_updated_at?: string | null
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          integration_id?: string | null
+          kind: Database["public"]["Enums"]["voice_provider_kind"]
+          last_checked_at?: string | null
+          last_error?: string | null
+          name: string
+          region?: string
+          status?: Database["public"]["Enums"]["voice_provider_status"]
+          tags?: string[]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          capabilities?: string[]
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          credential_fingerprint?: string | null
+          credential_updated_at?: string | null
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          integration_id?: string | null
+          kind?: Database["public"]["Enums"]["voice_provider_kind"]
+          last_checked_at?: string | null
+          last_error?: string | null
+          name?: string
+          region?: string
+          status?: Database["public"]["Enums"]["voice_provider_status"]
+          tags?: string[]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voice_providers_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "voice_providers_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       webhook_deliveries: {
         Row: {
@@ -2356,6 +3143,36 @@ export type Database = {
       }
     }
     Enums: {
+      billing_scope:
+        | "workspace"
+        | "organization"
+        | "owner"
+        | "developer"
+        | "reseller"
+      call_direction: "inbound" | "outbound"
+      call_status:
+        | "queued"
+        | "ringing"
+        | "in_progress"
+        | "completed"
+        | "failed"
+        | "missed"
+        | "cancelled"
+        | "no_answer"
+      credit_txn_kind:
+        | "grant"
+        | "purchase"
+        | "consumption"
+        | "refund"
+        | "expiry"
+        | "adjustment"
+      credit_type:
+        | "ai_credits"
+        | "voice_minutes"
+        | "storage"
+        | "knowledge"
+        | "integrations"
+        | "marketplace"
       document_status:
         | "uploaded"
         | "scanning"
@@ -2402,6 +3219,13 @@ export type Database = {
         | "rate_limited"
         | "paused"
         | "archived"
+      invoice_status:
+        | "draft"
+        | "open"
+        | "paid"
+        | "void"
+        | "uncollectible"
+        | "archived"
       knowledge_source:
         | "pdf"
         | "word"
@@ -2435,7 +3259,21 @@ export type Database = {
         | "summarized"
         | "deleted"
       memory_layer: "short_term" | "long_term" | "session" | "persistent"
+      payment_provider:
+        | "stripe"
+        | "hyperpay"
+        | "paytabs"
+        | "moyasar"
+        | "stc_pay"
+        | "manual"
       prompt_scope: "workspace" | "worker" | "system" | "shared"
+      subscription_status:
+        | "trialing"
+        | "active"
+        | "past_due"
+        | "paused"
+        | "cancelled"
+        | "expired"
       sync_mode: "manual" | "automatic" | "scheduled" | "realtime"
       sync_run_status:
         | "queued"
@@ -2444,6 +3282,38 @@ export type Database = {
         | "failed"
         | "conflict"
         | "cancelled"
+      usage_category:
+        | "worker"
+        | "voice"
+        | "api"
+        | "knowledge"
+        | "memory"
+        | "storage"
+        | "integration"
+      voice_number_status:
+        | "available"
+        | "pending"
+        | "verifying"
+        | "connected"
+        | "disconnected"
+        | "archived"
+      voice_number_type: "platform" | "byon" | "sip_trunk" | "pbx"
+      voice_provider_kind:
+        | "twilio"
+        | "telnyx"
+        | "vonage"
+        | "plivo"
+        | "sip"
+        | "pbx"
+        | "local"
+        | "custom"
+      voice_provider_status:
+        | "prepared"
+        | "pending"
+        | "connected"
+        | "disconnected"
+        | "error"
+        | "archived"
       webhook_direction: "incoming" | "outgoing"
       worker_status: "draft" | "active" | "paused" | "archived"
       workflow_status: "draft" | "published" | "paused" | "archived"
@@ -2575,6 +3445,40 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      billing_scope: [
+        "workspace",
+        "organization",
+        "owner",
+        "developer",
+        "reseller",
+      ],
+      call_direction: ["inbound", "outbound"],
+      call_status: [
+        "queued",
+        "ringing",
+        "in_progress",
+        "completed",
+        "failed",
+        "missed",
+        "cancelled",
+        "no_answer",
+      ],
+      credit_txn_kind: [
+        "grant",
+        "purchase",
+        "consumption",
+        "refund",
+        "expiry",
+        "adjustment",
+      ],
+      credit_type: [
+        "ai_credits",
+        "voice_minutes",
+        "storage",
+        "knowledge",
+        "integrations",
+        "marketplace",
+      ],
       document_status: [
         "uploaded",
         "scanning",
@@ -2626,6 +3530,14 @@ export const Constants = {
         "paused",
         "archived",
       ],
+      invoice_status: [
+        "draft",
+        "open",
+        "paid",
+        "void",
+        "uncollectible",
+        "archived",
+      ],
       knowledge_source: [
         "pdf",
         "word",
@@ -2662,7 +3574,23 @@ export const Constants = {
         "deleted",
       ],
       memory_layer: ["short_term", "long_term", "session", "persistent"],
+      payment_provider: [
+        "stripe",
+        "hyperpay",
+        "paytabs",
+        "moyasar",
+        "stc_pay",
+        "manual",
+      ],
       prompt_scope: ["workspace", "worker", "system", "shared"],
+      subscription_status: [
+        "trialing",
+        "active",
+        "past_due",
+        "paused",
+        "cancelled",
+        "expired",
+      ],
       sync_mode: ["manual", "automatic", "scheduled", "realtime"],
       sync_run_status: [
         "queued",
@@ -2671,6 +3599,42 @@ export const Constants = {
         "failed",
         "conflict",
         "cancelled",
+      ],
+      usage_category: [
+        "worker",
+        "voice",
+        "api",
+        "knowledge",
+        "memory",
+        "storage",
+        "integration",
+      ],
+      voice_number_status: [
+        "available",
+        "pending",
+        "verifying",
+        "connected",
+        "disconnected",
+        "archived",
+      ],
+      voice_number_type: ["platform", "byon", "sip_trunk", "pbx"],
+      voice_provider_kind: [
+        "twilio",
+        "telnyx",
+        "vonage",
+        "plivo",
+        "sip",
+        "pbx",
+        "local",
+        "custom",
+      ],
+      voice_provider_status: [
+        "prepared",
+        "pending",
+        "connected",
+        "disconnected",
+        "error",
+        "archived",
       ],
       webhook_direction: ["incoming", "outgoing"],
       worker_status: ["draft", "active", "paused", "archived"],
