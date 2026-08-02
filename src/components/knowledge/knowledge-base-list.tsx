@@ -54,7 +54,7 @@ export function KnowledgeBaseList({
   documents: KnowledgeDocument[];
   workspaceId: string | undefined;
   isLoading?: boolean;
-  activeId?: string;
+  activeId?: string | undefined;
   onSelect: (base: KnowledgeBase) => void;
   onCreate: () => void;
 }) {
