@@ -14,6 +14,7 @@ import {
   Code2,
   Settings,
   ShieldCheck,
+  Store,
   type LucideIcon,
 } from "lucide-react";
 
