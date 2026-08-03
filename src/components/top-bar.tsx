@@ -62,13 +62,14 @@ export function TopBar() {
   }
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b bg-background/80 px-3 backdrop-blur-md sm:px-5">
+    <header className="sticky top-0 z-20 flex h-16 w-full items-center gap-1 overflow-hidden border-b bg-background/80 px-2 backdrop-blur-md sm:gap-2 sm:px-5">
       <SidebarTrigger className="shrink-0" />
       <Separator orientation="vertical" className="mx-1 hidden h-6 sm:block" />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-9 max-w-[220px] justify-between gap-2 px-2.5">
+          <Button variant="outline" className="h-9 min-w-0 max-w-[150px] justify-between gap-1.5 px-2 sm:max-w-[220px] sm:gap-2 sm:px-2.5">
+
             <span className="brand-gradient size-5 shrink-0 rounded-md" />
             <span className="truncate text-sm font-medium">
               {activeWorkspace?.name ?? t("No workspace")}
