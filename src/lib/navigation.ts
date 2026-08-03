@@ -62,6 +62,7 @@ export const navSections: NavSection[] = [
     label: "Platform",
     items: [
       { title: "Developer", to: "/developer", icon: Code2 },
+      { title: "Marketplace", to: "/marketplace", icon: Store },
       { title: "Administration", to: "/administration", icon: ShieldCheck },
       { title: "Settings", to: "/settings", icon: Settings },
     ],
