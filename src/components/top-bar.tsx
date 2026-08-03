@@ -142,7 +142,7 @@ export function TopBar() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label={t("Language")}>
+            <Button variant="ghost" size="icon" className="hidden sm:inline-flex" aria-label={t("Language")}>
               <Globe className="size-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -181,7 +181,7 @@ export function TopBar() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="ml-1 h-9 gap-2 px-1.5">
+            <Button variant="ghost" className="h-9 shrink-0 gap-2 px-1.5 sm:ml-1">
               <Avatar className="size-7">
                 {avatarUrl && <AvatarImage src={avatarUrl} alt={fullName || email} />}
                 <AvatarFallback className="bg-surface text-[11px] font-semibold">
