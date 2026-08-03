@@ -18,11 +18,16 @@ import { navSections } from "@/lib/navigation";
 import { useWorkspace } from "@/lib/workspace";
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (router) => router.location.pathname });
   const { activeWorkspace } = useWorkspace();
   const { t, dir } = useI18n();
+
+  const closeOnMobile = () => {
+    if (isMobile) setOpenMobile(false);
+  };
+
 
   return (
     <Sidebar collapsible="icon" side={dir === "rtl" ? "right" : "left"} className="border-r">
