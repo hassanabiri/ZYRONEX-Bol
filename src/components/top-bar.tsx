@@ -62,13 +62,14 @@ export function TopBar() {
   }
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b bg-background/80 px-3 backdrop-blur-md sm:px-5">
+    <header className="sticky top-0 z-20 flex h-16 w-full items-center gap-1 overflow-hidden border-b bg-background/80 px-2 backdrop-blur-md sm:gap-2 sm:px-5">
       <SidebarTrigger className="shrink-0" />
       <Separator orientation="vertical" className="mx-1 hidden h-6 sm:block" />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-9 max-w-[220px] justify-between gap-2 px-2.5">
+          <Button variant="outline" className="h-9 min-w-0 max-w-[150px] justify-between gap-1.5 px-2 sm:max-w-[220px] sm:gap-2 sm:px-2.5">
+
             <span className="brand-gradient size-5 shrink-0 rounded-md" />
             <span className="truncate text-sm font-medium">
               {activeWorkspace?.name ?? t("No workspace")}
@@ -132,10 +133,8 @@ export function TopBar() {
         />
       </div>
 
-      <div className="ml-auto flex items-center gap-1 md:ml-2">
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label={t("Search")}>
-          <Search className="size-4" />
-        </Button>
+      <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1 md:ml-2">
+
 
         <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={t("Toggle theme")}>
           {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
@@ -143,7 +142,7 @@ export function TopBar() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label={t("Language")}>
+            <Button variant="ghost" size="icon" className="hidden sm:inline-flex" aria-label={t("Language")}>
               <Globe className="size-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -182,7 +181,7 @@ export function TopBar() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="ml-1 h-9 gap-2 px-1.5">
+            <Button variant="ghost" className="h-9 shrink-0 gap-2 px-1.5 sm:ml-1">
               <Avatar className="size-7">
                 {avatarUrl && <AvatarImage src={avatarUrl} alt={fullName || email} />}
                 <AvatarFallback className="bg-surface text-[11px] font-semibold">
@@ -203,7 +202,14 @@ export function TopBar() {
             <DropdownMenuItem onSelect={() => navigate({ to: "/settings" })}>
               <Settings className="me-2 size-4" /> {t("Settings")}
             </DropdownMenuItem>
+            <DropdownMenuItem
+              className="sm:hidden"
+              onSelect={() => setLanguage(language === "en" ? "ar" : "en")}
+            >
+              <Globe className="me-2 size-4" /> {language === "en" ? "العربية" : "English"}
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
+
             <DropdownMenuItem onSelect={handleSignOut}>
               <LogOut className="me-2 size-4" /> {t("Sign out")}
             </DropdownMenuItem>

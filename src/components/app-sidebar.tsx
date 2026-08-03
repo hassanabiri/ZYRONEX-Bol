@@ -18,16 +18,21 @@ import { navSections } from "@/lib/navigation";
 import { useWorkspace } from "@/lib/workspace";
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (router) => router.location.pathname });
   const { activeWorkspace } = useWorkspace();
   const { t, dir } = useI18n();
 
+  const closeOnMobile = () => {
+    if (isMobile) setOpenMobile(false);
+  };
+
+
   return (
     <Sidebar collapsible="icon" side={dir === "rtl" ? "right" : "left"} className="border-r">
       <SidebarHeader className="h-16 justify-center px-3">
-        <Link to="/dashboard" className="flex items-center gap-2.5 overflow-hidden">
+        <Link to="/dashboard" onClick={closeOnMobile} className="flex items-center gap-2.5 overflow-hidden">
           <span className="brand-gradient flex size-8 shrink-0 items-center justify-center rounded-lg font-display text-sm font-bold text-primary-foreground">
             Z
           </span>
@@ -51,7 +56,7 @@ export function AppSidebar() {
                 {section.items.map((item) => (
                   <SidebarMenuItem key={item.to}>
                     <SidebarMenuButton asChild isActive={pathname === item.to} tooltip={t(item.title)}>
-                      <Link to={item.to} className="flex items-center gap-2.5">
+                      <Link to={item.to} onClick={closeOnMobile} className="flex items-center gap-2.5">
                         <item.icon className="size-4 shrink-0" />
                         <span className="truncate">{t(item.title)}</span>
                       </Link>
