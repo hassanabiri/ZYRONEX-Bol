@@ -202,7 +202,14 @@ export function TopBar() {
             <DropdownMenuItem onSelect={() => navigate({ to: "/settings" })}>
               <Settings className="me-2 size-4" /> {t("Settings")}
             </DropdownMenuItem>
+            <DropdownMenuItem
+              className="sm:hidden"
+              onSelect={() => setLanguage(language === "en" ? "ar" : "en")}
+            >
+              <Globe className="me-2 size-4" /> {language === "en" ? "العربية" : "English"}
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
+
             <DropdownMenuItem onSelect={handleSignOut}>
               <LogOut className="me-2 size-4" /> {t("Sign out")}
             </DropdownMenuItem>
