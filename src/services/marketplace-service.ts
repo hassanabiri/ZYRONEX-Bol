@@ -254,11 +254,9 @@ export const marketplaceService = {
     return data;
   },
 
+  /** Abuse reports go through a definer RPC so nobody can edit another review. */
   async reportReview(reviewId: string) {
-    const { error } = await supabase
-      .from("marketplace_reviews")
-      .update({ reported: true })
-      .eq("id", reviewId);
+    const { error } = await supabase.rpc("report_marketplace_review", { _review_id: reviewId });
     if (error) throw error;
   },
 
