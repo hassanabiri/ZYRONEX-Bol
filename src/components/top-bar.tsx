@@ -133,10 +133,8 @@ export function TopBar() {
         />
       </div>
 
-      <div className="ml-auto flex items-center gap-1 md:ml-2">
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label={t("Search")}>
-          <Search className="size-4" />
-        </Button>
+      <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1 md:ml-2">
+
 
         <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={t("Toggle theme")}>
           {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
