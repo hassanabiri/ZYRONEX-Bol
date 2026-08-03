@@ -428,6 +428,116 @@ export type Database = {
           },
         ]
       }
+      developer_projects: {
+        Row: {
+          api_version: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          environment: string
+          id: string
+          metadata: Json
+          name: string
+          rate_limit_per_min: number
+          slug: string
+          status: Database["public"]["Enums"]["developer_project_status"]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          api_version?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          environment?: string
+          id?: string
+          metadata?: Json
+          name: string
+          rate_limit_per_min?: number
+          slug: string
+          status?: Database["public"]["Enums"]["developer_project_status"]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          api_version?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          environment?: string
+          id?: string
+          metadata?: Json
+          name?: string
+          rate_limit_per_min?: number
+          slug?: string
+          status?: Database["public"]["Enums"]["developer_project_status"]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "developer_projects_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      environment_variables: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          environment: string
+          id: string
+          is_secret: boolean
+          key: string
+          project_id: string | null
+          updated_at: string
+          value: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          environment?: string
+          id?: string
+          is_secret?: boolean
+          key: string
+          project_id?: string | null
+          updated_at?: string
+          value?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          environment?: string
+          id?: string
+          is_secret?: boolean
+          key?: string
+          project_id?: string | null
+          updated_at?: string
+          value?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "environment_variables_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "developer_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "environment_variables_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       execution_steps: {
         Row: {
           attempt: number
@@ -1320,6 +1430,54 @@ export type Database = {
           },
         ]
       }
+      marketplace_installs: {
+        Row: {
+          created_at: string
+          id: string
+          installed_by: string | null
+          license: Database["public"]["Enums"]["marketplace_license"]
+          product_id: string
+          status: string
+          version: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          installed_by?: string | null
+          license?: Database["public"]["Enums"]["marketplace_license"]
+          product_id: string
+          status?: string
+          version?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          installed_by?: string | null
+          license?: Database["public"]["Enums"]["marketplace_license"]
+          product_id?: string
+          status?: string
+          version?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_installs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_installs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketplace_listings: {
         Row: {
           category: string
@@ -1372,6 +1530,209 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "marketplace_listings_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_product_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          product_id: string
+          release_notes: string | null
+          snapshot: Json
+          version: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          product_id: string
+          release_notes?: string | null
+          snapshot?: Json
+          version: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          product_id?: string
+          release_notes?: string | null
+          snapshot?: Json
+          version?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_product_versions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_product_versions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_products: {
+        Row: {
+          category: Database["public"]["Enums"]["marketplace_category"]
+          compatibility: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          developer: string
+          featured: boolean
+          id: string
+          install_count: number
+          license: Database["public"]["Enums"]["marketplace_license"]
+          manifest: Json
+          name: string
+          price_cents: number
+          published_at: string | null
+          rating_avg: number
+          rating_count: number
+          release_notes: string | null
+          revenue_cents: number
+          screenshots: Json
+          slug: string
+          status: Database["public"]["Enums"]["marketplace_listing_status"]
+          summary: string | null
+          tags: string[]
+          updated_at: string
+          verified: boolean
+          version: string
+          workspace_id: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["marketplace_category"]
+          compatibility?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          developer: string
+          featured?: boolean
+          id?: string
+          install_count?: number
+          license?: Database["public"]["Enums"]["marketplace_license"]
+          manifest?: Json
+          name: string
+          price_cents?: number
+          published_at?: string | null
+          rating_avg?: number
+          rating_count?: number
+          release_notes?: string | null
+          revenue_cents?: number
+          screenshots?: Json
+          slug: string
+          status?: Database["public"]["Enums"]["marketplace_listing_status"]
+          summary?: string | null
+          tags?: string[]
+          updated_at?: string
+          verified?: boolean
+          version?: string
+          workspace_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["marketplace_category"]
+          compatibility?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          developer?: string
+          featured?: boolean
+          id?: string
+          install_count?: number
+          license?: Database["public"]["Enums"]["marketplace_license"]
+          manifest?: Json
+          name?: string
+          price_cents?: number
+          published_at?: string | null
+          rating_avg?: number
+          rating_count?: number
+          release_notes?: string | null
+          revenue_cents?: number
+          screenshots?: Json
+          slug?: string
+          status?: Database["public"]["Enums"]["marketplace_listing_status"]
+          summary?: string | null
+          tags?: string[]
+          updated_at?: string
+          verified?: boolean
+          version?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_products_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          product_id: string
+          rating: number
+          reported: boolean
+          updated_at: string
+          user_id: string
+          verified_purchase: boolean
+          workspace_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          product_id: string
+          rating: number
+          reported?: boolean
+          updated_at?: string
+          user_id: string
+          verified_purchase?: boolean
+          workspace_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          product_id?: string
+          rating?: number
+          reported?: boolean
+          updated_at?: string
+          user_id?: string
+          verified_purchase?: boolean
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_reviews_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -1697,6 +2058,75 @@ export type Database = {
           },
         ]
       }
+      oauth_clients: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string | null
+          grant_types: string[]
+          id: string
+          last_rotated_at: string | null
+          name: string
+          project_id: string | null
+          redirect_uris: string[]
+          scopes: string[]
+          secret_hash: string | null
+          secret_preview: string | null
+          status: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          grant_types?: string[]
+          id?: string
+          last_rotated_at?: string | null
+          name: string
+          project_id?: string | null
+          redirect_uris?: string[]
+          scopes?: string[]
+          secret_hash?: string | null
+          secret_preview?: string | null
+          status?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          grant_types?: string[]
+          id?: string
+          last_rotated_at?: string | null
+          name?: string
+          project_id?: string | null
+          redirect_uris?: string[]
+          scopes?: string[]
+          secret_hash?: string | null
+          secret_preview?: string | null
+          status?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_clients_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "developer_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oauth_clients_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_methods: {
         Row: {
           created_at: string
@@ -1770,6 +2200,68 @@ export type Database = {
           key?: string
         }
         Relationships: []
+      }
+      plugins: {
+        Row: {
+          created_at: string
+          dependencies: string[]
+          description: string | null
+          id: string
+          installed_by: string | null
+          latest_version: string
+          manifest: Json
+          name: string
+          permissions: string[]
+          publisher: string
+          slug: string
+          status: Database["public"]["Enums"]["plugin_status"]
+          updated_at: string
+          version: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          dependencies?: string[]
+          description?: string | null
+          id?: string
+          installed_by?: string | null
+          latest_version?: string
+          manifest?: Json
+          name: string
+          permissions?: string[]
+          publisher?: string
+          slug: string
+          status?: Database["public"]["Enums"]["plugin_status"]
+          updated_at?: string
+          version?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          dependencies?: string[]
+          description?: string | null
+          id?: string
+          installed_by?: string | null
+          latest_version?: string
+          manifest?: Json
+          name?: string
+          permissions?: string[]
+          publisher?: string
+          slug?: string
+          status?: Database["public"]["Enums"]["plugin_status"]
+          updated_at?: string
+          version?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plugins_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -3137,6 +3629,10 @@ export type Database = {
         Returns: boolean
       }
       member_workspace: { Args: { _member_id: string }; Returns: string }
+      report_marketplace_review: {
+        Args: { _review_id: string }
+        Returns: undefined
+      }
       shares_workspace: {
         Args: { _other_user_id: string; _user_id: string }
         Returns: boolean
@@ -3173,6 +3669,7 @@ export type Database = {
         | "knowledge"
         | "integrations"
         | "marketplace"
+      developer_project_status: "draft" | "active" | "suspended" | "archived"
       document_status:
         | "uploaded"
         | "scanning"
@@ -3242,6 +3739,23 @@ export type Database = {
         | "notion"
         | "google_drive"
       knowledge_status: "draft" | "active" | "archived"
+      marketplace_category:
+        | "workers"
+        | "workflows"
+        | "knowledge_packs"
+        | "prompt_packs"
+        | "voice_packs"
+        | "templates"
+        | "plugins"
+        | "extensions"
+        | "automation_packs"
+      marketplace_license:
+        | "free"
+        | "paid"
+        | "subscription"
+        | "enterprise"
+        | "trial"
+        | "lifetime"
       marketplace_listing_status:
         | "draft"
         | "submitted"
@@ -3266,6 +3780,12 @@ export type Database = {
         | "moyasar"
         | "stc_pay"
         | "manual"
+      plugin_status:
+        | "installed"
+        | "enabled"
+        | "disabled"
+        | "update_available"
+        | "removed"
       prompt_scope: "workspace" | "worker" | "system" | "shared"
       subscription_status:
         | "trialing"
@@ -3479,6 +3999,7 @@ export const Constants = {
         "integrations",
         "marketplace",
       ],
+      developer_project_status: ["draft", "active", "suspended", "archived"],
       document_status: [
         "uploaded",
         "scanning",
@@ -3555,6 +4076,25 @@ export const Constants = {
         "google_drive",
       ],
       knowledge_status: ["draft", "active", "archived"],
+      marketplace_category: [
+        "workers",
+        "workflows",
+        "knowledge_packs",
+        "prompt_packs",
+        "voice_packs",
+        "templates",
+        "plugins",
+        "extensions",
+        "automation_packs",
+      ],
+      marketplace_license: [
+        "free",
+        "paid",
+        "subscription",
+        "enterprise",
+        "trial",
+        "lifetime",
+      ],
       marketplace_listing_status: [
         "draft",
         "submitted",
@@ -3581,6 +4121,13 @@ export const Constants = {
         "moyasar",
         "stc_pay",
         "manual",
+      ],
+      plugin_status: [
+        "installed",
+        "enabled",
+        "disabled",
+        "update_available",
+        "removed",
       ],
       prompt_scope: ["workspace", "worker", "system", "shared"],
       subscription_status: [
