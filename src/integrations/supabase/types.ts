@@ -3629,6 +3629,10 @@ export type Database = {
         Returns: boolean
       }
       member_workspace: { Args: { _member_id: string }; Returns: string }
+      report_marketplace_review: {
+        Args: { _review_id: string }
+        Returns: undefined
+      }
       shares_workspace: {
         Args: { _other_user_id: string; _user_id: string }
         Returns: boolean
