@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.sync_product_rating() FROM PUBLIC, anon, authenticated;
