@@ -34,10 +34,10 @@ const num = (value: unknown) => {
 export function readMetrics(campaign: Campaign): CampaignMetrics {
   const meta = (campaign.metadata ?? {}) as Record<string, unknown>;
   return {
-    impressions: num(meta.impressions),
-    clicks: num(meta.clicks),
-    conversions: num(meta.conversions),
-    newCustomers: num(meta.new_customers),
+    impressions: num(meta['impressions']),
+    clicks: num(meta['clicks']),
+    conversions: num(meta['conversions']),
+    newCustomers: num(meta['new_customers']),
   };
 }
 
@@ -127,7 +127,7 @@ export function variantGroups(creatives: CreativeRequest[]): VariantGroup[] {
             (item.performance_score ?? 0) > (best.performance_score ?? 0) ? item : best,
           )
         : null;
-      return { key, title: variants[0].title, variants, winner };
+      return { key, title: variants[0]?.title ?? "", variants, winner };
     });
 }
 
