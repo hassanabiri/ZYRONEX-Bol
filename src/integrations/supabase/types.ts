@@ -254,6 +254,71 @@ export type Database = {
           },
         ]
       }
+      approval_requests: {
+        Row: {
+          amount: number | null
+          created_at: string
+          currency: string
+          decided_by: string | null
+          decision_note: string | null
+          details: string | null
+          id: string
+          levels_approved: number
+          levels_required: number
+          requested_by: string | null
+          status: Database["public"]["Enums"]["approval_state"]
+          subject_id: string | null
+          subject_type: string
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          currency?: string
+          decided_by?: string | null
+          decision_note?: string | null
+          details?: string | null
+          id?: string
+          levels_approved?: number
+          levels_required?: number
+          requested_by?: string | null
+          status?: Database["public"]["Enums"]["approval_state"]
+          subject_id?: string | null
+          subject_type: string
+          title: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          currency?: string
+          decided_by?: string | null
+          decision_note?: string | null
+          details?: string | null
+          id?: string
+          levels_approved?: number
+          levels_required?: number
+          requested_by?: string | null
+          status?: Database["public"]["Enums"]["approval_state"]
+          subject_id?: string | null
+          subject_type?: string
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_requests_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_subscriptions: {
         Row: {
           amount: number
@@ -324,6 +389,215 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "billing_subscriptions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brand_profiles: {
+        Row: {
+          brand_name: string | null
+          colors: Json
+          created_at: string
+          fonts: Json
+          guidelines: string | null
+          id: string
+          keywords: string[]
+          logo_url: string | null
+          tone: string | null
+          updated_at: string
+          voice: string | null
+          workspace_id: string
+          writing_style: string | null
+        }
+        Insert: {
+          brand_name?: string | null
+          colors?: Json
+          created_at?: string
+          fonts?: Json
+          guidelines?: string | null
+          id?: string
+          keywords?: string[]
+          logo_url?: string | null
+          tone?: string | null
+          updated_at?: string
+          voice?: string | null
+          workspace_id: string
+          writing_style?: string | null
+        }
+        Update: {
+          brand_name?: string | null
+          colors?: Json
+          created_at?: string
+          fonts?: Json
+          guidelines?: string | null
+          id?: string
+          keywords?: string[]
+          logo_url?: string | null
+          tone?: string | null
+          updated_at?: string
+          voice?: string | null
+          workspace_id?: string
+          writing_style?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_profiles_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_budget_allocations: {
+        Row: {
+          allocated: number
+          campaign_id: string
+          channel: Database["public"]["Enums"]["marketing_channel"]
+          created_at: string
+          id: string
+          spent: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          allocated?: number
+          campaign_id: string
+          channel: Database["public"]["Enums"]["marketing_channel"]
+          created_at?: string
+          id?: string
+          spent?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          allocated?: number
+          campaign_id?: string
+          channel?: Database["public"]["Enums"]["marketing_channel"]
+          created_at?: string
+          id?: string
+          spent?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_budget_allocations_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_budget_allocations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creative_requests: {
+        Row: {
+          assigned_worker_id: string | null
+          brief: string | null
+          campaign_id: string | null
+          created_at: string
+          created_by: string | null
+          credit_cost: number
+          credit_type: Database["public"]["Enums"]["credit_type"]
+          duration_ms: number | null
+          execution_id: string | null
+          id: string
+          kind: Database["public"]["Enums"]["creative_kind"]
+          output: Json
+          parent_request_id: string | null
+          performance_score: number | null
+          saved_to_library: boolean
+          status: Database["public"]["Enums"]["creative_status"]
+          title: string
+          updated_at: string
+          variant_label: string | null
+          workspace_id: string
+        }
+        Insert: {
+          assigned_worker_id?: string | null
+          brief?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          credit_cost?: number
+          credit_type?: Database["public"]["Enums"]["credit_type"]
+          duration_ms?: number | null
+          execution_id?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["creative_kind"]
+          output?: Json
+          parent_request_id?: string | null
+          performance_score?: number | null
+          saved_to_library?: boolean
+          status?: Database["public"]["Enums"]["creative_status"]
+          title: string
+          updated_at?: string
+          variant_label?: string | null
+          workspace_id: string
+        }
+        Update: {
+          assigned_worker_id?: string | null
+          brief?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          credit_cost?: number
+          credit_type?: Database["public"]["Enums"]["credit_type"]
+          duration_ms?: number | null
+          execution_id?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["creative_kind"]
+          output?: Json
+          parent_request_id?: string | null
+          performance_score?: number | null
+          saved_to_library?: boolean
+          status?: Database["public"]["Enums"]["creative_status"]
+          title?: string
+          updated_at?: string
+          variant_label?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creative_requests_assigned_worker_id_fkey"
+            columns: ["assigned_worker_id"]
+            isOneToOne: false
+            referencedRelation: "ai_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creative_requests_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creative_requests_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creative_requests_parent_request_id_fkey"
+            columns: ["parent_request_id"]
+            isOneToOne: false
+            referencedRelation: "creative_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creative_requests_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -421,6 +695,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "credit_transactions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_transfers: {
+        Row: {
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          fee: number
+          from_amount: number
+          from_type: Database["public"]["Enums"]["credit_type"]
+          id: string
+          note: string | null
+          rate: number
+          status: Database["public"]["Enums"]["transfer_state"]
+          to_amount: number
+          to_type: Database["public"]["Enums"]["credit_type"]
+          workspace_id: string
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          fee?: number
+          from_amount: number
+          from_type: Database["public"]["Enums"]["credit_type"]
+          id?: string
+          note?: string | null
+          rate?: number
+          status?: Database["public"]["Enums"]["transfer_state"]
+          to_amount: number
+          to_type: Database["public"]["Enums"]["credit_type"]
+          workspace_id: string
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          fee?: number
+          from_amount?: number
+          from_type?: Database["public"]["Enums"]["credit_type"]
+          id?: string
+          note?: string | null
+          rate?: number
+          status?: Database["public"]["Enums"]["transfer_state"]
+          to_amount?: number
+          to_type?: Database["public"]["Enums"]["credit_type"]
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transfers_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -1423,6 +1753,191 @@ export type Database = {
           },
           {
             foreignKeyName: "knowledge_folders_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_alerts: {
+        Row: {
+          action_key: string | null
+          action_payload: Json
+          campaign_id: string | null
+          created_at: string
+          expected_impact: string | null
+          id: string
+          kind: Database["public"]["Enums"]["marketing_alert_kind"]
+          reason: string | null
+          recommended_action: string | null
+          resolved: boolean
+          severity: Database["public"]["Enums"]["marketing_alert_severity"]
+          title: string
+          workspace_id: string
+        }
+        Insert: {
+          action_key?: string | null
+          action_payload?: Json
+          campaign_id?: string | null
+          created_at?: string
+          expected_impact?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["marketing_alert_kind"]
+          reason?: string | null
+          recommended_action?: string | null
+          resolved?: boolean
+          severity?: Database["public"]["Enums"]["marketing_alert_severity"]
+          title: string
+          workspace_id: string
+        }
+        Update: {
+          action_key?: string | null
+          action_payload?: Json
+          campaign_id?: string | null
+          created_at?: string
+          expected_impact?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["marketing_alert_kind"]
+          reason?: string | null
+          recommended_action?: string | null
+          resolved?: boolean
+          severity?: Database["public"]["Enums"]["marketing_alert_severity"]
+          title?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_alerts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_alerts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_audit_log: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          metadata: Json
+          reason: string | null
+          workspace_id: string
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          metadata?: Json
+          reason?: string | null
+          workspace_id: string
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          metadata?: Json
+          reason?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_audit_log_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_campaigns: {
+        Row: {
+          budget_spent: number
+          budget_total: number
+          channel: Database["public"]["Enums"]["marketing_channel"]
+          coordinator_worker_id: string | null
+          created_at: string
+          currency: string
+          ends_at: string | null
+          id: string
+          metadata: Json
+          name: string
+          objective: string | null
+          owner_user_id: string | null
+          revenue: number
+          starts_at: string | null
+          status: Database["public"]["Enums"]["marketing_campaign_status"]
+          tags: string[]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          budget_spent?: number
+          budget_total?: number
+          channel?: Database["public"]["Enums"]["marketing_channel"]
+          coordinator_worker_id?: string | null
+          created_at?: string
+          currency?: string
+          ends_at?: string | null
+          id?: string
+          metadata?: Json
+          name: string
+          objective?: string | null
+          owner_user_id?: string | null
+          revenue?: number
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["marketing_campaign_status"]
+          tags?: string[]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          budget_spent?: number
+          budget_total?: number
+          channel?: Database["public"]["Enums"]["marketing_channel"]
+          coordinator_worker_id?: string | null
+          created_at?: string
+          currency?: string
+          ends_at?: string | null
+          id?: string
+          metadata?: Json
+          name?: string
+          objective?: string | null
+          owner_user_id?: string | null
+          revenue?: number
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["marketing_campaign_status"]
+          tags?: string[]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_campaigns_coordinator_worker_id_fkey"
+            columns: ["coordinator_worker_id"]
+            isOneToOne: false
+            referencedRelation: "ai_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_campaigns_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -3639,6 +4154,7 @@ export type Database = {
       }
     }
     Enums: {
+      approval_state: "pending" | "approved" | "rejected" | "cancelled"
       billing_scope:
         | "workspace"
         | "organization"
@@ -3655,6 +4171,29 @@ export type Database = {
         | "missed"
         | "cancelled"
         | "no_answer"
+      creative_kind:
+        | "image"
+        | "video"
+        | "reel"
+        | "short_video"
+        | "copywriting"
+        | "ad_copy"
+        | "social_post"
+        | "banner"
+        | "landing_page"
+        | "email_campaign"
+        | "whatsapp_message"
+        | "sms_campaign"
+        | "multi_platform"
+      creative_status:
+        | "draft"
+        | "queued"
+        | "running"
+        | "review"
+        | "approved"
+        | "rejected"
+        | "failed"
+        | "archived"
       credit_txn_kind:
         | "grant"
         | "purchase"
@@ -3739,6 +4278,36 @@ export type Database = {
         | "notion"
         | "google_drive"
       knowledge_status: "draft" | "active" | "archived"
+      marketing_alert_kind:
+        | "low_credit"
+        | "credit_exhaustion"
+        | "high_burn"
+        | "campaign_stopped"
+        | "weak_performance"
+        | "opportunity"
+        | "optimization"
+        | "buy_credits"
+        | "upgrade_plan"
+      marketing_alert_severity: "info" | "warning" | "critical"
+      marketing_campaign_status:
+        | "draft"
+        | "pending_approval"
+        | "scheduled"
+        | "active"
+        | "paused"
+        | "completed"
+        | "archived"
+      marketing_channel:
+        | "social"
+        | "email"
+        | "whatsapp"
+        | "sms"
+        | "search"
+        | "display"
+        | "video"
+        | "content"
+        | "events"
+        | "affiliate"
       marketplace_category:
         | "workers"
         | "workflows"
@@ -3802,6 +4371,7 @@ export type Database = {
         | "failed"
         | "conflict"
         | "cancelled"
+      transfer_state: "pending" | "approved" | "completed" | "rejected"
       usage_category:
         | "worker"
         | "voice"
@@ -3965,6 +4535,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      approval_state: ["pending", "approved", "rejected", "cancelled"],
       billing_scope: [
         "workspace",
         "organization",
@@ -3982,6 +4553,31 @@ export const Constants = {
         "missed",
         "cancelled",
         "no_answer",
+      ],
+      creative_kind: [
+        "image",
+        "video",
+        "reel",
+        "short_video",
+        "copywriting",
+        "ad_copy",
+        "social_post",
+        "banner",
+        "landing_page",
+        "email_campaign",
+        "whatsapp_message",
+        "sms_campaign",
+        "multi_platform",
+      ],
+      creative_status: [
+        "draft",
+        "queued",
+        "running",
+        "review",
+        "approved",
+        "rejected",
+        "failed",
+        "archived",
       ],
       credit_txn_kind: [
         "grant",
@@ -4076,6 +4672,39 @@ export const Constants = {
         "google_drive",
       ],
       knowledge_status: ["draft", "active", "archived"],
+      marketing_alert_kind: [
+        "low_credit",
+        "credit_exhaustion",
+        "high_burn",
+        "campaign_stopped",
+        "weak_performance",
+        "opportunity",
+        "optimization",
+        "buy_credits",
+        "upgrade_plan",
+      ],
+      marketing_alert_severity: ["info", "warning", "critical"],
+      marketing_campaign_status: [
+        "draft",
+        "pending_approval",
+        "scheduled",
+        "active",
+        "paused",
+        "completed",
+        "archived",
+      ],
+      marketing_channel: [
+        "social",
+        "email",
+        "whatsapp",
+        "sms",
+        "search",
+        "display",
+        "video",
+        "content",
+        "events",
+        "affiliate",
+      ],
       marketplace_category: [
         "workers",
         "workflows",
@@ -4147,6 +4776,7 @@ export const Constants = {
         "conflict",
         "cancelled",
       ],
+      transfer_state: ["pending", "approved", "completed", "rejected"],
       usage_category: [
         "worker",
         "voice",
