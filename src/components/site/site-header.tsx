@@ -149,8 +149,9 @@ export function SiteHeader() {
             className="type-label flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-muted-foreground transition-colors hover:bg-surface hover:text-foreground"
           >
             <Globe className="size-4" />
-            {language === "ar" ? "EN" : "ع"}
-            <span className="hidden sm:inline">{language === "ar" ? "glish" : "ربي"}</span>
+            <span className="sm:hidden">{language === "ar" ? "EN" : "ع"}</span>
+            <span className="hidden sm:inline">{language === "ar" ? "English" : "العربية"}</span>
+
           </button>
 
           <button
