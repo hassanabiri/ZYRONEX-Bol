@@ -28,6 +28,7 @@ import { Route as AuthenticatedResourcesRouteImport } from './routes/_authentica
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedVoiceRouteImport } from './routes/_authenticated/voice'
 import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated/workspace'
+import { Route as SiteAiWorkersRouteImport } from './routes/_site/ai-workers'
 import { Route as AuthenticatedExecutionsIndexRouteImport } from './routes/_authenticated/executions.index'
 import { Route as AuthenticatedExecutionsExecutionIdRouteImport } from './routes/_authenticated/executions.$executionId'
 import { Route as AuthenticatedWorkersIndexRouteImport } from './routes/_authenticated/workers.index'
@@ -132,6 +133,11 @@ const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
   path: '/workspace',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const SiteAiWorkersRoute = SiteAiWorkersRouteImport.update({
+  id: '/_site/ai-workers',
+  path: '/ai-workers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedExecutionsIndexRoute =
   AuthenticatedExecutionsIndexRouteImport.update({
     id: '/executions/',
@@ -188,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/voice': typeof AuthenticatedVoiceRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
+  '/ai-workers': typeof SiteAiWorkersRoute
   '/executions/$executionId': typeof AuthenticatedExecutionsExecutionIdRoute
   '/workers/$workerId': typeof AuthenticatedWorkersWorkerIdRoute
   '/workflow/$workflowId': typeof AuthenticatedWorkflowWorkflowIdRoute
@@ -214,6 +221,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/voice': typeof AuthenticatedVoiceRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
+  '/ai-workers': typeof SiteAiWorkersRoute
   '/executions/$executionId': typeof AuthenticatedExecutionsExecutionIdRoute
   '/workers/$workerId': typeof AuthenticatedWorkersWorkerIdRoute
   '/workflow/$workflowId': typeof AuthenticatedWorkflowWorkflowIdRoute
@@ -242,6 +250,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/voice': typeof AuthenticatedVoiceRoute
   '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
+  '/_site/ai-workers': typeof SiteAiWorkersRoute
   '/_authenticated/executions/$executionId': typeof AuthenticatedExecutionsExecutionIdRoute
   '/_authenticated/workers/$workerId': typeof AuthenticatedWorkersWorkerIdRoute
   '/_authenticated/workflow/$workflowId': typeof AuthenticatedWorkflowWorkflowIdRoute
@@ -270,6 +279,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/voice'
     | '/workspace'
+    | '/ai-workers'
     | '/executions/$executionId'
     | '/workers/$workerId'
     | '/workflow/$workflowId'
@@ -296,6 +306,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/voice'
     | '/workspace'
+    | '/ai-workers'
     | '/executions/$executionId'
     | '/workers/$workerId'
     | '/workflow/$workflowId'
@@ -323,6 +334,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/voice'
     | '/_authenticated/workspace'
+    | '/_site/ai-workers'
     | '/_authenticated/executions/$executionId'
     | '/_authenticated/workers/$workerId'
     | '/_authenticated/workflow/$workflowId'
@@ -338,6 +350,7 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   OnboardingRoute: typeof OnboardingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SiteAiWorkersRoute: typeof SiteAiWorkersRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -475,6 +488,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWorkspaceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_site/ai-workers': {
+      id: '/_site/ai-workers'
+      path: '/ai-workers'
+      fullPath: '/ai-workers'
+      preLoaderRoute: typeof SiteAiWorkersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/executions/': {
       id: '/_authenticated/executions/'
       path: '/executions'
@@ -575,6 +595,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   OnboardingRoute: OnboardingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SiteAiWorkersRoute: SiteAiWorkersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
