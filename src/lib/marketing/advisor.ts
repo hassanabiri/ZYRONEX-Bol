@@ -75,9 +75,9 @@ export function buildRecommendations(input: {
   }
 
   for (const campaign of input.campaigns) {
-    const spend = Number(campaign.spend);
+    const spend = Number(campaign.budget_spent);
     const revenue = Number(campaign.revenue);
-    const budget = Number(campaign.budget);
+    const budget = Number(campaign.budget_total);
     if (campaign.status === "active" && budget > 0 && spend / budget >= 0.9) {
       out.push({
         key: `budget-${campaign.id}`,
