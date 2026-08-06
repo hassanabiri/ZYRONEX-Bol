@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Boxes, Play, ShieldCheck, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -6,6 +6,7 @@ import { ProductPreview } from "@/components/site/product-preview";
 import { Reveal } from "@/components/site/reveal";
 import { CtaBanner, SectionHeading, SiteSection } from "@/components/site/section";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import { capabilities, industries, integrationGroups, pillars } from "@/lib/site/content";
 
