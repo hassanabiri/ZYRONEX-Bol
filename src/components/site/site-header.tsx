@@ -248,6 +248,25 @@ export function SiteHeader() {
                 </nav>
 
                 <div className="mt-auto grid gap-2.5">
+                  <div className="grid grid-cols-2 gap-2 rounded-2xl border bg-card/60 p-1.5">
+                    {(["en", "ar"] as const).map((code) => (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => setLanguage(code)}
+                        className={cn(
+                          "flex items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors",
+                          language === code
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-surface hover:text-foreground",
+                        )}
+                      >
+                        <Globe className="size-4" />
+                        {code === "en" ? "English" : "العربية"}
+                      </button>
+                    ))}
+                  </div>
+
                   <Button asChild size="lg" className="rounded-xl font-semibold">
                     <Link to="/auth" onClick={() => setOpenMobile(false)}>
                       {t("Start free")}
