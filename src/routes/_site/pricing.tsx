@@ -2,7 +2,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 
 import { Reveal } from "@/components/site/reveal";
-import { CtaBanner, PageHero, SiteSection } from "@/components/site/section";
+import { CtaBanner, PageHero, SectionHeading, SiteSection } from "@/components/site/section";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { faqs, plans } from "@/lib/site/content";
