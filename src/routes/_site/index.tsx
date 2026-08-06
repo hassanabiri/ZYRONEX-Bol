@@ -84,7 +84,26 @@ function Counter({ value, suffix }: { value: number; suffix: string }) {
 
 function HomePage() {
   const { t } = useI18n();
+  const { session, loading } = useAuth();
+  const navigate = useNavigate();
   const marquee = [...integrationGroups.flatMap((group) => group.items)];
+
+  useEffect(() => {
+    if (!loading && session) navigate({ to: "/dashboard", replace: true });
+  }, [loading, session, navigate]);
+
+  if (loading || session) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <span className="brand-gradient flex size-10 animate-pulse items-center justify-center rounded-xl font-display font-bold text-primary-foreground">
+            Z
+          </span>
+          <p className="text-sm text-muted-foreground">{t("Loading ZYRONEX…")}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
