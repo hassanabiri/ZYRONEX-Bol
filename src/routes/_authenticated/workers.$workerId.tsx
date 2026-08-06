@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { EmptyState } from "@/components/empty-state";
+import { MarketingConsole } from "@/components/marketing/marketing-console";
 import { WorkerAvatar } from "@/components/workers/worker-avatar";
 import {
   WorkerKnowledgeTab,
@@ -140,6 +141,8 @@ function WorkerDetailRoute() {
     );
   }
 
+  const isMarketing = worker.type === "marketing" || worker.purpose === "marketing";
+
   const setStatus = (status: Worker["status"]) =>
     updateWorker
       .mutateAsync({ workerId: worker.id, patch: { status } })
@@ -225,6 +228,7 @@ function WorkerDetailRoute() {
           <TabsTrigger value="configuration">{t("Configuration")}</TabsTrigger>
           <TabsTrigger value="knowledge">{t("Knowledge")}</TabsTrigger>
           <TabsTrigger value="memory">{t("Memory")}</TabsTrigger>
+          {isMarketing && <TabsTrigger value="marketing">{t("Marketing")}</TabsTrigger>}
           {PLACEHOLDER_TABS.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value}>
               {t(tab.label)}
@@ -249,6 +253,12 @@ function WorkerDetailRoute() {
         <TabsContent value="memory">
           <WorkerMemoryTab worker={worker} />
         </TabsContent>
+
+        {isMarketing && (
+          <TabsContent value="marketing">
+            <MarketingConsole worker={worker} />
+          </TabsContent>
+        )}
 
         {PLACEHOLDER_TABS.map((tab) => (
           <TabsContent key={tab.value} value={tab.value}>
