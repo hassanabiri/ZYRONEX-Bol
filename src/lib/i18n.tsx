@@ -506,7 +506,6 @@ const ar: Record<string, string> = {
   "Shared identity injected into every creative brief so output stays on-brand.": "هوية مشتركة تُضاف لكل طلب إبداعي ليبقى الناتج متوافقاً مع العلامة.",
   "Brand name": "اسم العلامة",
   "Tone": "النبرة",
-  "Voice": "الصوت",
   "Writing style": "أسلوب الكتابة",
   "Keywords": "الكلمات المفتاحية",
   "Comma separated": "مفصولة بفواصل",
