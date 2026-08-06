@@ -8,6 +8,7 @@ import {
   BookOpen,
   Brain,
   AudioLines,
+  Megaphone,
   Plug,
   Server,
   CreditCard,
