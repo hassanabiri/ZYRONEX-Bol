@@ -310,7 +310,9 @@ export const marketingService = {
         unit: "asset",
         unit_cost: Number(request.credit_cost),
         total_cost: Number(request.credit_cost),
-        description: `${request.kind} · ${request.title}`,
+        reference_type: "creative_request",
+        reference_id: request.id,
+        metadata: { kind: request.kind, title: request.title } as never,
       })
       .catch(() => undefined);
     return updated;
