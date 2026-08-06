@@ -310,7 +310,7 @@ export function SiteHeader() {
                 </div>
 
                 {featured && (
-                  <div className="relative overflow-hidden rounded-2xl border bg-surface/60 p-6">
+                  <div className="relative overflow-hidden rounded-2xl border bg-surface p-6">
                     <div
                       aria-hidden
                       className="brand-gradient pointer-events-none absolute -end-16 -top-16 size-44 rounded-full opacity-25 blur-3xl"
