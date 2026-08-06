@@ -1,5 +1,5 @@
 import type { CreditType } from "@/lib/billing/catalog";
-import type { TablesInsert } from "@/integrations/supabase/types";
+import type { AlertKind, AlertSeverity } from "@/lib/marketing/catalog";
 import type {
   BudgetAllocation,
   Campaign,
@@ -9,8 +9,8 @@ import type {
 
 export type CmoRecommendation = {
   key: string;
-  kind: TablesInsert<"marketing_alerts">["kind"];
-  severity: TablesInsert<"marketing_alerts">["severity"];
+  kind: AlertKind;
+  severity: AlertSeverity;
   title: string;
   message: string;
   action: string | null;
