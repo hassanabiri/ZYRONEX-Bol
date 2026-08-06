@@ -9,8 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as SiteRouteRouteImport } from './routes/_site/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -28,6 +28,31 @@ import { Route as AuthenticatedResourcesRouteImport } from './routes/_authentica
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedVoiceRouteImport } from './routes/_authenticated/voice'
 import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated/workspace'
+import { Route as SiteIndexRouteImport } from './routes/_site/index'
+import { Route as SiteAboutRouteImport } from './routes/_site/about'
+import { Route as SiteAcademyRouteImport } from './routes/_site/academy'
+import { Route as SiteAiWorkersRouteImport } from './routes/_site/ai-workers'
+import { Route as SiteApiRouteImport } from './routes/_site/api'
+import { Route as SiteBlogRouteImport } from './routes/_site/blog'
+import { Route as SiteCareersRouteImport } from './routes/_site/careers'
+import { Route as SiteChangelogRouteImport } from './routes/_site/changelog'
+import { Route as SiteCompareRouteImport } from './routes/_site/compare'
+import { Route as SiteConnectorsRouteImport } from './routes/_site/connectors'
+import { Route as SiteContactRouteImport } from './routes/_site/contact'
+import { Route as SiteDemoRouteImport } from './routes/_site/demo'
+import { Route as SiteDevelopersRouteImport } from './routes/_site/developers'
+import { Route as SiteFaqRouteImport } from './routes/_site/faq'
+import { Route as SiteHelpRouteImport } from './routes/_site/help'
+import { Route as SiteIndustriesRouteImport } from './routes/_site/industries'
+import { Route as SiteKnowledgeCenterRouteImport } from './routes/_site/knowledge-center'
+import { Route as SitePartnersRouteImport } from './routes/_site/partners'
+import { Route as SitePressRouteImport } from './routes/_site/press'
+import { Route as SitePricingRouteImport } from './routes/_site/pricing'
+import { Route as SitePrivacyRouteImport } from './routes/_site/privacy'
+import { Route as SiteSecurityRouteImport } from './routes/_site/security'
+import { Route as SiteSolutionsRouteImport } from './routes/_site/solutions'
+import { Route as SiteStatusRouteImport } from './routes/_site/status'
+import { Route as SiteTermsRouteImport } from './routes/_site/terms'
 import { Route as AuthenticatedExecutionsIndexRouteImport } from './routes/_authenticated/executions.index'
 import { Route as AuthenticatedExecutionsExecutionIdRouteImport } from './routes/_authenticated/executions.$executionId'
 import { Route as AuthenticatedWorkersIndexRouteImport } from './routes/_authenticated/workers.index'
@@ -35,13 +60,12 @@ import { Route as AuthenticatedWorkersWorkerIdRouteImport } from './routes/_auth
 import { Route as AuthenticatedWorkflowIndexRouteImport } from './routes/_authenticated/workflow.index'
 import { Route as AuthenticatedWorkflowWorkflowIdRouteImport } from './routes/_authenticated/workflow.$workflowId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiteRouteRoute = SiteRouteRouteImport.update({
+  id: '/_site',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -132,6 +156,131 @@ const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
   path: '/workspace',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const SiteIndexRoute = SiteIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteAboutRoute = SiteAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteAcademyRoute = SiteAcademyRouteImport.update({
+  id: '/academy',
+  path: '/academy',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteAiWorkersRoute = SiteAiWorkersRouteImport.update({
+  id: '/ai-workers',
+  path: '/ai-workers',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteApiRoute = SiteApiRouteImport.update({
+  id: '/api',
+  path: '/api',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteBlogRoute = SiteBlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteCareersRoute = SiteCareersRouteImport.update({
+  id: '/careers',
+  path: '/careers',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteChangelogRoute = SiteChangelogRouteImport.update({
+  id: '/changelog',
+  path: '/changelog',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteCompareRoute = SiteCompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteConnectorsRoute = SiteConnectorsRouteImport.update({
+  id: '/connectors',
+  path: '/connectors',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteContactRoute = SiteContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteDemoRoute = SiteDemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteDevelopersRoute = SiteDevelopersRouteImport.update({
+  id: '/developers',
+  path: '/developers',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteFaqRoute = SiteFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteHelpRoute = SiteHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteIndustriesRoute = SiteIndustriesRouteImport.update({
+  id: '/industries',
+  path: '/industries',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteKnowledgeCenterRoute = SiteKnowledgeCenterRouteImport.update({
+  id: '/knowledge-center',
+  path: '/knowledge-center',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SitePartnersRoute = SitePartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SitePressRoute = SitePressRouteImport.update({
+  id: '/press',
+  path: '/press',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SitePricingRoute = SitePricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SitePrivacyRoute = SitePrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteSecurityRoute = SiteSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteSolutionsRoute = SiteSolutionsRouteImport.update({
+  id: '/solutions',
+  path: '/solutions',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteStatusRoute = SiteStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteTermsRoute = SiteTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
 const AuthenticatedExecutionsIndexRoute =
   AuthenticatedExecutionsIndexRouteImport.update({
     id: '/executions/',
@@ -170,7 +319,7 @@ const AuthenticatedWorkflowWorkflowIdRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof SiteIndexRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/onboarding': typeof OnboardingRoute
@@ -188,6 +337,30 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/voice': typeof AuthenticatedVoiceRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
+  '/about': typeof SiteAboutRoute
+  '/academy': typeof SiteAcademyRoute
+  '/ai-workers': typeof SiteAiWorkersRoute
+  '/api': typeof SiteApiRoute
+  '/blog': typeof SiteBlogRoute
+  '/careers': typeof SiteCareersRoute
+  '/changelog': typeof SiteChangelogRoute
+  '/compare': typeof SiteCompareRoute
+  '/connectors': typeof SiteConnectorsRoute
+  '/contact': typeof SiteContactRoute
+  '/demo': typeof SiteDemoRoute
+  '/developers': typeof SiteDevelopersRoute
+  '/faq': typeof SiteFaqRoute
+  '/help': typeof SiteHelpRoute
+  '/industries': typeof SiteIndustriesRoute
+  '/knowledge-center': typeof SiteKnowledgeCenterRoute
+  '/partners': typeof SitePartnersRoute
+  '/press': typeof SitePressRoute
+  '/pricing': typeof SitePricingRoute
+  '/privacy': typeof SitePrivacyRoute
+  '/security': typeof SiteSecurityRoute
+  '/solutions': typeof SiteSolutionsRoute
+  '/status': typeof SiteStatusRoute
+  '/terms': typeof SiteTermsRoute
   '/executions/$executionId': typeof AuthenticatedExecutionsExecutionIdRoute
   '/workers/$workerId': typeof AuthenticatedWorkersWorkerIdRoute
   '/workflow/$workflowId': typeof AuthenticatedWorkflowWorkflowIdRoute
@@ -196,7 +369,7 @@ export interface FileRoutesByFullPath {
   '/workflow/': typeof AuthenticatedWorkflowIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/': typeof SiteIndexRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/onboarding': typeof OnboardingRoute
@@ -214,6 +387,30 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/voice': typeof AuthenticatedVoiceRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
+  '/about': typeof SiteAboutRoute
+  '/academy': typeof SiteAcademyRoute
+  '/ai-workers': typeof SiteAiWorkersRoute
+  '/api': typeof SiteApiRoute
+  '/blog': typeof SiteBlogRoute
+  '/careers': typeof SiteCareersRoute
+  '/changelog': typeof SiteChangelogRoute
+  '/compare': typeof SiteCompareRoute
+  '/connectors': typeof SiteConnectorsRoute
+  '/contact': typeof SiteContactRoute
+  '/demo': typeof SiteDemoRoute
+  '/developers': typeof SiteDevelopersRoute
+  '/faq': typeof SiteFaqRoute
+  '/help': typeof SiteHelpRoute
+  '/industries': typeof SiteIndustriesRoute
+  '/knowledge-center': typeof SiteKnowledgeCenterRoute
+  '/partners': typeof SitePartnersRoute
+  '/press': typeof SitePressRoute
+  '/pricing': typeof SitePricingRoute
+  '/privacy': typeof SitePrivacyRoute
+  '/security': typeof SiteSecurityRoute
+  '/solutions': typeof SiteSolutionsRoute
+  '/status': typeof SiteStatusRoute
+  '/terms': typeof SiteTermsRoute
   '/executions/$executionId': typeof AuthenticatedExecutionsExecutionIdRoute
   '/workers/$workerId': typeof AuthenticatedWorkersWorkerIdRoute
   '/workflow/$workflowId': typeof AuthenticatedWorkflowWorkflowIdRoute
@@ -223,8 +420,8 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/_site': typeof SiteRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/onboarding': typeof OnboardingRoute
@@ -242,6 +439,31 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/voice': typeof AuthenticatedVoiceRoute
   '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
+  '/_site/about': typeof SiteAboutRoute
+  '/_site/academy': typeof SiteAcademyRoute
+  '/_site/ai-workers': typeof SiteAiWorkersRoute
+  '/_site/api': typeof SiteApiRoute
+  '/_site/blog': typeof SiteBlogRoute
+  '/_site/careers': typeof SiteCareersRoute
+  '/_site/changelog': typeof SiteChangelogRoute
+  '/_site/compare': typeof SiteCompareRoute
+  '/_site/connectors': typeof SiteConnectorsRoute
+  '/_site/contact': typeof SiteContactRoute
+  '/_site/demo': typeof SiteDemoRoute
+  '/_site/developers': typeof SiteDevelopersRoute
+  '/_site/faq': typeof SiteFaqRoute
+  '/_site/help': typeof SiteHelpRoute
+  '/_site/industries': typeof SiteIndustriesRoute
+  '/_site/knowledge-center': typeof SiteKnowledgeCenterRoute
+  '/_site/partners': typeof SitePartnersRoute
+  '/_site/press': typeof SitePressRoute
+  '/_site/pricing': typeof SitePricingRoute
+  '/_site/privacy': typeof SitePrivacyRoute
+  '/_site/security': typeof SiteSecurityRoute
+  '/_site/solutions': typeof SiteSolutionsRoute
+  '/_site/status': typeof SiteStatusRoute
+  '/_site/terms': typeof SiteTermsRoute
+  '/_site/': typeof SiteIndexRoute
   '/_authenticated/executions/$executionId': typeof AuthenticatedExecutionsExecutionIdRoute
   '/_authenticated/workers/$workerId': typeof AuthenticatedWorkersWorkerIdRoute
   '/_authenticated/workflow/$workflowId': typeof AuthenticatedWorkflowWorkflowIdRoute
@@ -270,6 +492,30 @@ export interface FileRouteTypes {
     | '/settings'
     | '/voice'
     | '/workspace'
+    | '/about'
+    | '/academy'
+    | '/ai-workers'
+    | '/api'
+    | '/blog'
+    | '/careers'
+    | '/changelog'
+    | '/compare'
+    | '/connectors'
+    | '/contact'
+    | '/demo'
+    | '/developers'
+    | '/faq'
+    | '/help'
+    | '/industries'
+    | '/knowledge-center'
+    | '/partners'
+    | '/press'
+    | '/pricing'
+    | '/privacy'
+    | '/security'
+    | '/solutions'
+    | '/status'
+    | '/terms'
     | '/executions/$executionId'
     | '/workers/$workerId'
     | '/workflow/$workflowId'
@@ -296,6 +542,30 @@ export interface FileRouteTypes {
     | '/settings'
     | '/voice'
     | '/workspace'
+    | '/about'
+    | '/academy'
+    | '/ai-workers'
+    | '/api'
+    | '/blog'
+    | '/careers'
+    | '/changelog'
+    | '/compare'
+    | '/connectors'
+    | '/contact'
+    | '/demo'
+    | '/developers'
+    | '/faq'
+    | '/help'
+    | '/industries'
+    | '/knowledge-center'
+    | '/partners'
+    | '/press'
+    | '/pricing'
+    | '/privacy'
+    | '/security'
+    | '/solutions'
+    | '/status'
+    | '/terms'
     | '/executions/$executionId'
     | '/workers/$workerId'
     | '/workflow/$workflowId'
@@ -304,8 +574,8 @@ export interface FileRouteTypes {
     | '/workflow'
   id:
     | '__root__'
-    | '/'
     | '/_authenticated'
+    | '/_site'
     | '/auth'
     | '/forgot-password'
     | '/onboarding'
@@ -323,6 +593,31 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/voice'
     | '/_authenticated/workspace'
+    | '/_site/about'
+    | '/_site/academy'
+    | '/_site/ai-workers'
+    | '/_site/api'
+    | '/_site/blog'
+    | '/_site/careers'
+    | '/_site/changelog'
+    | '/_site/compare'
+    | '/_site/connectors'
+    | '/_site/contact'
+    | '/_site/demo'
+    | '/_site/developers'
+    | '/_site/faq'
+    | '/_site/help'
+    | '/_site/industries'
+    | '/_site/knowledge-center'
+    | '/_site/partners'
+    | '/_site/press'
+    | '/_site/pricing'
+    | '/_site/privacy'
+    | '/_site/security'
+    | '/_site/solutions'
+    | '/_site/status'
+    | '/_site/terms'
+    | '/_site/'
     | '/_authenticated/executions/$executionId'
     | '/_authenticated/workers/$workerId'
     | '/_authenticated/workflow/$workflowId'
@@ -332,8 +627,8 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  SiteRouteRoute: typeof SiteRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -342,18 +637,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_site': {
+      id: '/_site'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof SiteRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -475,6 +770,181 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWorkspaceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_site/': {
+      id: '/_site/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof SiteIndexRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/about': {
+      id: '/_site/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof SiteAboutRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/academy': {
+      id: '/_site/academy'
+      path: '/academy'
+      fullPath: '/academy'
+      preLoaderRoute: typeof SiteAcademyRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/ai-workers': {
+      id: '/_site/ai-workers'
+      path: '/ai-workers'
+      fullPath: '/ai-workers'
+      preLoaderRoute: typeof SiteAiWorkersRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/api': {
+      id: '/_site/api'
+      path: '/api'
+      fullPath: '/api'
+      preLoaderRoute: typeof SiteApiRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/blog': {
+      id: '/_site/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof SiteBlogRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/careers': {
+      id: '/_site/careers'
+      path: '/careers'
+      fullPath: '/careers'
+      preLoaderRoute: typeof SiteCareersRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/changelog': {
+      id: '/_site/changelog'
+      path: '/changelog'
+      fullPath: '/changelog'
+      preLoaderRoute: typeof SiteChangelogRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/compare': {
+      id: '/_site/compare'
+      path: '/compare'
+      fullPath: '/compare'
+      preLoaderRoute: typeof SiteCompareRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/connectors': {
+      id: '/_site/connectors'
+      path: '/connectors'
+      fullPath: '/connectors'
+      preLoaderRoute: typeof SiteConnectorsRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/contact': {
+      id: '/_site/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof SiteContactRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/demo': {
+      id: '/_site/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof SiteDemoRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/developers': {
+      id: '/_site/developers'
+      path: '/developers'
+      fullPath: '/developers'
+      preLoaderRoute: typeof SiteDevelopersRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/faq': {
+      id: '/_site/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof SiteFaqRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/help': {
+      id: '/_site/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof SiteHelpRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/industries': {
+      id: '/_site/industries'
+      path: '/industries'
+      fullPath: '/industries'
+      preLoaderRoute: typeof SiteIndustriesRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/knowledge-center': {
+      id: '/_site/knowledge-center'
+      path: '/knowledge-center'
+      fullPath: '/knowledge-center'
+      preLoaderRoute: typeof SiteKnowledgeCenterRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/partners': {
+      id: '/_site/partners'
+      path: '/partners'
+      fullPath: '/partners'
+      preLoaderRoute: typeof SitePartnersRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/press': {
+      id: '/_site/press'
+      path: '/press'
+      fullPath: '/press'
+      preLoaderRoute: typeof SitePressRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/pricing': {
+      id: '/_site/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof SitePricingRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/privacy': {
+      id: '/_site/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof SitePrivacyRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/security': {
+      id: '/_site/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof SiteSecurityRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/solutions': {
+      id: '/_site/solutions'
+      path: '/solutions'
+      fullPath: '/solutions'
+      preLoaderRoute: typeof SiteSolutionsRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/status': {
+      id: '/_site/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof SiteStatusRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/_site/terms': {
+      id: '/_site/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof SiteTermsRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
     '/_authenticated/executions/': {
       id: '/_authenticated/executions/'
       path: '/executions'
@@ -568,9 +1038,69 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface SiteRouteRouteChildren {
+  SiteAboutRoute: typeof SiteAboutRoute
+  SiteAcademyRoute: typeof SiteAcademyRoute
+  SiteAiWorkersRoute: typeof SiteAiWorkersRoute
+  SiteApiRoute: typeof SiteApiRoute
+  SiteBlogRoute: typeof SiteBlogRoute
+  SiteCareersRoute: typeof SiteCareersRoute
+  SiteChangelogRoute: typeof SiteChangelogRoute
+  SiteCompareRoute: typeof SiteCompareRoute
+  SiteConnectorsRoute: typeof SiteConnectorsRoute
+  SiteContactRoute: typeof SiteContactRoute
+  SiteDemoRoute: typeof SiteDemoRoute
+  SiteDevelopersRoute: typeof SiteDevelopersRoute
+  SiteFaqRoute: typeof SiteFaqRoute
+  SiteHelpRoute: typeof SiteHelpRoute
+  SiteIndustriesRoute: typeof SiteIndustriesRoute
+  SiteKnowledgeCenterRoute: typeof SiteKnowledgeCenterRoute
+  SitePartnersRoute: typeof SitePartnersRoute
+  SitePressRoute: typeof SitePressRoute
+  SitePricingRoute: typeof SitePricingRoute
+  SitePrivacyRoute: typeof SitePrivacyRoute
+  SiteSecurityRoute: typeof SiteSecurityRoute
+  SiteSolutionsRoute: typeof SiteSolutionsRoute
+  SiteStatusRoute: typeof SiteStatusRoute
+  SiteTermsRoute: typeof SiteTermsRoute
+  SiteIndexRoute: typeof SiteIndexRoute
+}
+
+const SiteRouteRouteChildren: SiteRouteRouteChildren = {
+  SiteAboutRoute: SiteAboutRoute,
+  SiteAcademyRoute: SiteAcademyRoute,
+  SiteAiWorkersRoute: SiteAiWorkersRoute,
+  SiteApiRoute: SiteApiRoute,
+  SiteBlogRoute: SiteBlogRoute,
+  SiteCareersRoute: SiteCareersRoute,
+  SiteChangelogRoute: SiteChangelogRoute,
+  SiteCompareRoute: SiteCompareRoute,
+  SiteConnectorsRoute: SiteConnectorsRoute,
+  SiteContactRoute: SiteContactRoute,
+  SiteDemoRoute: SiteDemoRoute,
+  SiteDevelopersRoute: SiteDevelopersRoute,
+  SiteFaqRoute: SiteFaqRoute,
+  SiteHelpRoute: SiteHelpRoute,
+  SiteIndustriesRoute: SiteIndustriesRoute,
+  SiteKnowledgeCenterRoute: SiteKnowledgeCenterRoute,
+  SitePartnersRoute: SitePartnersRoute,
+  SitePressRoute: SitePressRoute,
+  SitePricingRoute: SitePricingRoute,
+  SitePrivacyRoute: SitePrivacyRoute,
+  SiteSecurityRoute: SiteSecurityRoute,
+  SiteSolutionsRoute: SiteSolutionsRoute,
+  SiteStatusRoute: SiteStatusRoute,
+  SiteTermsRoute: SiteTermsRoute,
+  SiteIndexRoute: SiteIndexRoute,
+}
+
+const SiteRouteRouteWithChildren = SiteRouteRoute._addFileChildren(
+  SiteRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  SiteRouteRoute: SiteRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   OnboardingRoute: OnboardingRoute,
@@ -579,13 +1109,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
