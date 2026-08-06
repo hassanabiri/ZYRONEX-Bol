@@ -35,9 +35,8 @@ function ConnectorsPage() {
       <SiteSection className="pt-4">
         <div className="grid gap-6">
           {integrationGroups.map((group, groupIndex) => (
-            <Reveal key={group.name} delay={groupIndex * 80} className="rounded-3xl border bg-card/50 p-6">
-              <h2 className="font-display text-lg font-semibold">{t(group.name)}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">{t(group.description)}</p>
+            <Reveal key={group.group} delay={groupIndex * 80} className="rounded-3xl border bg-card/50 p-6">
+              <h2 className="font-display text-lg font-semibold">{t(group.group)}</h2>
               <div className="mt-5 flex flex-wrap gap-2">
                 {group.items.map((item) => (
                   <span
