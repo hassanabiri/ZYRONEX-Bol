@@ -8,7 +8,6 @@ import {
   BookOpen,
   Brain,
   AudioLines,
-  Megaphone,
   Plug,
   Server,
   CreditCard,
@@ -50,7 +49,6 @@ export const navSections: NavSection[] = [
       { title: "Knowledge", to: "/knowledge", icon: BookOpen },
       { title: "Memory", to: "/memory", icon: Brain },
       { title: "Voice", to: "/voice", icon: AudioLines },
-      { title: "Marketing", to: "/marketing", icon: Megaphone },
     ],
   },
   {
