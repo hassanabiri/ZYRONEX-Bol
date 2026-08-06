@@ -28,7 +28,6 @@ import { useBudgetAllocations, useCampaigns, useMarketingMutations } from "@/hoo
 import { useI18n } from "@/lib/i18n";
 import {
   CAMPAIGN_STATUSES,
-  CAMPAIGN_STATUS_MAP,
   MARKETING_CHANNELS,
   type CampaignStatus,
   type MarketingChannel,
@@ -53,6 +52,7 @@ export function BudgetBoard({
   const [budget, setBudget] = useState("1000");
   const [allocChannel, setAllocChannel] = useState<MarketingChannel>("social");
   const [allocAmount, setAllocAmount] = useState("500");
+  const [allocCampaign, setAllocCampaign] = useState("");
 
   const totals = useMemo(() => {
     const budgetTotal = campaigns.reduce((sum, row) => sum + Number(row.budget_total), 0);
@@ -258,7 +258,19 @@ export function BudgetBoard({
         </CardHeader>
         <CardContent className="space-y-3">
           {canManage && (
-            <div className="grid gap-2 sm:grid-cols-3">
+            <div className="grid gap-2 sm:grid-cols-4">
+              <Select value={allocCampaign} onValueChange={setAllocCampaign}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("Select a campaign")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {campaigns.map((campaign) => (
+                    <SelectItem key={campaign.id} value={campaign.id}>
+                      {campaign.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select
                 value={allocChannel}
                 onValueChange={(value) => setAllocChannel(value as MarketingChannel)}
@@ -277,8 +289,10 @@ export function BudgetBoard({
               <Input value={allocAmount} onChange={(event) => setAllocAmount(event.target.value)} />
               <Button
                 variant="outline"
+                disabled={!allocCampaign}
                 onClick={() =>
                   mutations.saveAllocation.mutate({
+                    campaign_id: allocCampaign,
                     channel: allocChannel,
                     allocated: Number(allocAmount) || 0,
                   })
