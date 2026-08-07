@@ -2,6 +2,7 @@ import type { Session, User } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { authService } from "@/services/auth-service";
 
 type AuthContextValue = {
   session: Session | null;
@@ -22,7 +23,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
+      // "Remember me" off: drop a session that outlived its browser tab.
+      if (data.session && authService.shouldDropSession()) {
+        await authService.signOut().catch(() => undefined);
+        setSession(null);
+        setLoading(false);
+        return;
+      }
       setSession(data.session);
       setLoading(false);
     });
@@ -36,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       loading,
       signOut: async () => {
-        await supabase.auth.signOut();
+        await authService.signOut();
       },
     }),
     [session, loading],
