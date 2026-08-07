@@ -38,7 +38,12 @@ function AuthenticatedLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !session) navigate({ to: "/auth", replace: true });
+    if (!loading && !session)
+      navigate({
+        to: "/auth",
+        replace: true,
+        search: { next: window.location.pathname + window.location.search },
+      });
   }, [loading, session, navigate]);
 
   if (loading || !session) return <Loader />;
