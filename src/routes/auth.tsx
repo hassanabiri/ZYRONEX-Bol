@@ -14,7 +14,7 @@ import { useI18n } from "@/lib/i18n";
 import { authService } from "@/services/auth-service";
 import { profileService } from "@/services/profile-service";
 
-type AuthSearch = { next?: string };
+type AuthSearch = { next?: string | undefined };
 
 function safeNext(next?: string) {
   if (!next || !next.startsWith("/") || next.startsWith("//")) return "/dashboard";
@@ -279,7 +279,6 @@ function AuthPage() {
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder="you@company.com"
                     autoComplete="email"
-                    webkit-autofill="true"
                   />
                 </div>
 
