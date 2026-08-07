@@ -17,6 +17,31 @@ const STORAGE_KEY = "zyronex.language";
  * Missing keys fall back to the English text, so untranslated UI never breaks.
  */
 const ar: Record<string, string> = {
+  or: "أو",
+  "Remember me": "تذكرني",
+  "Continue with Google": "المتابعة عبر Google",
+  "Continue with Apple": "المتابعة عبر Apple",
+  "Sign up with Google": "إنشاء حساب عبر Google",
+  "Sign up with Apple": "إنشاء حساب عبر Apple",
+  "Use a password": "استخدام كلمة المرور",
+  "Email me a magic link": "أرسل لي رابط دخول سحري",
+  "Enterprise SSO": "الدخول الموحد للمؤسسات",
+  "Continue with SSO": "المتابعة عبر الدخول الموحد",
+  "Magic link sent. Check your inbox to finish signing in.":
+    "تم إرسال رابط الدخول. تحقق من بريدك لإكمال تسجيل الدخول.",
+  "We'll email you a one-time link. No password needed — the link expires shortly after it is sent.":
+    "سنرسل إليك رابطًا لمرة واحدة عبر البريد. لا حاجة لكلمة مرور — وينتهي الرابط بعد فترة قصيرة.",
+  "You'll be redirected to your organization's identity provider (SAML 2.0 / OIDC).":
+    "ستتم إعادة توجيهك إلى مزوّد الهوية الخاص بمؤسستك (SAML 2.0 / OIDC).",
+  "OAuth 2.0, OpenID Connect and SAML 2.0 single sign-on":
+    "دعم OAuth 2.0 وOpenID Connect والدخول الموحد SAML 2.0",
+  "Passwordless magic links and verified email accounts":
+    "روابط دخول بدون كلمة مرور وحسابات بريد موثّقة",
+  "Automatic identity linking — one account per person":
+    "ربط تلقائي للهويات — حساب واحد لكل مستخدم",
+  "Enter your work email to continue with SSO":
+    "أدخل بريد العمل للمتابعة عبر الدخول الموحد",
+
   // Sidebar / navigation
   Overview: "نظرة عامة",
   Build: "البناء",
