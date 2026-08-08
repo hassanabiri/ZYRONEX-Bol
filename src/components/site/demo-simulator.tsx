@@ -22,7 +22,6 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n";
 import { BUSINESS_TYPES, FOCUS_AREAS, SCENARIOS } from "@/lib/site/simulation";
 import type { SimulationResult } from "@/lib/site/simulation";
@@ -437,5 +436,3 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
     </button>
   );
 }
-
-export { Input };
