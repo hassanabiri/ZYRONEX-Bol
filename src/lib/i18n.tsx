@@ -1850,7 +1850,7 @@ const ar: Record<string, string> = {
   "Handle a new inbound customer and turn it into an opportunity.": "تعامل مع عميل جديد وحوّله إلى فرصة بيع.",
   "How ZYRONEX would work inside your business": "كيف يمكن لـ ZYRONEX أن تعمل داخل نشاطك",
   "I run an online store selling food products and I want to manage sales, marketing, customer service and operations…": "لدي متجر إلكتروني يبيع منتجات غذائية وأريد إدارة المبيعات والتسويق وخدمة العملاء والعمليات…",
-  "Integrations": "التكاملات",
+  
   "Let ZYRONEX run in front of you.": "دع ZYRONEX تعمل أمامك.",
   "Live": "مباشر",
   "Live operation timeline": "الخط الزمني للتشغيل الحي",
