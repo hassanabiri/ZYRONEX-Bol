@@ -50,6 +50,7 @@ import { Route as SitePressRouteImport } from './routes/_site/press'
 import { Route as SitePricingRouteImport } from './routes/_site/pricing'
 import { Route as SitePrivacyRouteImport } from './routes/_site/privacy'
 import { Route as SiteSecurityRouteImport } from './routes/_site/security'
+import { Route as SiteSolutionBuilderRouteImport } from './routes/_site/solution-builder'
 import { Route as SiteSolutionsRouteImport } from './routes/_site/solutions'
 import { Route as SiteStatusRouteImport } from './routes/_site/status'
 import { Route as SiteTermsRouteImport } from './routes/_site/terms'
@@ -266,6 +267,11 @@ const SiteSecurityRoute = SiteSecurityRouteImport.update({
   path: '/security',
   getParentRoute: () => SiteRouteRoute,
 } as any)
+const SiteSolutionBuilderRoute = SiteSolutionBuilderRouteImport.update({
+  id: '/solution-builder',
+  path: '/solution-builder',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
 const SiteSolutionsRoute = SiteSolutionsRouteImport.update({
   id: '/solutions',
   path: '/solutions',
@@ -358,6 +364,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof SitePricingRoute
   '/privacy': typeof SitePrivacyRoute
   '/security': typeof SiteSecurityRoute
+  '/solution-builder': typeof SiteSolutionBuilderRoute
   '/solutions': typeof SiteSolutionsRoute
   '/status': typeof SiteStatusRoute
   '/terms': typeof SiteTermsRoute
@@ -408,6 +415,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof SitePricingRoute
   '/privacy': typeof SitePrivacyRoute
   '/security': typeof SiteSecurityRoute
+  '/solution-builder': typeof SiteSolutionBuilderRoute
   '/solutions': typeof SiteSolutionsRoute
   '/status': typeof SiteStatusRoute
   '/terms': typeof SiteTermsRoute
@@ -460,6 +468,7 @@ export interface FileRoutesById {
   '/_site/pricing': typeof SitePricingRoute
   '/_site/privacy': typeof SitePrivacyRoute
   '/_site/security': typeof SiteSecurityRoute
+  '/_site/solution-builder': typeof SiteSolutionBuilderRoute
   '/_site/solutions': typeof SiteSolutionsRoute
   '/_site/status': typeof SiteStatusRoute
   '/_site/terms': typeof SiteTermsRoute
@@ -513,6 +522,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/security'
+    | '/solution-builder'
     | '/solutions'
     | '/status'
     | '/terms'
@@ -563,6 +573,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/security'
+    | '/solution-builder'
     | '/solutions'
     | '/status'
     | '/terms'
@@ -614,6 +625,7 @@ export interface FileRouteTypes {
     | '/_site/pricing'
     | '/_site/privacy'
     | '/_site/security'
+    | '/_site/solution-builder'
     | '/_site/solutions'
     | '/_site/status'
     | '/_site/terms'
@@ -924,6 +936,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteSecurityRouteImport
       parentRoute: typeof SiteRouteRoute
     }
+    '/_site/solution-builder': {
+      id: '/_site/solution-builder'
+      path: '/solution-builder'
+      fullPath: '/solution-builder'
+      preLoaderRoute: typeof SiteSolutionBuilderRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
     '/_site/solutions': {
       id: '/_site/solutions'
       path: '/solutions'
@@ -1060,6 +1079,7 @@ interface SiteRouteRouteChildren {
   SitePricingRoute: typeof SitePricingRoute
   SitePrivacyRoute: typeof SitePrivacyRoute
   SiteSecurityRoute: typeof SiteSecurityRoute
+  SiteSolutionBuilderRoute: typeof SiteSolutionBuilderRoute
   SiteSolutionsRoute: typeof SiteSolutionsRoute
   SiteStatusRoute: typeof SiteStatusRoute
   SiteTermsRoute: typeof SiteTermsRoute
@@ -1088,6 +1108,7 @@ const SiteRouteRouteChildren: SiteRouteRouteChildren = {
   SitePricingRoute: SitePricingRoute,
   SitePrivacyRoute: SitePrivacyRoute,
   SiteSecurityRoute: SiteSecurityRoute,
+  SiteSolutionBuilderRoute: SiteSolutionBuilderRoute,
   SiteSolutionsRoute: SiteSolutionsRoute,
   SiteStatusRoute: SiteStatusRoute,
   SiteTermsRoute: SiteTermsRoute,

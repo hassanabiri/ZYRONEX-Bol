@@ -22,7 +22,8 @@ const PAGE_CONTEXT: Record<string, { label: string; context: string; prompts: st
   "/api": { label: "API reference", context: "REST API with scoped workspace keys, executions, workers, knowledge and webhooks.", prompts: ["How do I trigger an execution?", "How do webhooks work?"] },
   "/help": { label: "Help center", context: "Guides, tickets, issue reports and feature requests.", prompts: ["How do I open a ticket?", "Where do I report a problem?"] },
   "/contact": { label: "Contact", context: "Contact form routed to sales, support or partnerships.", prompts: ["Can I talk to sales?", "How fast do you reply?"] },
-  "/demo": { label: "Book a demo", context: "Guided walkthrough request with a specialist.", prompts: ["What is covered in the demo?", "Can you demo the voice platform?"] },
+  "/demo": { label: "AI live simulation", context: "An interactive AI simulation that models the visitor's business running on ZYRONEX — no human sales involved.", prompts: ["How does the simulation work?", "Can it model my business?"] },
+  "/solution-builder": { label: "AI Solution Builder", context: "The AI designs a tailored ZYRONEX configuration: capabilities, integrations and recommended plan.", prompts: ["Design a system for my business", "Which plan would I need?"] },
 };
 
 const FALLBACK = {

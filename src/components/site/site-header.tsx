@@ -279,7 +279,7 @@ export function SiteHeader() {
                   </Button>
                   <Button asChild variant="ghost" size="lg" className="rounded-xl text-muted-foreground">
                     <Link to="/demo" onClick={() => setOpenMobile(false)}>
-                      {t("Book a demo")}
+                      {t("Start the AI simulation")}
                     </Link>
                   </Button>
                 </div>
@@ -350,7 +350,7 @@ export function SiteHeader() {
                           <Link to={featured.to}>{t(featured.cta)}</Link>
                         </Button>
                         <Button asChild size="sm" variant="outline" className="rounded-xl">
-                          <Link to="/demo">{t("Book a demo")}</Link>
+                          <Link to="/demo">{t("Start the AI simulation")}</Link>
                         </Button>
                       </div>
                     </div>

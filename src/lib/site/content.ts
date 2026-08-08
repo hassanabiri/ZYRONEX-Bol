@@ -86,7 +86,7 @@ export const siteFooter: SiteNavGroup[] = [
       { title: "Careers", to: "/careers" },
       { title: "Press", to: "/press" },
       { title: "Contact", to: "/contact" },
-      { title: "Book a demo", to: "/demo" },
+      { title: "See ZYRONEX run on your business", to: "/demo" },
     ],
   },
   {
@@ -185,8 +185,8 @@ export const plans: Plan[] = [
       "Custom roles and approvals",
     ],
     highlighted: true,
-    cta: "Talk to sales",
-    to: "/contact",
+    cta: "Design your system with AI",
+    to: "/solution-builder",
   },
   {
     name: "Enterprise",
@@ -200,8 +200,8 @@ export const plans: Plan[] = [
       "Audit exports and retention controls",
       "Named support and onboarding",
     ],
-    cta: "Book a demo",
-    to: "/demo",
+    cta: "Design your system with AI",
+    to: "/solution-builder",
   },
 ];
 
@@ -289,7 +289,7 @@ export const contentPages: Record<string, ContentPage> = {
     title: "Operating blueprints per sector",
     description: "The same core platform, configured for the controls and workflows each sector expects.",
     sections: industries.map((industry) => ({ heading: industry.name, body: industry.body })),
-    cta: { label: "Book a demo", to: "/demo" },
+    cta: { label: "See ZYRONEX run on your business", to: "/demo" },
   },
   developers: {
     slug: "/developers",

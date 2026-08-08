@@ -133,7 +133,7 @@ function HomePage() {
               <Button asChild size="lg" variant="outline" className="gap-2">
                 <Link to="/demo">
                   <Play className="size-4" />
-                  {t("Book a demo")}
+                  {t("See ZYRONEX run on your business")}
                 </Link>
               </Button>
             </div>

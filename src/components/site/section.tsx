@@ -99,7 +99,7 @@ export function CtaBanner() {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/demo">{t("Book a demo")}</Link>
+              <Link to="/demo">{t("Start the AI simulation")}</Link>
             </Button>
           </div>
         </div>
