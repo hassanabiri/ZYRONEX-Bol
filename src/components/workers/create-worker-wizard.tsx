@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, PlugZap, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
