@@ -62,19 +62,56 @@ export function CreateWorkerWizard({
   const [customType, setCustomType] = useState("");
   const [purpose, setPurpose] = useState<string>("answer-customers");
   const [customPurpose, setCustomPurpose] = useState("");
+  const [aiMode, setAiMode] = useState<"platform" | "custom">("platform");
   const [provider, setProvider] = useState<string>("openai");
   const [customProvider, setCustomProvider] = useState("");
   const [model, setModel] = useState("");
-  const [language, setLanguage] = useState("en");
-  const [timezone, setTimezone] = useState("UTC");
-  const [region, setRegion] = useState("us-east");
+  const [apiKey, setApiKey] = useState("");
+  const [baseUrl, setBaseUrl] = useState("");
+  const [testing, setTesting] = useState(false);
+  const [testState, setTestState] = useState<"idle" | "ok" | "error">("idle");
+  const [testMessage, setTestMessage] = useState("");
+  const [language, setLanguage] = useState("ar");
+  const [timezone, setTimezone] = useState("Asia/Riyadh");
+  const [region, setRegion] = useState("me-central");
 
   const resolvedType = type === "custom" && customType ? slugify(customType) : type;
   const resolvedPurpose = purpose === "custom" && customPurpose ? slugify(customPurpose) : purpose;
   const resolvedProvider =
-    provider === "custom" && customProvider ? slugify(customProvider) : provider;
+    aiMode === "platform"
+      ? "zyronex"
+      : provider === "custom" && customProvider
+        ? slugify(customProvider)
+        : provider;
 
   const canContinue = step !== 0 || name.trim().length > 1;
+
+  async function handleTestConnection() {
+    setTesting(true);
+    setTestState("idle");
+    try {
+      const result = await testAiProviderConnection({
+        data: {
+          provider: resolvedProvider,
+          apiKey,
+          model: model.trim() || undefined,
+          baseUrl: baseUrl.trim() || undefined,
+        },
+      });
+      if (result.ok) {
+        setTestState("ok");
+        setTestMessage("");
+      } else {
+        setTestState("error");
+        setTestMessage(TEST_ERRORS[result.reason ?? "failed"]);
+      }
+    } catch {
+      setTestState("error");
+      setTestMessage(TEST_ERRORS.failed);
+    } finally {
+      setTesting(false);
+    }
+  }
 
   async function handleFinish() {
     if (!workspaceId) return;
@@ -88,18 +125,19 @@ export function CreateWorkerWizard({
         type: resolvedType,
         purpose: resolvedPurpose,
         provider: resolvedProvider,
-        model: model.trim() || null,
+        model: aiMode === "custom" ? model.trim() || null : null,
         language,
         timezone,
         region,
         status: "draft",
       });
-      toast.success(t("Worker created"));
+      toast.success(t("Worker created successfully"));
       onCreated(worker.id);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("Could not create worker"));
     }
   }
+
 
   return (
     <div className="space-y-6">
