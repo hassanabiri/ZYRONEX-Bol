@@ -33,7 +33,19 @@ import {
   WORKSPACE_TIMEZONES,
 } from "@/lib/workspace-options";
 
+import { testAiProviderConnection } from "@/lib/ai-provider.functions";
+
 const STEPS = ["Identity", "Purpose", "AI Provider", "Localization", "Review"] as const;
+
+const TEST_ERRORS: Record<string, string> = {
+  invalid_key: "Invalid API key.",
+  expired_credentials: "Credentials have expired.",
+  unreachable: "Provider is unreachable.",
+  model_unavailable: "Model is not available.",
+  rate_limited: "Usage limit exceeded.",
+  failed: "Connection failed.",
+};
+
 
 function slugify(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
