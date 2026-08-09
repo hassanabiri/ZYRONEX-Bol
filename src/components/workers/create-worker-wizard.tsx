@@ -235,42 +235,114 @@ export function CreateWorkerWizard({
 
       {step === 2 && (
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>{t("AI Provider")}</Label>
-            <Select value={provider} onValueChange={setProvider}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {WORKER_PROVIDER_SUGGESTIONS.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {t(humanize(value))}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {provider === "custom" && (
-              <Input
-                value={customProvider}
-                onChange={(event) => setCustomProvider(event.target.value)}
-                placeholder={t("Provider name")}
-              />
-            )}
+          <div className="grid gap-3 sm:grid-cols-2">
+            {(
+              [
+                {
+                  value: "platform" as const,
+                  title: "ZYRONEX Intelligence (default)",
+                  body: "The platform handles models, keys and routing automatically. Nothing to configure.",
+                },
+                {
+                  value: "custom" as const,
+                  title: "Use my own provider account",
+                  body: "Connect your own AI provider credentials for this worker.",
+                },
+              ]
+            ).map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setAiMode(option.value)}
+                className={cn(
+                  "rounded-xl border p-4 text-start transition",
+                  aiMode === option.value ? "border-primary ring-1 ring-primary/40" : "hover:border-primary/40",
+                )}
+              >
+                <p className="text-sm font-semibold">{t(option.title)}</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{t(option.body)}</p>
+              </button>
+            ))}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="worker-model">{t("Model (optional)")}</Label>
-            <Input
-              id="worker-model"
-              value={model}
-              onChange={(event) => setModel(event.target.value)}
-              placeholder={t("Model identifier")}
-            />
-          </div>
-          <p className="rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
-            {t("Providers are recorded as configuration only. No credentials are stored and no requests are sent.")}
-          </p>
+
+          {aiMode === "custom" && (
+            <div className="space-y-4 rounded-xl border p-4">
+              <div className="space-y-2">
+                <Label>{t("AI Provider")}</Label>
+                <Select value={provider} onValueChange={setProvider}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {WORKER_PROVIDER_SUGGESTIONS.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        {t(humanize(value))}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {provider === "custom" && (
+                  <Input
+                    value={customProvider}
+                    onChange={(event) => setCustomProvider(event.target.value)}
+                    placeholder={t("Provider name")}
+                  />
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="worker-api-key">{t("API Key")}</Label>
+                <Input
+                  id="worker-api-key"
+                  type="password"
+                  value={apiKey}
+                  onChange={(event) => setApiKey(event.target.value)}
+                  placeholder="sk-…"
+                  autoComplete="off"
+                />
+              </div>
+              {(provider === "custom" || provider === "azure") && (
+                <div className="space-y-2">
+                  <Label htmlFor="worker-base-url">{t("Base URL")}</Label>
+                  <Input
+                    id="worker-base-url"
+                    value={baseUrl}
+                    onChange={(event) => setBaseUrl(event.target.value)}
+                    placeholder="https://api.example.com/v1"
+                  />
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="worker-model">{t("Model (optional)")}</Label>
+                <Input
+                  id="worker-model"
+                  value={model}
+                  onChange={(event) => setModel(event.target.value)}
+                  placeholder={t("Model identifier")}
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="gap-2"
+                  disabled={testing || !apiKey.trim()}
+                  onClick={handleTestConnection}
+                >
+                  {testing ? <Sparkles className="size-4 animate-pulse" /> : <PlugZap className="size-4" />}
+                  {t("Test connection")}
+                </Button>
+                {testState === "ok" && (
+                  <span className="text-xs font-medium text-emerald-500">{t("Connected successfully.")}</span>
+                )}
+                {testState === "error" && (
+                  <span className="text-xs font-medium text-destructive">{t(testMessage)}</span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
+
 
       {step === 3 && (
         <div className="space-y-4">
