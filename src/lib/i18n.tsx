@@ -299,6 +299,25 @@ const ar: Record<string, string> = {
   "Provider name": "اسم المزوّد",
   "Model (optional)": "النموذج (اختياري)",
   "Model identifier": "معرّف النموذج",
+  "ZYRONEX Intelligence (default)": "ذكاء ZYRONEX (الافتراضي)",
+  "ZYRONEX Intelligence": "ذكاء ZYRONEX",
+  "The platform handles models, keys and routing automatically. Nothing to configure.":
+    "تتولى المنصة النماذج والمفاتيح والتوجيه تلقائيًا، دون أي إعدادات إضافية.",
+  "Use my own provider account": "استخدام حسابي الخاص لدى مزود الذكاء الاصطناعي",
+  "Connect your own AI provider credentials for this worker.":
+    "اربط بيانات اعتماد مزودك الخاص بالذكاء الاصطناعي لهذا العامل.",
+  "API Key": "مفتاح API",
+  "Base URL": "رابط الخدمة الأساسي",
+  "Test connection": "اختبار الاتصال",
+  "Connected successfully.": "تم الاتصال بنجاح.",
+  "Connection failed.": "فشل الاتصال.",
+  "Invalid API key.": "مفتاح API غير صالح.",
+  "Credentials have expired.": "انتهت صلاحية بيانات الاعتماد.",
+  "Provider is unreachable.": "تعذر الوصول إلى المزود.",
+  "Model is not available.": "النموذج غير متوفر.",
+  "Usage limit exceeded.": "تجاوز حد الاستخدام.",
+  "Worker created successfully": "تم إنشاء العامل بنجاح",
+
   Model: "النموذج",
   "Providers are recorded as configuration only. No credentials are stored and no requests are sent.":
     "تُسجَّل بيانات المزوّد كإعدادات فقط. لا يتم تخزين أي مفاتيح ولا إرسال أي طلبات.",
