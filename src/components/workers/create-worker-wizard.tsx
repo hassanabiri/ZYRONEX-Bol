@@ -462,8 +462,12 @@ export function CreateWorkerWizard({
             {[
               ["Type", humanize(resolvedType)],
               ["Purpose", humanize(resolvedPurpose)],
-              ["AI Provider", humanize(resolvedProvider)],
-              ["Model", model || "—"],
+              [
+                "AI Provider",
+                aiMode === "platform" ? t("ZYRONEX Intelligence") : humanize(resolvedProvider),
+              ],
+              ["Model", (aiMode === "custom" && model) || "—"],
+
               ["Language", language],
               ["Timezone", timezone],
               ["Region", humanize(region)],
