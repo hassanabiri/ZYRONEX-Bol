@@ -115,11 +115,11 @@ export function CreateWorkerWizard({
         setTestMessage("");
       } else {
         setTestState("error");
-        setTestMessage(TEST_ERRORS[result.reason ?? "failed"]);
+        setTestMessage(TEST_ERRORS[result.reason ?? "failed"] ?? TEST_ERRORS["failed"]!);
       }
     } catch {
       setTestState("error");
-      setTestMessage(TEST_ERRORS.failed);
+      setTestMessage(TEST_ERRORS["failed"]!);
     } finally {
       setTesting(false);
     }
