@@ -1,9 +1,10 @@
 export type ProviderTestInput = {
   provider: string;
   apiKey: string;
-  model?: string;
-  baseUrl?: string;
+  model?: string | undefined;
+  baseUrl?: string | undefined;
 };
+
 
 export type ProviderTestResult = {
   ok: boolean;
