@@ -123,10 +123,9 @@ function fallback(input: Input): SimulationResult {
   };
 }
 
-/** Calls Lovable AI Gateway (Responses API, streamed and consumed server-side). */
+/** Calls the Google Gemini API directly with the GEMINI_API_KEY secret. */
 export async function generateSimulation(input: Input): Promise<{ result: SimulationResult; live: boolean }> {
-  const apiKey = process.env["LOVABLE_API_KEY"];
-  if (!apiKey) return { result: fallback(input), live: false };
+  const { generateGeminiText } = await import("@/lib/ai/gemini.server");
 
   const ar = input.language === "ar";
   const instructions = [
@@ -150,55 +149,20 @@ export async function generateSimulation(input: Input): Promise<{ result: Simula
   ].join("\n");
 
   try {
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Lovable-API-Key": apiKey,
-        "X-Lovable-AIG-SDK": "fetch",
-      },
-      body: JSON.stringify({
-        model: "openai/gpt-5.6-sol",
-        instructions,
-        input: prompt,
-        stream: true,
-        reasoning: { effort: "low", summary: "auto" },
-        text: { format: { type: "json_schema", name: "zyronex_simulation", strict: true, schema: SCHEMA } },
-      }),
+    const text = await generateGeminiText({
+      system: instructions,
+      turns: [{ role: "user", content: prompt }],
+      jsonSchema: SCHEMA,
+      maxOutputTokens: 4096,
     });
+    if (!text) return { result: fallback(input), live: false };
 
-    if (!response.ok || !response.body) return { result: fallback(input), live: false };
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    let text = "";
-    while (true) {
-      const chunk = await reader.read();
-      if (chunk.done) break;
-      buffer += decoder.decode(chunk.value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() ?? "";
-      for (const line of lines) {
-        if (!line.startsWith("data:")) continue;
-        const payload = line.slice(5).trim();
-        if (!payload || payload === "[DONE]") continue;
-        try {
-          const event = JSON.parse(payload) as { type?: string; delta?: string };
-          if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
-            text += event.delta;
-          }
-        } catch {
-          /* ignore partial frames */
-        }
-      }
-    }
-
-    if (!text.trim()) return { result: fallback(input), live: false };
     const parsed = JSON.parse(text) as SimulationResult;
     if (!parsed.agents?.length || !parsed.timeline?.length) return { result: fallback(input), live: false };
     return { result: parsed, live: true };
-  } catch {
+  } catch (error) {
+    console.error("Gemini simulation failed", error);
     return { result: fallback(input), live: false };
   }
 }
+
