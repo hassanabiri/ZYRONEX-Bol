@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, PlugZap, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -33,7 +33,19 @@ import {
   WORKSPACE_TIMEZONES,
 } from "@/lib/workspace-options";
 
+import { testAiProviderConnection } from "@/lib/ai-provider.functions";
+
 const STEPS = ["Identity", "Purpose", "AI Provider", "Localization", "Review"] as const;
+
+const TEST_ERRORS: Record<string, string> = {
+  invalid_key: "Invalid API key.",
+  expired_credentials: "Credentials have expired.",
+  unreachable: "Provider is unreachable.",
+  model_unavailable: "Model is not available.",
+  rate_limited: "Usage limit exceeded.",
+  failed: "Connection failed.",
+};
+
 
 function slugify(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -62,19 +74,56 @@ export function CreateWorkerWizard({
   const [customType, setCustomType] = useState("");
   const [purpose, setPurpose] = useState<string>("answer-customers");
   const [customPurpose, setCustomPurpose] = useState("");
+  const [aiMode, setAiMode] = useState<"platform" | "custom">("platform");
   const [provider, setProvider] = useState<string>("openai");
   const [customProvider, setCustomProvider] = useState("");
   const [model, setModel] = useState("");
-  const [language, setLanguage] = useState("en");
-  const [timezone, setTimezone] = useState("UTC");
-  const [region, setRegion] = useState("us-east");
+  const [apiKey, setApiKey] = useState("");
+  const [baseUrl, setBaseUrl] = useState("");
+  const [testing, setTesting] = useState(false);
+  const [testState, setTestState] = useState<"idle" | "ok" | "error">("idle");
+  const [testMessage, setTestMessage] = useState("");
+  const [language, setLanguage] = useState("ar");
+  const [timezone, setTimezone] = useState("Asia/Riyadh");
+  const [region, setRegion] = useState("me-central");
 
   const resolvedType = type === "custom" && customType ? slugify(customType) : type;
   const resolvedPurpose = purpose === "custom" && customPurpose ? slugify(customPurpose) : purpose;
   const resolvedProvider =
-    provider === "custom" && customProvider ? slugify(customProvider) : provider;
+    aiMode === "platform"
+      ? "zyronex"
+      : provider === "custom" && customProvider
+        ? slugify(customProvider)
+        : provider;
 
   const canContinue = step !== 0 || name.trim().length > 1;
+
+  async function handleTestConnection() {
+    setTesting(true);
+    setTestState("idle");
+    try {
+      const result = await testAiProviderConnection({
+        data: {
+          provider: resolvedProvider,
+          apiKey,
+          model: model.trim() || undefined,
+          baseUrl: baseUrl.trim() || undefined,
+        },
+      });
+      if (result.ok) {
+        setTestState("ok");
+        setTestMessage("");
+      } else {
+        setTestState("error");
+        setTestMessage(TEST_ERRORS[result.reason ?? "failed"] ?? TEST_ERRORS["failed"]!);
+      }
+    } catch {
+      setTestState("error");
+      setTestMessage(TEST_ERRORS["failed"]!);
+    } finally {
+      setTesting(false);
+    }
+  }
 
   async function handleFinish() {
     if (!workspaceId) return;
@@ -88,18 +137,19 @@ export function CreateWorkerWizard({
         type: resolvedType,
         purpose: resolvedPurpose,
         provider: resolvedProvider,
-        model: model.trim() || null,
+        model: aiMode === "custom" ? model.trim() || null : null,
         language,
         timezone,
         region,
         status: "draft",
       });
-      toast.success(t("Worker created"));
+      toast.success(t("Worker created successfully"));
       onCreated(worker.id);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("Could not create worker"));
     }
   }
+
 
   return (
     <div className="space-y-6">
@@ -235,42 +285,114 @@ export function CreateWorkerWizard({
 
       {step === 2 && (
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>{t("AI Provider")}</Label>
-            <Select value={provider} onValueChange={setProvider}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {WORKER_PROVIDER_SUGGESTIONS.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {t(humanize(value))}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {provider === "custom" && (
-              <Input
-                value={customProvider}
-                onChange={(event) => setCustomProvider(event.target.value)}
-                placeholder={t("Provider name")}
-              />
-            )}
+          <div className="grid gap-3 sm:grid-cols-2">
+            {(
+              [
+                {
+                  value: "platform" as const,
+                  title: "ZYRONEX Intelligence (default)",
+                  body: "The platform handles models, keys and routing automatically. Nothing to configure.",
+                },
+                {
+                  value: "custom" as const,
+                  title: "Use my own provider account",
+                  body: "Connect your own AI provider credentials for this worker.",
+                },
+              ]
+            ).map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setAiMode(option.value)}
+                className={cn(
+                  "rounded-xl border p-4 text-start transition",
+                  aiMode === option.value ? "border-primary ring-1 ring-primary/40" : "hover:border-primary/40",
+                )}
+              >
+                <p className="text-sm font-semibold">{t(option.title)}</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{t(option.body)}</p>
+              </button>
+            ))}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="worker-model">{t("Model (optional)")}</Label>
-            <Input
-              id="worker-model"
-              value={model}
-              onChange={(event) => setModel(event.target.value)}
-              placeholder={t("Model identifier")}
-            />
-          </div>
-          <p className="rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
-            {t("Providers are recorded as configuration only. No credentials are stored and no requests are sent.")}
-          </p>
+
+          {aiMode === "custom" && (
+            <div className="space-y-4 rounded-xl border p-4">
+              <div className="space-y-2">
+                <Label>{t("AI Provider")}</Label>
+                <Select value={provider} onValueChange={setProvider}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {WORKER_PROVIDER_SUGGESTIONS.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        {t(humanize(value))}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {provider === "custom" && (
+                  <Input
+                    value={customProvider}
+                    onChange={(event) => setCustomProvider(event.target.value)}
+                    placeholder={t("Provider name")}
+                  />
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="worker-api-key">{t("API Key")}</Label>
+                <Input
+                  id="worker-api-key"
+                  type="password"
+                  value={apiKey}
+                  onChange={(event) => setApiKey(event.target.value)}
+                  placeholder="sk-…"
+                  autoComplete="off"
+                />
+              </div>
+              {(provider === "custom" || provider === "azure") && (
+                <div className="space-y-2">
+                  <Label htmlFor="worker-base-url">{t("Base URL")}</Label>
+                  <Input
+                    id="worker-base-url"
+                    value={baseUrl}
+                    onChange={(event) => setBaseUrl(event.target.value)}
+                    placeholder="https://api.example.com/v1"
+                  />
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="worker-model">{t("Model (optional)")}</Label>
+                <Input
+                  id="worker-model"
+                  value={model}
+                  onChange={(event) => setModel(event.target.value)}
+                  placeholder={t("Model identifier")}
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="gap-2"
+                  disabled={testing || !apiKey.trim()}
+                  onClick={handleTestConnection}
+                >
+                  {testing ? <Sparkles className="size-4 animate-pulse" /> : <PlugZap className="size-4" />}
+                  {t("Test connection")}
+                </Button>
+                {testState === "ok" && (
+                  <span className="text-xs font-medium text-emerald-500">{t("Connected successfully.")}</span>
+                )}
+                {testState === "error" && (
+                  <span className="text-xs font-medium text-destructive">{t(testMessage)}</span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
+
 
       {step === 3 && (
         <div className="space-y-4">
@@ -340,8 +462,12 @@ export function CreateWorkerWizard({
             {[
               ["Type", humanize(resolvedType)],
               ["Purpose", humanize(resolvedPurpose)],
-              ["AI Provider", humanize(resolvedProvider)],
-              ["Model", model || "—"],
+              [
+                "AI Provider",
+                aiMode === "platform" ? t("ZYRONEX Intelligence") : humanize(resolvedProvider),
+              ],
+              ["Model", (aiMode === "custom" && model) || "—"],
+
               ["Language", language],
               ["Timezone", timezone],
               ["Region", humanize(region)],
