@@ -75,7 +75,6 @@ const ar: Record<string, string> = {
   "Search or run a command…": "ابحث أو نفّذ أمرًا…",
   "Search pages, settings or run a command…": "ابحث في الصفحات والإعدادات أو نفّذ أمرًا…",
   "No results found.": "لا توجد نتائج.",
-  Actions: "إجراءات",
   "What is this field?": "ما هي هذه الخانة؟",
   "What is this?": "ما هذا؟",
   "Required format": "الصيغة المطلوبة",
