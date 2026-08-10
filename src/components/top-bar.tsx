@@ -45,6 +45,7 @@ import { useWorkspace } from "@/lib/workspace";
 
 export function TopBar() {
   const [createOpen, setCreateOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { theme, toggleTheme } = useTheme();
