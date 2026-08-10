@@ -33,7 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { CommandPalette } from "@/components/command-palette";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { CreateWorkspaceWizard } from "@/components/workspace/create-workspace-wizard";
