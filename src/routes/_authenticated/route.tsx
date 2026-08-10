@@ -52,9 +52,13 @@ function AuthenticatedLayout() {
     <WorkspaceProvider>
       <WorkspaceGate>
         <SidebarProvider>
-          <div className="flex min-h-screen w-full bg-background">
+          <div className="relative flex min-h-screen w-full bg-background">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none fixed inset-0 z-0 opacity-[0.55] [background:radial-gradient(60rem_40rem_at_15%_-10%,color-mix(in_oklab,var(--primary)_16%,transparent),transparent_60%),radial-gradient(50rem_35rem_at_100%_0%,color-mix(in_oklab,var(--primary)_10%,transparent),transparent_55%)]"
+            />
             <AppSidebar />
-            <SidebarInset className="min-w-0 flex-1">
+            <SidebarInset className="relative z-10 min-w-0 flex-1 bg-transparent">
               <TopBar />
               <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-6 sm:px-6 sm:py-8">
                 <Outlet />
@@ -62,6 +66,7 @@ function AuthenticatedLayout() {
             </SidebarInset>
           </div>
         </SidebarProvider>
+
       </WorkspaceGate>
     </WorkspaceProvider>
   );
