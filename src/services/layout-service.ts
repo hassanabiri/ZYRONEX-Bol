@@ -15,13 +15,14 @@ function parseLayout(value: unknown): LayoutItem[] {
   return value.flatMap((entry) => {
     if (!entry || typeof entry !== "object") return [];
     const item = entry as Record<string, unknown>;
-    if (typeof item.id !== "string") return [];
-    const size = Number(item.size);
+    const id = item["id"];
+    if (typeof id !== "string") return [];
+    const size = Number(item["size"]);
     return [
       {
-        id: item.id,
+        id,
         size: (size === 1 || size === 2 || size === 3 ? size : 1) as CardSize,
-        hidden: item.hidden === true,
+        hidden: item["hidden"] === true,
       },
     ];
   });
