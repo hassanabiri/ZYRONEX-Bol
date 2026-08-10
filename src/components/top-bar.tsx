@@ -33,7 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { CommandPalette } from "@/components/command-palette";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { CreateWorkspaceWizard } from "@/components/workspace/create-workspace-wizard";
@@ -45,6 +45,7 @@ import { useWorkspace } from "@/lib/workspace";
 
 export function TopBar() {
   const [createOpen, setCreateOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { theme, toggleTheme } = useTheme();
@@ -124,14 +125,33 @@ export function TopBar() {
       </Dialog>
 
 
-      <div className="relative ml-auto hidden w-full max-w-sm md:block">
-        <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder={t("Search workspace…")}
-          className="h-9 bg-surface ps-9"
-          aria-label={t("Search workspace")}
-        />
-      </div>
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        onCreateWorkspace={() => setCreateOpen(true)}
+      />
+
+      <button
+        type="button"
+        onClick={() => setPaletteOpen(true)}
+        className="relative ml-auto hidden h-9 w-full max-w-sm items-center gap-2 rounded-md border bg-surface px-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 md:flex"
+        aria-label={t("Search workspace")}
+      >
+        <Search className="size-4 shrink-0" />
+        <span className="truncate">{t("Search or run a command…")}</span>
+        <kbd className="ms-auto rounded border px-1.5 py-0.5 text-[10px] font-medium">⌘K</kbd>
+      </button>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        className="ml-auto shrink-0 md:hidden"
+        onClick={() => setPaletteOpen(true)}
+        aria-label={t("Search workspace")}
+      >
+        <Search className="size-4" />
+      </Button>
+
 
       <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1 md:ml-2">
 
