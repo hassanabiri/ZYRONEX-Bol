@@ -21,18 +21,24 @@ export function EmptyState({
 
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-6 text-center ${
+      className={`relative flex flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border border-dashed border-border/70 bg-surface/30 px-6 text-center ${
         compact ? "py-8" : "py-14"
       }`}
     >
-      <span className="flex size-12 items-center justify-center rounded-2xl bg-surface text-muted-foreground">
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-24 opacity-60 [background:radial-gradient(24rem_8rem_at_50%_0%,color-mix(in_oklab,var(--primary)_12%,transparent),transparent_70%)]"
+      />
+      <span className="icon-chip relative size-12 rounded-2xl">
         <Icon className="size-5" />
       </span>
-      <div className="space-y-1">
+      <div className="relative space-y-1">
         <p className="text-sm font-semibold">{t(title)}</p>
-        <p className="mx-auto max-w-sm text-xs text-muted-foreground">{t(description)}</p>
+        <p className="mx-auto max-w-sm text-xs leading-relaxed text-muted-foreground">
+          {t(description)}
+        </p>
       </div>
-      {action && <div className="pt-1">{action}</div>}
+      {action && <div className="relative pt-1">{action}</div>}
     </div>
   );
 }
