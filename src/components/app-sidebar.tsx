@@ -30,10 +30,18 @@ export function AppSidebar() {
 
 
   return (
-    <Sidebar collapsible="icon" side={dir === "rtl" ? "right" : "left"} className="border-r">
-      <SidebarHeader className="h-16 justify-center px-3">
-        <Link to="/dashboard" onClick={closeOnMobile} className="flex items-center gap-2.5 overflow-hidden">
-          <span className="brand-gradient flex size-8 shrink-0 items-center justify-center rounded-lg font-display text-sm font-bold text-primary-foreground">
+    <Sidebar
+      collapsible="icon"
+      side={dir === "rtl" ? "right" : "left"}
+      className="border-r border-border/60 bg-sidebar/80 backdrop-blur-xl"
+    >
+      <SidebarHeader className="hairline-b h-16 justify-center px-3">
+        <Link
+          to="/dashboard"
+          onClick={closeOnMobile}
+          className="flex items-center gap-2.5 overflow-hidden rounded-lg transition-opacity hover:opacity-90"
+        >
+          <span className="brand-gradient flex size-8 shrink-0 items-center justify-center rounded-lg font-display text-sm font-bold text-primary-foreground shadow-sm">
             Z
           </span>
           {!collapsed && (
@@ -45,24 +53,44 @@ export function AppSidebar() {
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="px-1">
+      <SidebarContent className="px-1.5 py-1">
         {navSections.map((section) => (
-          <SidebarGroup key={section.label}>
-            <SidebarGroupLabel className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          <SidebarGroup key={section.label} className="py-1">
+            <SidebarGroupLabel className="px-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
               {t(section.label)}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
-                {section.items.map((item) => (
-                  <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton asChild isActive={pathname === item.to} tooltip={t(item.title)}>
-                      <Link to={item.to} onClick={closeOnMobile} className="flex items-center gap-2.5">
-                        <item.icon className="size-4 shrink-0" />
-                        <span className="truncate">{t(item.title)}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+              <SidebarMenu className="gap-0.5">
+                {section.items.map((item) => {
+                  const active = pathname === item.to;
+                  return (
+                    <SidebarMenuItem key={item.to}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={active}
+                        tooltip={t(item.title)}
+                        className="h-9 rounded-lg font-medium data-[active=true]:bg-primary/12 data-[active=true]:text-primary"
+                      >
+                        <Link
+                          to={item.to}
+                          onClick={closeOnMobile}
+                          className="relative flex items-center gap-2.5"
+                        >
+                          {active && !collapsed ? (
+                            <span
+                              aria-hidden="true"
+                              className="absolute inset-y-1.5 -start-1.5 w-[3px] rounded-full bg-primary"
+                            />
+                          ) : null}
+                          <item.icon
+                            className={`size-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`}
+                          />
+                          <span className="truncate">{t(item.title)}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -71,9 +99,11 @@ export function AppSidebar() {
 
       <SidebarFooter className="px-3 pb-4">
         {!collapsed && (
-          <div className="rounded-lg border bg-surface px-3 py-2.5">
-            <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{t("Plan")}</p>
-            <p className="mt-0.5 truncate text-sm font-medium capitalize">
+          <div className="rounded-xl border border-border/70 bg-surface/60 px-3 py-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80">
+              {t("Plan")}
+            </p>
+            <p className="mt-0.5 truncate text-sm font-semibold capitalize">
               {activeWorkspace?.subscription_plan ?? "—"}
             </p>
           </div>
