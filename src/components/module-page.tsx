@@ -32,12 +32,12 @@ export function ModulePage({
         actions={<Badge variant="outline">{t("Not configured")}</Badge>}
       />
 
-      <Card className="border-dashed">
+      <Card className="border-dashed border-border/70 bg-surface/30">
         <CardHeader className="flex-row items-center gap-4 space-y-0">
-          <span className="flex size-11 items-center justify-center rounded-xl bg-surface text-primary">
+          <span className="icon-chip size-11 shrink-0">
             <Icon className="size-5" />
           </span>
-          <div className="space-y-1">
+          <div className="min-w-0 space-y-1">
             <CardTitle className="text-base">{t("Module scaffold ready")}</CardTitle>
             <CardDescription>
               {t(
@@ -50,14 +50,16 @@ export function ModulePage({
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {capabilities.map((capability) => (
-          <Card key={capability.title} className="panel-shadow">
+          <Card key={capability.title} className="elevated-card card-hover">
             <CardHeader className="space-y-3">
-              <span className="flex size-9 items-center justify-center rounded-lg bg-surface text-muted-foreground">
+              <span className="icon-chip size-9">
                 <capability.icon className="size-4" />
               </span>
               <div className="space-y-1">
                 <CardTitle className="text-sm font-semibold">{t(capability.title)}</CardTitle>
-                <CardDescription className="text-sm">{t(capability.description)}</CardDescription>
+                <CardDescription className="text-sm leading-relaxed">
+                  {t(capability.description)}
+                </CardDescription>
               </div>
             </CardHeader>
             <CardContent>
