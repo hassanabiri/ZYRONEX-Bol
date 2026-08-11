@@ -111,7 +111,9 @@ function SortableCard({
           </div>
         </div>
       ) : null}
-      <div className={cn("h-full", editing && "pointer-events-none select-none")}>{children}</div>
+      <div className={cn("h-full", editing && "pointer-events-none select-none pt-8")}>
+        {children}
+      </div>
     </div>
   );
 }
