@@ -27,20 +27,20 @@ export function QuickActions() {
   const navigate = useNavigate();
 
   return (
-    <Card className="panel-shadow">
-      <CardHeader className="space-y-1">
+    <Card className="elevated-card">
+      <CardHeader className="space-y-1 pb-3">
         <CardTitle className="text-base">{t("Quick Actions")}</CardTitle>
         <CardDescription>{t("Jump straight into the most common workspace tasks.")}</CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <CardContent className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
         {actions.map((action) => (
           <Button
             key={action.label}
             variant="outline"
-            className="h-auto justify-start gap-3 px-3 py-3 text-start"
+            className="group h-auto justify-start gap-3 rounded-xl border-border/70 bg-surface/40 px-3 py-3 text-start transition-colors hover:border-primary/40 hover:bg-primary/5"
             onClick={() => navigate({ to: action.to })}
           >
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface text-primary">
+            <span className="icon-chip size-9 shrink-0 transition-transform group-hover:scale-105">
               <action.icon className="size-4" />
             </span>
             <span className="truncate text-sm font-medium">{t(action.label)}</span>
