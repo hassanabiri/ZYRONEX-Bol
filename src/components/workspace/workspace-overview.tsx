@@ -82,16 +82,20 @@ export function WorkspaceOverview({ workspaceId }: { workspaceId: string | undef
       map[card.id] = {
         title: t(card.title),
         node: (
-          <Card className="panel-shadow h-full">
-            <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+          <Card className="elevated-card card-hover h-full">
+            <CardHeader className="flex-row items-start justify-between space-y-0 pb-2">
+              <CardTitle className="min-w-0 truncate pe-2 text-[13px] font-medium text-muted-foreground">
                 {t(card.title)}
               </CardTitle>
-              <card.icon className="size-4 text-muted-foreground" />
+              <span className="icon-chip size-8 shrink-0">
+                <card.icon className="size-4" />
+              </span>
             </CardHeader>
             <CardContent className="space-y-1">
-              <p className="font-display text-2xl font-semibold">{card.value}</p>
-              <p className="text-xs text-muted-foreground">{t(card.caption)}</p>
+              <p className="stat-value font-display text-2xl font-semibold sm:text-3xl">
+                {card.value}
+              </p>
+              <p className="text-xs leading-relaxed text-muted-foreground">{t(card.caption)}</p>
             </CardContent>
           </Card>
         ),
@@ -101,15 +105,17 @@ export function WorkspaceOverview({ workspaceId }: { workspaceId: string | undef
     map["activity"] = {
       title: t("Recent Activity"),
       node: (
-        <Card className="panel-shadow h-full">
-          <CardHeader className="flex-row items-center justify-between space-y-0">
-            <div className="space-y-1">
+        <Card className="elevated-card h-full">
+          <CardHeader className="flex-row items-start justify-between space-y-0">
+            <div className="min-w-0 space-y-1">
               <CardTitle className="text-base">{t("Recent Activity")}</CardTitle>
               <CardDescription>
                 {t("Audit trail across agents, workflows and members.")}
               </CardDescription>
             </div>
-            <Activity className="size-4 text-muted-foreground" />
+            <span className="icon-chip size-8 shrink-0">
+              <Activity className="size-4" />
+            </span>
           </CardHeader>
           <CardContent>
             <EmptyState

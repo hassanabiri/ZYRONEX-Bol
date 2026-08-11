@@ -328,3 +328,46 @@
     transform: translateY(0) scale(1);
   }
 }
+
+/* ── UI/UX renovation utilities (presentation only) ────────────────── */
+
+@utility elevated-card {
+  background-color: color-mix(in oklab, var(--card) 92%, transparent);
+  backdrop-filter: blur(18px) saturate(140%);
+  border-color: color-mix(in oklab, var(--foreground) 9%, transparent);
+  box-shadow: var(--shadow-panel);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+@utility card-hover {
+  &:hover {
+    border-color: color-mix(in oklab, var(--primary) 32%, transparent);
+    box-shadow: 0 14px 40px -22px color-mix(in oklab, var(--primary) 55%, transparent);
+  }
+}
+
+@utility icon-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background-image: linear-gradient(
+    140deg,
+    color-mix(in oklab, var(--primary) 18%, transparent),
+    color-mix(in oklab, var(--primary) 6%, transparent)
+  );
+  color: var(--primary);
+  border: 1px solid color-mix(in oklab, var(--primary) 18%, transparent);
+}
+
+@utility stat-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+@utility hairline-b {
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
+}
