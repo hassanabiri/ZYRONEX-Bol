@@ -65,12 +65,12 @@ function SortableCard({
       )}
     >
       {editing ? (
-        <div className="absolute inset-x-0 -top-3 z-10 flex justify-center">
-          <div className="flex items-center gap-0.5 rounded-full border bg-background/95 px-1 py-0.5 shadow-sm backdrop-blur">
+        <div className="absolute inset-x-0 top-1 z-20 flex justify-center px-1">
+          <div className="flex max-w-full items-center gap-0.5 overflow-hidden rounded-full border bg-background/95 px-1 py-0.5 shadow-sm backdrop-blur">
             <button
               type="button"
               aria-label={`${t("Move")} ${title}`}
-              className="flex size-7 cursor-grab touch-none items-center justify-center rounded-full text-muted-foreground hover:text-foreground active:cursor-grabbing"
+              className="flex size-9 shrink-0 cursor-grab touch-none items-center justify-center rounded-full text-muted-foreground hover:text-foreground active:cursor-grabbing"
               {...attributes}
               {...listeners}
             >
@@ -80,33 +80,33 @@ function SortableCard({
               type="button"
               size="icon"
               variant="ghost"
-              className="size-7 rounded-full"
+              className="size-9 shrink-0 rounded-full"
               aria-label={t("Shrink card")}
               disabled={item.size === 1}
               onClick={() => onResize((item.size - 1) as CardSize)}
             >
-              <Minimize2 className="size-3.5" />
+              <Minimize2 className="size-4" />
             </Button>
             <Button
               type="button"
               size="icon"
               variant="ghost"
-              className="size-7 rounded-full"
+              className="size-9 shrink-0 rounded-full"
               aria-label={t("Enlarge card")}
               disabled={item.size === 3}
               onClick={() => onResize((item.size + 1) as CardSize)}
             >
-              <Maximize2 className="size-3.5" />
+              <Maximize2 className="size-4" />
             </Button>
             <Button
               type="button"
               size="icon"
               variant="ghost"
-              className="size-7 rounded-full"
+              className="size-9 shrink-0 rounded-full"
               aria-label={item.hidden ? t("Show card") : t("Hide card")}
               onClick={onToggleHidden}
             >
-              {item.hidden ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+              {item.hidden ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </Button>
           </div>
         </div>
