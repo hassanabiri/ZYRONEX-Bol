@@ -162,14 +162,20 @@ export function DashboardGrid({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-end gap-2">
+      <div className="flex w-full flex-wrap items-center justify-end gap-2">
         {isSaving ? (
           <span className="text-xs text-muted-foreground">{t("Saving layout…")}</span>
         ) : null}
         {editing ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button type="button" variant="ghost" size="sm" onClick={onReset}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-9 flex-1 sm:flex-none"
+                onClick={onReset}
+              >
                 <RotateCcw className="size-4" />
                 {t("Reset layout")}
               </Button>
@@ -181,6 +187,7 @@ export function DashboardGrid({
           type="button"
           variant={editing ? "default" : "outline"}
           size="sm"
+          className="h-9 flex-1 sm:flex-none"
           onClick={() => setEditing((value) => !value)}
         >
           <GripVertical className="size-4" />
