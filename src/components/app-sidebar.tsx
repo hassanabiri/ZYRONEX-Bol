@@ -107,7 +107,7 @@ export function AppSidebar() {
                         asChild
                         isActive={active}
                         tooltip={t(item.title)}
-                        className="h-9 rounded-lg font-medium data-[active=true]:bg-primary/12 data-[active=true]:text-primary"
+                        className="h-9 rounded-lg pe-8 font-medium data-[active=true]:bg-primary/12 data-[active=true]:text-primary"
                       >
                         <Link
                           to={item.to}
