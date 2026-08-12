@@ -1,4 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { Star } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   Sidebar,
@@ -17,6 +19,8 @@ import { useI18n } from "@/lib/i18n";
 import { navSections } from "@/lib/navigation";
 import { useWorkspace } from "@/lib/workspace";
 
+const FAVORITES_KEY = "zyronex.sidebar.favorites";
+
 export function AppSidebar() {
   const { state, isMobile, setOpenMobile } = useSidebar();
   const collapsed = state === "collapsed";
@@ -27,6 +31,40 @@ export function AppSidebar() {
   const closeOnMobile = () => {
     if (isMobile) setOpenMobile(false);
   };
+
+  const [favorites, setFavorites] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(FAVORITES_KEY);
+      if (raw) setFavorites(JSON.parse(raw) as string[]);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const toggleFavorite = useCallback((to: string) => {
+    setFavorites((current) => {
+      const next = current.includes(to)
+        ? current.filter((item) => item !== to)
+        : [...current, to];
+      try {
+        window.localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }, []);
+
+  const sections = useMemo(() => {
+    const favoriteItems = navSections
+      .flatMap((section) => section.items)
+      .filter((item) => favorites.includes(item.to));
+    return favoriteItems.length
+      ? [{ label: "Favorites", items: favoriteItems }, ...navSections]
+      : navSections;
+  }, [favorites]);
 
 
   return (
@@ -54,7 +92,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-1.5 py-1">
-        {navSections.map((section) => (
+        {sections.map((section) => (
           <SidebarGroup key={section.label} className="py-1">
             <SidebarGroupLabel className="px-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
               {t(section.label)}
@@ -64,12 +102,12 @@ export function AppSidebar() {
                 {section.items.map((item) => {
                   const active = pathname === item.to;
                   return (
-                    <SidebarMenuItem key={item.to}>
+                    <SidebarMenuItem key={`${section.label}-${item.to}`} className="group/menu-item relative">
                       <SidebarMenuButton
                         asChild
                         isActive={active}
                         tooltip={t(item.title)}
-                        className="h-9 rounded-lg font-medium data-[active=true]:bg-primary/12 data-[active=true]:text-primary"
+                        className="h-9 rounded-lg pe-8 font-medium data-[active=true]:bg-primary/12 data-[active=true]:text-primary"
                       >
                         <Link
                           to={item.to}
@@ -88,6 +126,20 @@ export function AppSidebar() {
                           <span className="truncate">{t(item.title)}</span>
                         </Link>
                       </SidebarMenuButton>
+                      {!collapsed ? (
+                        <button
+                          type="button"
+                          aria-label={t(favorites.includes(item.to) ? "Remove from favorites" : "Add to favorites")}
+                          onClick={() => toggleFavorite(item.to)}
+                          className={`absolute inset-y-0 end-1 my-auto flex size-7 items-center justify-center rounded-md text-muted-foreground/50 opacity-0 transition-opacity hover:text-primary focus-visible:opacity-100 group-hover/menu-item:opacity-100 ${
+                            favorites.includes(item.to) ? "text-primary opacity-100" : ""
+                          }`}
+                        >
+                          <Star
+                            className={`size-3.5 ${favorites.includes(item.to) ? "fill-current" : ""}`}
+                          />
+                        </button>
+                      ) : null}
                     </SidebarMenuItem>
                   );
                 })}

@@ -745,6 +745,38 @@ const ar: Record<string, string> = {
   "Show card": "إظهار البطاقة",
   "Hide card": "إخفاء البطاقة",
   "Saving layout…": "جارٍ حفظ الترتيب…",
+  Favorites: "المفضلة",
+  "Add to favorites": "إضافة إلى المفضلة",
+  "Remove from favorites": "إزالة من المفضلة",
+  "Ask ZYRONEX AI": "اسأل ذكاء ZYRONEX",
+  "Ask about this page…": "اسأل عن هذه الصفحة…",
+  "What can I do on this page?": "ماذا يمكنني أن أفعل في هذه الصفحة؟",
+  "Explain this module in simple words": "اشرح هذه الوحدة بكلمات بسيطة",
+  "What should I set up next?": "ما الذي يجب إعداده بعد ذلك؟",
+  "An automatic notification that tells ZYRONEX when something happens in a connected service.":
+    "إشعار تلقائي يخبر ZYRONEX عند حدوث شيء في خدمة مرتبطة.",
+  "Automatic notifications that tell ZYRONEX when something happens in a connected service.":
+    "إشعارات تلقائية تخبر ZYRONEX عند حدوث شيء في خدمة مرتبطة.",
+  "Scheduled data refresh between ZYRONEX and the connected service.":
+    "تحديث مجدول للبيانات بين ZYRONEX والخدمة المرتبطة.",
+  "A secure sign-in method that connects an account without sharing its password.":
+    "طريقة دخول آمنة تربط الحساب دون مشاركة كلمة المرور.",
+  "A private key that lets ZYRONEX talk to another service on your behalf.":
+    "مفتاح خاص يتيح لـ ZYRONEX التواصل مع خدمة أخرى نيابة عنك.",
+  "The usage balance consumed when workers run, speak or process documents.":
+    "رصيد الاستخدام الذي يُستهلك عند تشغيل العمّال أو التحدث أو معالجة المستندات.",
+  "One complete run of a workflow or worker, with its steps and results.":
+    "تشغيل كامل لسير عمل أو عامل، مع خطواته ونتائجه.",
+  "What a worker remembers across conversations and runs.":
+    "ما يتذكّره العامل عبر المحادثات وعمليات التشغيل.",
+  "Documents and sources a worker can read to answer accurately.":
+    "المستندات والمصادر التي يقرأها العامل ليجيب بدقة.",
+  "Role-based access control: who is allowed to do what inside the workspace.":
+    "التحكم بالصلاحيات حسب الدور: من المسموح له بفعل ماذا داخل مساحة العمل.",
+  "How long the system takes to respond, in milliseconds.":
+    "الزمن الذي يستغرقه النظام للاستجابة، بالمللي ثانية.",
+  "How much work the system completes in a given period.":
+    "حجم العمل الذي ينجزه النظام خلال فترة محددة.",
   "Reset layout": "إعادة الترتيب الافتراضي",
   "Restore the default dashboard arrangement": "استعادة الترتيب الافتراضي للوحة التحكم",
   "Customize layout": "تخصيص الترتيب",

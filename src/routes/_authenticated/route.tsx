@@ -2,6 +2,7 @@ import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import { AskZyronexAi } from "@/components/ask-zyronex-ai";
 import { TopBar } from "@/components/top-bar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useAuth } from "@/lib/auth";
@@ -64,6 +65,7 @@ function AuthenticatedLayout() {
                 <Outlet />
               </main>
             </SidebarInset>
+            <AskZyronexAi />
           </div>
         </SidebarProvider>
 
