@@ -63,9 +63,10 @@ export function TopBar() {
   }
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 w-full items-center gap-1 overflow-hidden border-b bg-background/80 px-2 backdrop-blur-md sm:gap-2 sm:px-5">
+    <header className="sticky top-0 z-20 flex h-16 w-full items-center gap-1 overflow-hidden border-b border-border/60 bg-background/70 px-2 shadow-[0_1px_0_0_color-mix(in_oklab,var(--foreground)_6%,transparent)] backdrop-blur-xl sm:gap-2 sm:px-5">
       <SidebarTrigger className="shrink-0" />
       <Separator orientation="vertical" className="mx-1 hidden h-6 sm:block" />
+
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -134,7 +135,7 @@ export function TopBar() {
       <button
         type="button"
         onClick={() => setPaletteOpen(true)}
-        className="relative ml-auto hidden h-9 w-full max-w-sm items-center gap-2 rounded-md border bg-surface px-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 md:flex"
+        className="relative ml-auto hidden h-9 w-full max-w-sm items-center gap-2 rounded-full border border-border/70 bg-surface/60 px-3.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-surface md:flex"
         aria-label={t("Search workspace")}
       >
         <Search className="size-4 shrink-0" />
