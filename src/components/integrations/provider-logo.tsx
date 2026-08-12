@@ -40,12 +40,11 @@ export function ProviderLogo({
   provider,
   className,
 }: {
-  provider: Pick<ProviderDefinition, "id" | "name" | "icon">;
+  provider: Pick<ProviderDefinition, "id" | "name">;
   className?: string;
 }) {
   const slug = BRAND_SLUGS[provider.id];
   const [failed, setFailed] = useState(false);
-  const Icon = provider.icon;
 
   return (
     <span
@@ -66,7 +65,7 @@ export function ProviderLogo({
           onError={() => setFailed(true)}
         />
       ) : (
-        <Icon className="size-5" />
+        <span className="text-sm font-bold uppercase">{provider.name.slice(0, 2)}</span>
       )}
     </span>
   );
