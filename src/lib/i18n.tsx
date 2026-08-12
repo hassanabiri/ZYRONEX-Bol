@@ -753,7 +753,6 @@ const ar: Record<string, string> = {
   "What can I do on this page?": "ماذا يمكنني أن أفعل في هذه الصفحة؟",
   "Explain this module in simple words": "اشرح هذه الوحدة بكلمات بسيطة",
   "What should I set up next?": "ما الذي يجب إعداده بعد ذلك؟",
-  "What is this?": "ما هذا؟",
   "An automatic notification that tells ZYRONEX when something happens in a connected service.":
     "إشعار تلقائي يخبر ZYRONEX عند حدوث شيء في خدمة مرتبطة.",
   "Automatic notifications that tell ZYRONEX when something happens in a connected service.":
