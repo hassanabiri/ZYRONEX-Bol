@@ -4,6 +4,8 @@ import { Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { TermInfo } from "@/components/ui/term-info";
+import { ProviderLogo } from "@/components/integrations/provider-logo";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -86,18 +88,36 @@ export function ProviderCatalog({
           const count = connectedCount.get(provider.id) ?? 0;
           return (
             <Card key={provider.id} className="flex flex-col">
-              <CardHeader className="space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="text-base">{provider.name}</CardTitle>
-                  {count > 0 && <Badge variant="secondary">{count} {t("connected")}</Badge>}
+              <CardHeader className="space-y-3">
+                <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3">
+                  <ProviderLogo provider={provider} />
+                  <div className="min-w-0 space-y-1">
+                    <CardTitle className="truncate text-base">{provider.name}</CardTitle>
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground/70">
+                      {t(provider.category)}
+                    </p>
+                  </div>
+                  {count > 0 ? (
+                    <Badge variant="success" className="shrink-0">
+                      {count} {t("connected")}
+                    </Badge>
+                  ) : null}
                 </div>
-                <CardDescription>{provider.description}</CardDescription>
+                <CardDescription className="line-clamp-2">{provider.description}</CardDescription>
               </CardHeader>
               <CardContent className="mt-auto space-y-3">
                 <div className="flex flex-wrap gap-1.5">
                   <Badge variant="outline">{provider.authType}</Badge>
-                  {provider.supportsWebhooks && <Badge variant="outline">{t("Webhooks")}</Badge>}
-                  {provider.supportsSync && <Badge variant="outline">{t("Sync")}</Badge>}
+                  {provider.supportsWebhooks ? (
+                    <Badge variant="outline">
+                      <TermInfo term="Webhooks">{t("Webhooks")}</TermInfo>
+                    </Badge>
+                  ) : null}
+                  {provider.supportsSync ? (
+                    <Badge variant="outline">
+                      <TermInfo term="Sync">{t("Sync")}</TermInfo>
+                    </Badge>
+                  ) : null}
                 </div>
                 <Button className="w-full" onClick={() => onConnect(provider)}>
                   {t("Connect")}
