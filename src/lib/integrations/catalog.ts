@@ -84,10 +84,25 @@ export type CredentialField = {
   placeholder?: string;
 };
 
+/**
+ * Providers that share one underlying authorization. The UI lists capabilities
+ * separately while the backend reuses a single secure connection per group.
+ */
+export type ConnectionGroup = "meta" | "google" | "microsoft" | "tiktok";
+
+export const CONNECTION_GROUP_LABELS: Record<ConnectionGroup, string> = {
+  meta: "Meta connection",
+  google: "Google connection",
+  microsoft: "Microsoft connection",
+  tiktok: "TikTok connection",
+};
+
 export type ProviderDefinition = {
   id: string;
   name: string;
   category: IntegrationCategory;
+  /** Extra categories the provider also appears under (no duplicate connection). */
+  secondaryCategories?: IntegrationCategory[];
   authType: IntegrationAuthType;
   description: string;
   scopes: string[];
@@ -96,7 +111,12 @@ export type ProviderDefinition = {
   configFields?: CredentialField[];
   supportsWebhooks?: boolean;
   supportsSync?: boolean;
+  /** Capabilities surfaced to agents and workflows. */
+  capabilities?: string[];
+  connectionGroup?: ConnectionGroup;
+  comingSoon?: boolean;
 };
+
 
 const oauth = (extra: CredentialField[] = []): CredentialField[] => [
   { key: "client_id", label: "Client ID", secret: false },
