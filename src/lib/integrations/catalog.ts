@@ -2,17 +2,24 @@ import {
   Bot,
   Boxes,
   Braces,
+  CalendarDays,
+  CheckSquare,
   CreditCard,
   Database,
   HardDrive,
+  Headphones,
+  Megaphone,
   MessageSquare,
   Mic,
   Plug,
+  Receipt,
+  Share2,
   ShoppingCart,
   Terminal,
   Users,
   type LucideIcon,
 } from "lucide-react";
+
 
 import type { Enums } from "@/integrations/supabase/types";
 
@@ -26,11 +33,17 @@ export type MarketplaceListingStatus = Enums<"marketplace_listing_status">;
 
 export type IntegrationCategory =
   | "communication"
+  | "social"
+  | "advertising"
   | "commerce"
-  | "crm"
   | "payments"
-  | "storage"
+  | "crm"
+  | "support"
   | "productivity"
+  | "storage"
+  | "tasks"
+  | "calendar"
+  | "accounting"
   | "databases"
   | "developer"
   | "voice"
@@ -42,18 +55,25 @@ export const INTEGRATION_CATEGORIES: {
   label: string;
   icon: LucideIcon;
 }[] = [
-  { id: "communication", label: "Communication", icon: MessageSquare },
-  { id: "commerce", label: "Commerce", icon: ShoppingCart },
-  { id: "crm", label: "CRM", icon: Users },
+  { id: "communication", label: "Communication & Messaging", icon: MessageSquare },
+  { id: "social", label: "Social Media & Content", icon: Share2 },
+  { id: "advertising", label: "Advertising & Marketing", icon: Megaphone },
+  { id: "commerce", label: "E-Commerce & Stores", icon: ShoppingCart },
   { id: "payments", label: "Payments", icon: CreditCard },
-  { id: "storage", label: "Storage", icon: HardDrive },
+  { id: "crm", label: "CRM & Sales", icon: Users },
+  { id: "support", label: "Customer Support", icon: Headphones },
   { id: "productivity", label: "Productivity", icon: Boxes },
+  { id: "storage", label: "Files & Storage", icon: HardDrive },
+  { id: "tasks", label: "Tasks & Projects", icon: CheckSquare },
+  { id: "calendar", label: "Calendar & Scheduling", icon: CalendarDays },
+  { id: "accounting", label: "Accounting & Finance", icon: Receipt },
   { id: "databases", label: "Databases", icon: Database },
   { id: "developer", label: "Developer", icon: Terminal },
   { id: "voice", label: "Voice", icon: Mic },
   { id: "ai_providers", label: "AI Providers", icon: Bot },
-  { id: "custom", label: "Custom", icon: Plug },
+  { id: "custom", label: "Advanced / Future", icon: Plug },
 ];
+
 
 export type CredentialField = {
   key: string;
@@ -64,10 +84,25 @@ export type CredentialField = {
   placeholder?: string;
 };
 
+/**
+ * Providers that share one underlying authorization. The UI lists capabilities
+ * separately while the backend reuses a single secure connection per group.
+ */
+export type ConnectionGroup = "meta" | "google" | "microsoft" | "tiktok";
+
+export const CONNECTION_GROUP_LABELS: Record<ConnectionGroup, string> = {
+  meta: "Meta connection",
+  google: "Google connection",
+  microsoft: "Microsoft connection",
+  tiktok: "TikTok connection",
+};
+
 export type ProviderDefinition = {
   id: string;
   name: string;
   category: IntegrationCategory;
+  /** Extra categories the provider also appears under (no duplicate connection). */
+  secondaryCategories?: IntegrationCategory[];
   authType: IntegrationAuthType;
   description: string;
   scopes: string[];
@@ -76,7 +111,12 @@ export type ProviderDefinition = {
   configFields?: CredentialField[];
   supportsWebhooks?: boolean;
   supportsSync?: boolean;
+  /** Capabilities surfaced to agents and workflows. */
+  capabilities?: string[];
+  connectionGroup?: ConnectionGroup;
+  comingSoon?: boolean;
 };
+
 
 const oauth = (extra: CredentialField[] = []): CredentialField[] => [
   { key: "client_id", label: "Client ID", secret: false },
@@ -86,7 +126,7 @@ const oauth = (extra: CredentialField[] = []): CredentialField[] => [
 
 const apiKey = (label = "API key"): CredentialField[] => [{ key: "api_key", label, secret: true }];
 
-export const PROVIDERS: ProviderDefinition[] = [
+const BASE_PROVIDERS: ProviderDefinition[] = [
   // Communication
   {
     id: "whatsapp",
@@ -378,7 +418,7 @@ export const PROVIDERS: ProviderDefinition[] = [
   {
     id: "mcp_server",
     name: "MCP Server",
-    category: "developer",
+    category: "custom",
     authType: "bearer",
     description: "Model Context Protocol server (reserved for a future release).",
     scopes: ["tools.list", "tools.call"],
@@ -460,7 +500,338 @@ export const PROVIDERS: ProviderDefinition[] = [
     credentialFields: apiKey(),
     configFields: [{ key: "base_url", label: "Base URL", secret: false, optional: true }],
   },
+  // Social media & content
+  {
+    id: "tiktok",
+    name: "TikTok",
+    category: "social",
+    authType: "oauth2",
+    description: "TikTok content publishing, comments and engagement analytics.",
+    scopes: ["video.publish", "video.list", "user.info.basic"],
+    credentialFields: oauth(),
+    connectionGroup: "tiktok",
+    supportsWebhooks: true,
+  },
+  {
+    id: "x_twitter",
+    name: "X",
+    category: "social",
+    authType: "oauth2",
+    description: "Post, schedule and monitor engagement on X.",
+    scopes: ["tweet.read", "tweet.write", "users.read"],
+    credentialFields: oauth(),
+    supportsWebhooks: true,
+  },
+  {
+    id: "youtube",
+    name: "YouTube",
+    category: "social",
+    authType: "oauth2",
+    description: "Video uploads, metadata, comments and channel analytics.",
+    scopes: ["youtube.upload", "youtube.readonly"],
+    credentialFields: oauth(),
+    connectionGroup: "google",
+    supportsSync: true,
+  },
+  // Advertising & marketing
+  {
+    id: "google_ads",
+    name: "Google Ads",
+    category: "advertising",
+    authType: "oauth2",
+    description: "Campaigns, ad groups, keywords, budgets and performance reporting.",
+    scopes: ["adwords"],
+    credentialFields: oauth([{ key: "developer_token", label: "Developer token", secret: true }]),
+    configFields: [{ key: "customer_id", label: "Customer ID", secret: false }],
+    connectionGroup: "google",
+    supportsSync: true,
+  },
+  {
+    id: "meta_ads",
+    name: "Meta Ads",
+    category: "advertising",
+    authType: "oauth2",
+    description: "Facebook and Instagram ad sets, creatives, audiences and insights.",
+    scopes: ["ads_management", "ads_read"],
+    credentialFields: oauth(),
+    configFields: [{ key: "ad_account_id", label: "Ad account ID", secret: false }],
+    connectionGroup: "meta",
+    supportsSync: true,
+  },
+  {
+    id: "tiktok_ads",
+    name: "TikTok Ads",
+    category: "advertising",
+    authType: "oauth2",
+    description: "TikTok campaigns, ad groups, creatives and conversion reporting.",
+    scopes: ["ads.management", "ads.read"],
+    credentialFields: oauth(),
+    configFields: [{ key: "advertiser_id", label: "Advertiser ID", secret: false }],
+    connectionGroup: "tiktok",
+    supportsSync: true,
+  },
+  // Customer support
+  {
+    id: "zendesk",
+    name: "Zendesk",
+    category: "support",
+    authType: "oauth2",
+    description: "Tickets, customers, comments and agent assignment.",
+    scopes: ["tickets:read", "tickets:write"],
+    credentialFields: oauth(),
+    configFields: [{ key: "subdomain", label: "Subdomain", secret: false }],
+    supportsWebhooks: true,
+    supportsSync: true,
+  },
+  {
+    id: "freshdesk",
+    name: "Freshdesk",
+    category: "support",
+    authType: "api_key",
+    description: "Freshdesk tickets, contacts and status automation.",
+    scopes: ["tickets.read", "tickets.write"],
+    credentialFields: apiKey(),
+    configFields: [{ key: "domain", label: "Helpdesk domain", secret: false }],
+    supportsWebhooks: true,
+    supportsSync: true,
+  },
+  {
+    id: "intercom",
+    name: "Intercom",
+    category: "support",
+    authType: "oauth2",
+    description: "Conversations, contacts and AI-agent handoff.",
+    scopes: ["read_conversations", "write_conversations"],
+    credentialFields: oauth(),
+    supportsWebhooks: true,
+    supportsSync: true,
+  },
+  // CRM
+  {
+    id: "pipedrive",
+    name: "Pipedrive",
+    category: "crm",
+    authType: "api_key",
+    description: "Deals, leads, contacts and activity tracking.",
+    scopes: ["deals:read", "deals:write"],
+    credentialFields: apiKey(),
+    configFields: [{ key: "company_domain", label: "Company domain", secret: false }],
+    supportsWebhooks: true,
+    supportsSync: true,
+  },
+  // Files & storage
+  {
+    id: "onedrive",
+    name: "OneDrive",
+    category: "storage",
+    authType: "oauth2",
+    description: "OneDrive and SharePoint files and folder events.",
+    scopes: ["Files.ReadWrite.All"],
+    credentialFields: oauth([{ key: "tenant_id", label: "Tenant ID", secret: false, optional: true }]),
+    connectionGroup: "microsoft",
+    supportsSync: true,
+  },
+  {
+    id: "dropbox",
+    name: "Dropbox",
+    category: "storage",
+    authType: "oauth2",
+    description: "Dropbox files, folders and change notifications.",
+    scopes: ["files.content.read", "files.content.write"],
+    credentialFields: oauth(),
+    supportsWebhooks: true,
+    supportsSync: true,
+  },
+  // Tasks & projects
+  {
+    id: "trello",
+    name: "Trello",
+    category: "tasks",
+    authType: "api_key",
+    description: "Boards, lists and cards with due dates and comments.",
+    scopes: ["read", "write"],
+    credentialFields: [
+      { key: "api_key", label: "API key", secret: true },
+      { key: "token", label: "Token", secret: true },
+    ],
+    supportsWebhooks: true,
+    supportsSync: true,
+  },
+  {
+    id: "asana",
+    name: "Asana",
+    category: "tasks",
+    authType: "oauth2",
+    description: "Projects, tasks, assignees and status updates.",
+    scopes: ["tasks:read", "tasks:write"],
+    credentialFields: oauth(),
+    supportsWebhooks: true,
+    supportsSync: true,
+  },
+  {
+    id: "jira",
+    name: "Jira",
+    category: "tasks",
+    authType: "oauth2",
+    description: "Issues, sprints, transitions and comments.",
+    scopes: ["read:jira-work", "write:jira-work"],
+    credentialFields: oauth(),
+    configFields: [{ key: "site_url", label: "Site URL", secret: false }],
+    supportsWebhooks: true,
+    supportsSync: true,
+  },
+  // Calendar & scheduling
+  {
+    id: "google_calendar",
+    name: "Google Calendar",
+    category: "calendar",
+    authType: "oauth2",
+    description: "Events, reminders and meeting scheduling.",
+    scopes: ["calendar.events"],
+    credentialFields: oauth(),
+    connectionGroup: "google",
+    supportsSync: true,
+  },
+  {
+    id: "microsoft_calendar",
+    name: "Microsoft Calendar",
+    category: "calendar",
+    authType: "oauth2",
+    description: "Outlook calendar events and meeting scheduling.",
+    scopes: ["Calendars.ReadWrite"],
+    credentialFields: oauth([{ key: "tenant_id", label: "Tenant ID", secret: false, optional: true }]),
+    connectionGroup: "microsoft",
+    supportsSync: true,
+  },
+  // Accounting & finance
+  {
+    id: "quickbooks",
+    name: "QuickBooks",
+    category: "accounting",
+    authType: "oauth2",
+    description: "Customers, invoices, payments and transactions.",
+    scopes: ["com.intuit.quickbooks.accounting"],
+    credentialFields: oauth(),
+    configFields: [{ key: "realm_id", label: "Realm ID", secret: false }],
+    supportsSync: true,
+  },
+  {
+    id: "xero",
+    name: "Xero",
+    category: "accounting",
+    authType: "oauth2",
+    description: "Xero contacts, invoices and payment status.",
+    scopes: ["accounting.transactions", "accounting.contacts"],
+    credentialFields: oauth(),
+    supportsSync: true,
+  },
 ];
+
+/**
+ * Non-breaking metadata layer: capabilities, cross-category placement and shared
+ * authorization groups. Existing provider definitions are untouched.
+ */
+const PROVIDER_META: Record<string, Partial<ProviderDefinition>> = {
+  whatsapp: { capabilities: ["Messages", "Conversations", "Media", "Notifications", "Webhooks"] },
+  telegram: { capabilities: ["Messages", "Conversations", "Media", "Webhooks"] },
+  messenger: {
+    capabilities: ["Messages", "Conversations", "Replies", "Automation", "Webhooks"],
+    connectionGroup: "meta",
+  },
+  instagram: {
+    secondaryCategories: ["social"],
+    capabilities: ["Messages", "Comments", "Replies", "Publishing", "Scheduling", "Media", "Analytics"],
+    connectionGroup: "meta",
+  },
+  facebook_pages: {
+    secondaryCategories: ["social"],
+    capabilities: ["Messages", "Comments", "Publishing", "Scheduling", "Engagement", "Analytics"],
+    connectionGroup: "meta",
+  },
+  slack: { capabilities: ["Messages", "Channels", "Notifications", "Webhooks"] },
+  discord: { capabilities: ["Messages", "Channels", "Notifications"] },
+  tiktok: { capabilities: ["Publishing", "Scheduling", "Videos", "Comments", "Analytics"] },
+  x_twitter: { capabilities: ["Publishing", "Scheduling", "Media", "Replies", "Analytics"] },
+  youtube: { capabilities: ["Videos", "Publishing", "Comments", "Analytics"] },
+  google_ads: {
+    capabilities: ["Campaigns", "Ad groups", "Keywords", "Budgets", "Conversions", "Reporting"],
+  },
+  meta_ads: {
+    capabilities: ["Campaigns", "Ad sets", "Creatives", "Audiences", "Budgets", "Reporting"],
+  },
+  tiktok_ads: { capabilities: ["Campaigns", "Ad groups", "Creatives", "Targeting", "Reporting"] },
+  salla: { capabilities: ["Orders", "Products", "Customers", "Inventory", "Webhooks", "Sync"] },
+  zid: { capabilities: ["Orders", "Products", "Customers", "Inventory", "Webhooks", "Sync"] },
+  shopify: { capabilities: ["Orders", "Products", "Customers", "Inventory", "Shipping", "Sync"] },
+  woocommerce: { capabilities: ["Orders", "Products", "Customers", "Inventory", "Sync"] },
+  magento: { capabilities: ["Orders", "Products", "Customers", "Sync"] },
+  opencart: { capabilities: ["Orders", "Products", "Customers", "Sync"] },
+  stripe: { capabilities: ["Payments", "Customers", "Refunds", "Payouts", "Webhooks"] },
+  hyperpay: { capabilities: ["Payments", "Payment status", "Refunds"] },
+  moyasar: { capabilities: ["Payments", "Payment status", "Refunds", "Webhooks"] },
+  paytabs: { capabilities: ["Payments", "Payment status"] },
+  stc_pay: { capabilities: ["Payments", "Payment status"] },
+  salesforce: { capabilities: ["Contacts", "Leads", "Deals", "Activities", "Sync"] },
+  hubspot: { capabilities: ["Contacts", "Leads", "Deals", "Tasks", "Notes", "Sync"] },
+  pipedrive: { capabilities: ["Contacts", "Leads", "Deals", "Activities", "Webhooks"] },
+  zendesk: { capabilities: ["Tickets", "Customers", "Comments", "Assignment", "Escalation"] },
+  freshdesk: { capabilities: ["Tickets", "Contacts", "Comments", "Status", "Notifications"] },
+  intercom: { capabilities: ["Conversations", "Contacts", "Notes", "AI handoff", "Webhooks"] },
+  gmail: { capabilities: ["Email", "Notifications", "Sync"], connectionGroup: "google" },
+  outlook: {
+    capabilities: ["Email", "Calendar", "Notifications", "Sync"],
+    connectionGroup: "microsoft",
+  },
+  microsoft_365: {
+    capabilities: ["Teams", "SharePoint", "Files", "Documents", "Calendar"],
+    connectionGroup: "microsoft",
+  },
+  google_workspace: {
+    capabilities: ["Email", "Files", "Documents", "Calendar"],
+    connectionGroup: "google",
+  },
+  zoom: { secondaryCategories: ["productivity"], capabilities: ["Meetings", "Recordings", "Notifications"] },
+  google_meet: {
+    secondaryCategories: ["productivity"],
+    capabilities: ["Meetings", "Scheduling", "Recordings"],
+    connectionGroup: "google",
+  },
+  google_drive: {
+    capabilities: ["Upload", "Download", "Folders", "File events", "Sync"],
+    connectionGroup: "google",
+  },
+  onedrive: { capabilities: ["Upload", "Download", "Folders", "File events", "Sync"] },
+  dropbox: { capabilities: ["Upload", "Download", "Move", "Copy", "Folders", "Sync"] },
+  s3: { capabilities: ["Upload", "Download", "Read", "Write", "Sync"] },
+  trello: { capabilities: ["Create task", "Update task", "Assign", "Comments", "Projects"] },
+  asana: { capabilities: ["Create task", "Update task", "Assign", "Status", "Projects"] },
+  jira: { capabilities: ["Create task", "Update task", "Assign", "Status", "Comments"] },
+  google_calendar: {
+    capabilities: ["Create event", "Update event", "Cancel event", "Reminders"],
+  },
+  microsoft_calendar: {
+    capabilities: ["Create event", "Update event", "Cancel event", "Reminders"],
+  },
+  quickbooks: { capabilities: ["Customers", "Invoices", "Payments", "Transactions", "Sync"] },
+  xero: { capabilities: ["Customers", "Invoices", "Payments", "Sync"] },
+  rest_api: { capabilities: ["Custom requests", "Sync"] },
+  webhook: { capabilities: ["Inbound events", "Outbound events", "Signing"] },
+  graphql: { capabilities: ["Queries", "Mutations"] },
+  postgres: { capabilities: ["Read", "Write", "Sync"] },
+  custom_connector: { capabilities: ["Marketplace manifest", "Custom actions"] },
+  openai_compatible: { capabilities: ["Models", "Chat completions", "Embeddings"] },
+  mcp_server: { capabilities: ["Tools", "Resources"], comingSoon: true },
+};
+
+export const PROVIDERS: ProviderDefinition[] = BASE_PROVIDERS.map((provider) => ({
+  ...provider,
+  ...(PROVIDER_META[provider.id] ?? {}),
+}));
+
+/** Categories a provider is listed under (primary + secondary). */
+export function providerCategories(provider: ProviderDefinition): IntegrationCategory[] {
+  return [provider.category, ...(provider.secondaryCategories ?? [])];
+}
 
 export const PROVIDER_MAP = new Map(PROVIDERS.map((provider) => [provider.id, provider]));
 
