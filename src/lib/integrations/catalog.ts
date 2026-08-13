@@ -26,11 +26,17 @@ export type MarketplaceListingStatus = Enums<"marketplace_listing_status">;
 
 export type IntegrationCategory =
   | "communication"
+  | "social"
+  | "advertising"
   | "commerce"
-  | "crm"
   | "payments"
-  | "storage"
+  | "crm"
+  | "support"
   | "productivity"
+  | "storage"
+  | "tasks"
+  | "calendar"
+  | "accounting"
   | "databases"
   | "developer"
   | "voice"
@@ -42,18 +48,25 @@ export const INTEGRATION_CATEGORIES: {
   label: string;
   icon: LucideIcon;
 }[] = [
-  { id: "communication", label: "Communication", icon: MessageSquare },
-  { id: "commerce", label: "Commerce", icon: ShoppingCart },
-  { id: "crm", label: "CRM", icon: Users },
+  { id: "communication", label: "Communication & Messaging", icon: MessageSquare },
+  { id: "social", label: "Social Media & Content", icon: Share2 },
+  { id: "advertising", label: "Advertising & Marketing", icon: Megaphone },
+  { id: "commerce", label: "E-Commerce & Stores", icon: ShoppingCart },
   { id: "payments", label: "Payments", icon: CreditCard },
-  { id: "storage", label: "Storage", icon: HardDrive },
+  { id: "crm", label: "CRM & Sales", icon: Users },
+  { id: "support", label: "Customer Support", icon: Headphones },
   { id: "productivity", label: "Productivity", icon: Boxes },
+  { id: "storage", label: "Files & Storage", icon: HardDrive },
+  { id: "tasks", label: "Tasks & Projects", icon: CheckSquare },
+  { id: "calendar", label: "Calendar & Scheduling", icon: CalendarDays },
+  { id: "accounting", label: "Accounting & Finance", icon: Receipt },
   { id: "databases", label: "Databases", icon: Database },
   { id: "developer", label: "Developer", icon: Terminal },
   { id: "voice", label: "Voice", icon: Mic },
   { id: "ai_providers", label: "AI Providers", icon: Bot },
-  { id: "custom", label: "Custom", icon: Plug },
+  { id: "custom", label: "Advanced / Future", icon: Plug },
 ];
+
 
 export type CredentialField = {
   key: string;
