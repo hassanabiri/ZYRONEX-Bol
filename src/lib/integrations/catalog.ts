@@ -2,17 +2,24 @@ import {
   Bot,
   Boxes,
   Braces,
+  CalendarDays,
+  CheckSquare,
   CreditCard,
   Database,
   HardDrive,
+  Headphones,
+  Megaphone,
   MessageSquare,
   Mic,
   Plug,
+  Receipt,
+  Share2,
   ShoppingCart,
   Terminal,
   Users,
   type LucideIcon,
 } from "lucide-react";
+
 
 import type { Enums } from "@/integrations/supabase/types";
 
