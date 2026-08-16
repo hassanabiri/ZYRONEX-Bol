@@ -922,6 +922,7 @@ export type Database = {
           seq: number
           started_at: string | null
           status: Database["public"]["Enums"]["execution_status"]
+          trace_id: string | null
           workspace_id: string
         }
         Insert: {
@@ -939,6 +940,7 @@ export type Database = {
           seq?: number
           started_at?: string | null
           status?: Database["public"]["Enums"]["execution_status"]
+          trace_id?: string | null
           workspace_id: string
         }
         Update: {
@@ -956,6 +958,7 @@ export type Database = {
           seq?: number
           started_at?: string | null
           status?: Database["public"]["Enums"]["execution_status"]
+          trace_id?: string | null
           workspace_id?: string
         }
         Relationships: [
@@ -978,14 +981,19 @@ export type Database = {
       executions: {
         Row: {
           attempt: number
+          cancel_requested: boolean
           created_at: string
           created_by: string | null
           duration_ms: number | null
           error: string | null
           finished_at: string | null
           id: string
+          idempotency_key: string | null
           input: Json
+          lease_expires_at: string | null
+          lease_owner: string | null
           max_attempts: number
+          next_run_at: string
           output: Json | null
           priority: number
           progress: number
@@ -993,6 +1001,7 @@ export type Database = {
           started_at: string | null
           status: Database["public"]["Enums"]["execution_status"]
           timeout_seconds: number
+          trace_id: string
           trigger: string
           updated_at: string
           warnings: string[]
@@ -1003,14 +1012,19 @@ export type Database = {
         }
         Insert: {
           attempt?: number
+          cancel_requested?: boolean
           created_at?: string
           created_by?: string | null
           duration_ms?: number | null
           error?: string | null
           finished_at?: string | null
           id?: string
+          idempotency_key?: string | null
           input?: Json
+          lease_expires_at?: string | null
+          lease_owner?: string | null
           max_attempts?: number
+          next_run_at?: string
           output?: Json | null
           priority?: number
           progress?: number
@@ -1018,6 +1032,7 @@ export type Database = {
           started_at?: string | null
           status?: Database["public"]["Enums"]["execution_status"]
           timeout_seconds?: number
+          trace_id?: string
           trigger?: string
           updated_at?: string
           warnings?: string[]
@@ -1028,14 +1043,19 @@ export type Database = {
         }
         Update: {
           attempt?: number
+          cancel_requested?: boolean
           created_at?: string
           created_by?: string | null
           duration_ms?: number | null
           error?: string | null
           finished_at?: string | null
           id?: string
+          idempotency_key?: string | null
           input?: Json
+          lease_expires_at?: string | null
+          lease_owner?: string | null
           max_attempts?: number
+          next_run_at?: string
           output?: Json | null
           priority?: number
           progress?: number
@@ -1043,6 +1063,7 @@ export type Database = {
           started_at?: string | null
           status?: Database["public"]["Enums"]["execution_status"]
           timeout_seconds?: number
+          trace_id?: string
           trigger?: string
           updated_at?: string
           warnings?: string[]
@@ -4165,6 +4186,46 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_executions: {
+        Args: { _lease_owner: string; _lease_seconds?: number; _limit?: number }
+        Returns: {
+          attempt: number
+          cancel_requested: boolean
+          created_at: string
+          created_by: string | null
+          duration_ms: number | null
+          error: string | null
+          finished_at: string | null
+          id: string
+          idempotency_key: string | null
+          input: Json
+          lease_expires_at: string | null
+          lease_owner: string | null
+          max_attempts: number
+          next_run_at: string
+          output: Json | null
+          priority: number
+          progress: number
+          queued_at: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["execution_status"]
+          timeout_seconds: number
+          trace_id: string
+          trigger: string
+          updated_at: string
+          warnings: string[]
+          worker_id: string | null
+          workflow_id: string | null
+          workflow_version: number | null
+          workspace_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "executions"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       create_workspace: {
         Args: { _name: string; _slug: string }
         Returns: string
@@ -4182,6 +4243,7 @@ export type Database = {
         Returns: boolean
       }
       member_workspace: { Args: { _member_id: string }; Returns: string }
+      reap_stale_executions: { Args: never; Returns: number }
       report_marketplace_review: {
         Args: { _review_id: string }
         Returns: undefined
