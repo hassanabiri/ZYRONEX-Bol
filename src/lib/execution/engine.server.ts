@@ -79,7 +79,6 @@ const defaultHandler: NodeHandler = async ({ node, signal }) => {
   return {};
 };
 
-const db = () => supabaseAdmin as unknown as ReturnType<typeof supabaseAdmin.from> extends never ? never : typeof supabaseAdmin;
 
 async function logActivity(
   workspaceId: string,
@@ -483,4 +482,4 @@ async function finish(
   });
 }
 
-export const __internal = { backoffMs, defaultHandler, db };
+export const __internal = { backoffMs, defaultHandler };
