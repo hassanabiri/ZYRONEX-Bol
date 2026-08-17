@@ -19,7 +19,7 @@ console.log("row:", (await supabaseAdmin.from("executions").select("status,attem
 // timeout path
 const slow = await enqueueExecution({ workspaceId: WS, workflowId: WF, workflowVersion: 1, workflowName: "timeout test", graph: { nodes: [
   { id: "n1", kind: "start", label: "Start", position: {x:0,y:0}, params: { trigger: "manual" } },
-  { id: "n2", kind: "human_approval", label: "Slow", position: {x:0,y:100}, params: {} },
+  { id: "n2", kind: "human_approval", label: "Slow", position: {x:0,y:100}, params: { role: "admin", approver_role: "admin" } },
   { id: "n3", kind: "end", label: "End", position: {x:0,y:200}, params: {} },
 ], edges: [{id:"e1",source:"n1",target:"n2"},{id:"e2",source:"n2",target:"n3"}] } as never, trigger: "test", timeoutSeconds: 5, idempotencyKey: `to-${Date.now()}` });
 registerNodeHandler("human_approval", async ({ signal }) => { await new Promise((_, rej) => { const t = setTimeout(() => rej(new Error("never")), 30000); signal.addEventListener("abort", () => { clearTimeout(t); rej(new Error("cancelled")); }); }); return {}; });
