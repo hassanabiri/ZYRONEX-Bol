@@ -5,7 +5,7 @@ const WS = "5792e4f5-4010-4d5f-8671-aad33b3f0da1";
 const WF = "f7bb51f1-79a4-469b-ae51-bbafcd7d2403";
 const graph = {
   nodes: [
-    { id: "n1", kind: "start", label: "Start", position: { x: 0, y: 0 }, params: {} },
+    { id: "n1", kind: "start", label: "Start", position: { x: 0, y: 0 }, params: { trigger: "manual" } },
     { id: "n2", kind: "delay", label: "Wait", position: { x: 0, y: 100 }, params: { seconds: 1 } },
     { id: "n3", kind: "end", label: "End", position: { x: 0, y: 200 }, params: {} },
   ],
