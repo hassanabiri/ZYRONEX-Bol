@@ -42,7 +42,7 @@ function createLogger(workspaceId: string, integrationId: string | null) {
             message: String(redact(`[${event.connector}:${event.operation}] ${event.message}`)),
             status_code: event.status ?? null,
             latency_ms: event.durationMs ?? null,
-            trace_id: event.traceId,
+            payload: { trace_id: event.traceId, attempt: event.attempt ?? null },
           })) as never,
         )
         .then(
