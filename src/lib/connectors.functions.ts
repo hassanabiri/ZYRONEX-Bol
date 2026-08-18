@@ -49,7 +49,7 @@ export const runConnectorAction = createServerFn({ method: "POST" })
     const { assertCanExecute } = await import("@/lib/execution/guard.server");
     await assertCanExecute(context.supabase, data.workspaceId, context.userId);
     const { invokeConnector } = await import("@/lib/connectors/run.server");
-    return invokeConnector({
+    const result = await invokeConnector({
       workspaceId: data.workspaceId,
       ...(data.integrationId ? { integrationId: data.integrationId } : {}),
       ...(data.connectorId ? { connectorId: data.connectorId } : {}),
@@ -58,4 +58,6 @@ export const runConnectorAction = createServerFn({ method: "POST" })
       cursor: data.cursor,
       maxPages: data.maxPages,
     });
+    // Round-trip through JSON so only plain, serializable data crosses the RPC.
+    return JSON.parse(JSON.stringify(result)) as Record<string, unknown>;
   });
