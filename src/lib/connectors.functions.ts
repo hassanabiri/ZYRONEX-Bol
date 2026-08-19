@@ -58,6 +58,29 @@ export const runConnectorAction = createServerFn({ method: "POST" })
       cursor: data.cursor,
       maxPages: data.maxPages,
     });
-    // Round-trip through JSON so only plain, serializable data crosses the RPC.
-    return JSON.parse(JSON.stringify(result)) as Record<string, unknown>;
+    // Only plain, JSON-safe data crosses the RPC boundary.
+    return result.ok
+      ? {
+          ok: true as const,
+          connector: result.connector,
+          operation: result.operation,
+          items: JSON.stringify(result.items),
+          cursor: result.cursor,
+          pages: result.pages,
+          status: result.status,
+          attempts: result.attempts,
+          durationMs: result.durationMs,
+          traceId: result.traceId,
+        }
+      : {
+          ok: false as const,
+          connector: result.connector,
+          operation: result.operation,
+          errorKind: result.error.kind,
+          errorMessage: result.error.message,
+          retryable: result.error.retryable,
+          attempts: result.attempts,
+          durationMs: result.durationMs,
+          traceId: result.traceId,
+        };
   });
