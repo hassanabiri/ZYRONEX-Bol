@@ -3534,6 +3534,7 @@ export type Database = {
       }
       webhook_endpoints: {
         Row: {
+          connector: string | null
           created_at: string
           created_by: string | null
           direction: Database["public"]["Enums"]["webhook_direction"]
@@ -3542,16 +3543,21 @@ export type Database = {
           id: string
           integration_id: string | null
           last_delivery_at: string | null
+          last_event_at: string | null
           name: string
+          replay_window_seconds: number
           retry_limit: number
+          secret_ciphertext: string | null
           signing_secret_hint: string | null
           slug: string
           timeout_seconds: number
           updated_at: string
           url: string | null
+          workflow_id: string | null
           workspace_id: string
         }
         Insert: {
+          connector?: string | null
           created_at?: string
           created_by?: string | null
           direction?: Database["public"]["Enums"]["webhook_direction"]
@@ -3560,16 +3566,21 @@ export type Database = {
           id?: string
           integration_id?: string | null
           last_delivery_at?: string | null
+          last_event_at?: string | null
           name: string
+          replay_window_seconds?: number
           retry_limit?: number
+          secret_ciphertext?: string | null
           signing_secret_hint?: string | null
           slug: string
           timeout_seconds?: number
           updated_at?: string
           url?: string | null
+          workflow_id?: string | null
           workspace_id: string
         }
         Update: {
+          connector?: string | null
           created_at?: string
           created_by?: string | null
           direction?: Database["public"]["Enums"]["webhook_direction"]
@@ -3578,13 +3589,17 @@ export type Database = {
           id?: string
           integration_id?: string | null
           last_delivery_at?: string | null
+          last_event_at?: string | null
           name?: string
+          replay_window_seconds?: number
           retry_limit?: number
+          secret_ciphertext?: string | null
           signing_secret_hint?: string | null
           slug?: string
           timeout_seconds?: number
           updated_at?: string
           url?: string | null
+          workflow_id?: string | null
           workspace_id?: string
         }
         Relationships: [
@@ -3596,7 +3611,115 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "webhook_endpoints_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "webhook_endpoints_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_events: {
+        Row: {
+          attempts: number
+          connector: string | null
+          created_at: string
+          endpoint_id: string
+          error: string | null
+          event_id: string
+          event_type: string
+          execution_id: string | null
+          headers: Json
+          id: string
+          integration_id: string | null
+          max_attempts: number
+          next_attempt_at: string
+          payload: Json
+          processed_at: string | null
+          received_at: string
+          signature_valid: boolean
+          status: string
+          trace_id: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          attempts?: number
+          connector?: string | null
+          created_at?: string
+          endpoint_id: string
+          error?: string | null
+          event_id: string
+          event_type?: string
+          execution_id?: string | null
+          headers?: Json
+          id?: string
+          integration_id?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          payload?: Json
+          processed_at?: string | null
+          received_at?: string
+          signature_valid?: boolean
+          status?: string
+          trace_id?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          attempts?: number
+          connector?: string | null
+          created_at?: string
+          endpoint_id?: string
+          error?: string | null
+          event_id?: string
+          event_type?: string
+          execution_id?: string | null
+          headers?: Json
+          id?: string
+          integration_id?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          payload?: Json
+          processed_at?: string | null
+          received_at?: string
+          signature_valid?: boolean
+          status?: string
+          trace_id?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_events_endpoint_id_fkey"
+            columns: ["endpoint_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_endpoints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_events_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_events_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_events_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
