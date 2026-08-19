@@ -94,6 +94,8 @@ export const dispatchQueue = createServerFn({ method: "POST" })
     const { assertCanExecute } = await import("@/lib/execution/guard.server");
     await assertCanExecute(context.supabase, data.workspaceId, context.userId);
 
+    // Registers the connector-backed node handlers (http_request, integration).
+    await import("@/lib/connectors/node-handlers.server");
     const { dispatchExecutions } = await import("@/lib/execution/engine.server");
     return dispatchExecutions({ max: data.max, budgetMs: data.budgetMs });
   });
