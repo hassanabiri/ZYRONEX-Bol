@@ -59,7 +59,8 @@ const MAX_PAGES = 20;
 export function backoffMs(attempt: number, retryAfterMs?: number): number {
   if (retryAfterMs !== undefined) return Math.min(retryAfterMs, MAX_BACKOFF_MS);
   const base = Math.min(MAX_BACKOFF_MS, 300 * 2 ** (attempt - 1));
-  return Math.round(base * (0.75 + Math.random() * 0.5));
+  // Jitter is applied first, then capped, so the ceiling is never exceeded.
+  return Math.min(MAX_BACKOFF_MS, Math.round(base * (0.75 + Math.random() * 0.5)));
 }
 
 function assertCredentials(adapter: ConnectorAdapter, credentials: Record<string, string>) {
