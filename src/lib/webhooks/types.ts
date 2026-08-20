@@ -127,7 +127,7 @@ export type WebhookResponse = {
   status: number;
   body: {
     ok: boolean;
-    status: WebhookEventStatus | "rejected";
+    status: WebhookEventStatus | "rejected" | "duplicate";
     trace_id: string;
     event_id?: string;
     error?: WebhookFailureReason | "execution_failed";
