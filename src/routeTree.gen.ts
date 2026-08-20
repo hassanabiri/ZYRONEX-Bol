@@ -60,6 +60,7 @@ import { Route as AuthenticatedWorkersIndexRouteImport } from './routes/_authent
 import { Route as AuthenticatedWorkersWorkerIdRouteImport } from './routes/_authenticated/workers.$workerId'
 import { Route as AuthenticatedWorkflowIndexRouteImport } from './routes/_authenticated/workflow.index'
 import { Route as AuthenticatedWorkflowWorkflowIdRouteImport } from './routes/_authenticated/workflow.$workflowId'
+import { Route as ApiPublicWebhooksSlugRouteImport } from './routes/api/public/webhooks/$slug'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -323,6 +324,11 @@ const AuthenticatedWorkflowWorkflowIdRoute =
     path: '/workflow/$workflowId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicWebhooksSlugRoute = ApiPublicWebhooksSlugRouteImport.update({
+  id: '/api/public/webhooks/$slug',
+  path: '/api/public/webhooks/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
@@ -374,6 +380,7 @@ export interface FileRoutesByFullPath {
   '/executions/': typeof AuthenticatedExecutionsIndexRoute
   '/workers/': typeof AuthenticatedWorkersIndexRoute
   '/workflow/': typeof AuthenticatedWorkflowIndexRoute
+  '/api/public/webhooks/$slug': typeof ApiPublicWebhooksSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof SiteIndexRoute
@@ -425,6 +432,7 @@ export interface FileRoutesByTo {
   '/executions': typeof AuthenticatedExecutionsIndexRoute
   '/workers': typeof AuthenticatedWorkersIndexRoute
   '/workflow': typeof AuthenticatedWorkflowIndexRoute
+  '/api/public/webhooks/$slug': typeof ApiPublicWebhooksSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -479,6 +487,7 @@ export interface FileRoutesById {
   '/_authenticated/executions/': typeof AuthenticatedExecutionsIndexRoute
   '/_authenticated/workers/': typeof AuthenticatedWorkersIndexRoute
   '/_authenticated/workflow/': typeof AuthenticatedWorkflowIndexRoute
+  '/api/public/webhooks/$slug': typeof ApiPublicWebhooksSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -532,6 +541,7 @@ export interface FileRouteTypes {
     | '/executions/'
     | '/workers/'
     | '/workflow/'
+    | '/api/public/webhooks/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -583,6 +593,7 @@ export interface FileRouteTypes {
     | '/executions'
     | '/workers'
     | '/workflow'
+    | '/api/public/webhooks/$slug'
   id:
     | '__root__'
     | '/_authenticated'
@@ -636,6 +647,7 @@ export interface FileRouteTypes {
     | '/_authenticated/executions/'
     | '/_authenticated/workers/'
     | '/_authenticated/workflow/'
+    | '/api/public/webhooks/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -645,6 +657,7 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   OnboardingRoute: typeof OnboardingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiPublicWebhooksSlugRoute: typeof ApiPublicWebhooksSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1006,6 +1019,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWorkflowWorkflowIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/webhooks/$slug': {
+      id: '/api/public/webhooks/$slug'
+      path: '/api/public/webhooks/$slug'
+      fullPath: '/api/public/webhooks/$slug'
+      preLoaderRoute: typeof ApiPublicWebhooksSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1126,6 +1146,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   OnboardingRoute: OnboardingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiPublicWebhooksSlugRoute: ApiPublicWebhooksSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
