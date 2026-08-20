@@ -237,9 +237,14 @@ export async function issueWebhookSecret(supabase: Client, userId: string, endpo
 
   const secret = randomSecret();
   const admin = await adminClient();
+  // The verifier needs the real value, so it is stored in the AES-256-GCM
+  // vault; only the hint ever reaches the browser.
   const { error: updateError } = await admin
     .from("webhook_endpoints")
-    .update({ signing_secret_hint: `${secret.slice(0, 6)}…${secret.slice(-4)}` })
+    .update({
+      signing_secret_hint: `${secret.slice(0, 6)}…${secret.slice(-4)}`,
+      secret_ciphertext: encryptCredentials({ signing_secret: secret }),
+    } as never)
     .eq("id", endpointId);
   if (updateError) throw updateError;
   return { secret };
