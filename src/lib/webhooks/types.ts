@@ -27,11 +27,11 @@ export type WebhookEventStatus =
 /** Result of a connector-specific verification pass. Never carries the secret. */
 export type WebhookVerification = {
   ok: boolean;
-  reason?: WebhookFailureReason;
-  message?: string;
-  eventId?: string;
-  eventType?: string;
-  timestampMs?: number;
+  reason?: WebhookFailureReason | undefined;
+  message?: string | undefined;
+  eventId?: string | undefined;
+  eventType?: string | undefined;
+  timestampMs?: number | undefined;
 };
 
 export type WebhookVerifierInput = {
