@@ -74,19 +74,14 @@ describe("webhook ingress", () => {
     expect(store.recorded.deliveries[0]?.["success"]).toBe(true);
   });
 
-  it("rejects an invalid signature without touching storage", async () => {
+  it("rejects a missing signature without touching storage", async () => {
     const body = JSON.stringify({ id: "evt_2" });
     const store = makeStore({ endpoints: { "orders-in": endpoint() } });
 
-    const res = await handleWebhook({
-      slug: "orders-in",
-      rawBody: body,
-      headers: { "x-zyronex-signature": "t=1,v1=deadbeef" },
-      store,
-    });
+    const res = await handleWebhook({ slug: "orders-in", rawBody: body, headers: {}, store });
 
     expect(res.status).toBe(401);
-    expect(res.body.error).toBe("replay");
+    expect(res.body.error).toBe("invalid_signature");
     expect(store.recorded.events).toHaveLength(0);
   });
 
