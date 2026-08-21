@@ -500,6 +500,132 @@ export type Database = {
           },
         ]
       }
+      connection_accounts: {
+        Row: {
+          account_identifier: string
+          account_label: string | null
+          connector: string
+          created_at: string
+          created_by: string | null
+          credential_ref: string | null
+          expires_at: string | null
+          id: string
+          integration_id: string | null
+          last_error: string | null
+          last_verified_at: string | null
+          metadata: Json
+          provider: string
+          refresh_failures: number
+          refresh_lock_expires_at: string | null
+          refresh_lock_owner: string | null
+          scopes: string[]
+          status: Database["public"]["Enums"]["connection_account_status"]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          account_identifier: string
+          account_label?: string | null
+          connector: string
+          created_at?: string
+          created_by?: string | null
+          credential_ref?: string | null
+          expires_at?: string | null
+          id?: string
+          integration_id?: string | null
+          last_error?: string | null
+          last_verified_at?: string | null
+          metadata?: Json
+          provider: string
+          refresh_failures?: number
+          refresh_lock_expires_at?: string | null
+          refresh_lock_owner?: string | null
+          scopes?: string[]
+          status?: Database["public"]["Enums"]["connection_account_status"]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          account_identifier?: string
+          account_label?: string | null
+          connector?: string
+          created_at?: string
+          created_by?: string | null
+          credential_ref?: string | null
+          expires_at?: string | null
+          id?: string
+          integration_id?: string | null
+          last_error?: string | null
+          last_verified_at?: string | null
+          metadata?: Json
+          provider?: string
+          refresh_failures?: number
+          refresh_lock_expires_at?: string | null
+          refresh_lock_owner?: string | null
+          scopes?: string[]
+          status?: Database["public"]["Enums"]["connection_account_status"]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connection_accounts_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connection_accounts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      connection_credentials: {
+        Row: {
+          account_id: string
+          ciphertext: string
+          fingerprint: string | null
+          id: string
+          rotated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          account_id: string
+          ciphertext: string
+          fingerprint?: string | null
+          id?: string
+          rotated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          account_id?: string
+          ciphertext?: string
+          fingerprint?: string | null
+          id?: string
+          rotated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connection_credentials_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "connection_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connection_credentials_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creative_requests: {
         Row: {
           assigned_worker_id: string | null
@@ -2632,6 +2758,72 @@ export type Database = {
           },
         ]
       }
+      oauth_authorization_states: {
+        Row: {
+          code_verifier: string | null
+          connector: string
+          consumed_at: string | null
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          id: string
+          integration_id: string | null
+          metadata: Json
+          provider: string
+          redirect_uri: string
+          scopes: string[]
+          state_hash: string
+          workspace_id: string
+        }
+        Insert: {
+          code_verifier?: string | null
+          connector: string
+          consumed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at: string
+          id?: string
+          integration_id?: string | null
+          metadata?: Json
+          provider: string
+          redirect_uri: string
+          scopes?: string[]
+          state_hash: string
+          workspace_id: string
+        }
+        Update: {
+          code_verifier?: string | null
+          connector?: string
+          consumed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          integration_id?: string | null
+          metadata?: Json
+          provider?: string
+          redirect_uri?: string
+          scopes?: string[]
+          state_hash?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_authorization_states_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oauth_authorization_states_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       oauth_clients: {
         Row: {
           client_id: string
@@ -4394,6 +4586,13 @@ export type Database = {
         | "missed"
         | "cancelled"
         | "no_answer"
+      connection_account_status:
+        | "connected"
+        | "expired"
+        | "reauth_required"
+        | "revoked"
+        | "error"
+        | "disconnected"
       creative_kind:
         | "image"
         | "video"
@@ -4776,6 +4975,14 @@ export const Constants = {
         "missed",
         "cancelled",
         "no_answer",
+      ],
+      connection_account_status: [
+        "connected",
+        "expired",
+        "reauth_required",
+        "revoked",
+        "error",
+        "disconnected",
       ],
       creative_kind: [
         "image",
