@@ -32,6 +32,19 @@ async function admin(): Promise<Client> {
 // row records and are mapped explicitly below.
 type Row = Record<string, unknown>;
 
+function toPending(row: Row): PendingAuthorization {
+  return {
+    workspaceId: String(row["workspace_id"]),
+    integrationId: (row["integration_id"] as string | null) ?? null,
+    provider: String(row["provider"]),
+    connector: String(row["connector"]),
+    redirectUri: String(row["redirect_uri"]),
+    codeVerifier: (row["code_verifier"] as string | null) ?? null,
+    scopes: (row["scopes"] as string[] | null) ?? [],
+    createdBy: (row["created_by"] as string | null) ?? null,
+  };
+}
+
 function toAccount(row: Row): ConnectionAccount {
   return {
     id: String(row["id"]),
@@ -75,6 +88,18 @@ export function createSupabaseOAuthStore(): OAuthStore {
       if (error) throw error;
     },
 
+    async peekState(stateHash, nowMs) {
+      const client = await admin();
+      const { data } = await client
+        .from(STATES)
+        .select("*")
+        .eq("state_hash", stateHash)
+        .is("consumed_at", null)
+        .gt("expires_at", new Date(nowMs).toISOString())
+        .maybeSingle();
+      return data ? toPending(data as Row) : null;
+    },
+
     async consumeState(stateHash, nowMs) {
       const client = await admin();
       // Conditional update = atomic consume: a replayed callback matches zero
@@ -88,18 +113,7 @@ export function createSupabaseOAuthStore(): OAuthStore {
         .select("*")
         .maybeSingle();
       if (error) throw error;
-      if (!data) return null;
-      const row = data as Row;
-      return {
-        workspaceId: String(row["workspace_id"]),
-        integrationId: (row["integration_id"] as string | null) ?? null,
-        provider: String(row["provider"]),
-        connector: String(row["connector"]),
-        redirectUri: String(row["redirect_uri"]),
-        codeVerifier: (row["code_verifier"] as string | null) ?? null,
-        scopes: (row["scopes"] as string[] | null) ?? [],
-        createdBy: (row["created_by"] as string | null) ?? null,
-      } satisfies PendingAuthorization;
+      return data ? toPending(data as Row) : null;
     },
 
     async upsertAccount(input) {
