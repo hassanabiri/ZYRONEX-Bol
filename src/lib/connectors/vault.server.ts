@@ -91,6 +91,27 @@ export async function resolveIntegrationCredentials(
     }
   }
 
+  // A connected OAuth account always wins over a manually pasted token: the
+  // access token is refreshed on demand and never leaves this module.
+  try {
+    const { data: account } = await client
+      .from("connection_accounts" as never)
+      .select("id, status")
+      .eq("workspace_id", workspaceId)
+      .eq("integration_id", data.id)
+      .in("status", ["connected", "expired"])
+      .limit(1)
+      .maybeSingle();
+    const accountId = (account as { id?: string } | null)?.id;
+    if (accountId) {
+      const { getAccessTokenForAccount } = await import("@/lib/oauth/accounts.server");
+      credentials["access_token"] = await getAccessTokenForAccount(workspaceId, accountId);
+    }
+  } catch (error) {
+    if (error instanceof ConnectorError) throw error;
+    throw new ConnectorError("auth", "The connected account needs to be reauthorized", { retryable: false });
+  }
+
   return {
     id: data.id,
     workspaceId,
