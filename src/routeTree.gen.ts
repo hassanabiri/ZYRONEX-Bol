@@ -61,6 +61,7 @@ import { Route as AuthenticatedWorkersWorkerIdRouteImport } from './routes/_auth
 import { Route as AuthenticatedWorkflowIndexRouteImport } from './routes/_authenticated/workflow.index'
 import { Route as AuthenticatedWorkflowWorkflowIdRouteImport } from './routes/_authenticated/workflow.$workflowId'
 import { Route as ApiPublicWebhooksSlugRouteImport } from './routes/api/public/webhooks/$slug'
+import { Route as ApiPublicOauthCallbackConnectorRouteImport } from './routes/api/public/oauth/callback/$connector'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -329,6 +330,12 @@ const ApiPublicWebhooksSlugRoute = ApiPublicWebhooksSlugRouteImport.update({
   path: '/api/public/webhooks/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicOauthCallbackConnectorRoute =
+  ApiPublicOauthCallbackConnectorRouteImport.update({
+    id: '/api/public/oauth/callback/$connector',
+    path: '/api/public/oauth/callback/$connector',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
@@ -381,6 +388,7 @@ export interface FileRoutesByFullPath {
   '/workers/': typeof AuthenticatedWorkersIndexRoute
   '/workflow/': typeof AuthenticatedWorkflowIndexRoute
   '/api/public/webhooks/$slug': typeof ApiPublicWebhooksSlugRoute
+  '/api/public/oauth/callback/$connector': typeof ApiPublicOauthCallbackConnectorRoute
 }
 export interface FileRoutesByTo {
   '/': typeof SiteIndexRoute
@@ -433,6 +441,7 @@ export interface FileRoutesByTo {
   '/workers': typeof AuthenticatedWorkersIndexRoute
   '/workflow': typeof AuthenticatedWorkflowIndexRoute
   '/api/public/webhooks/$slug': typeof ApiPublicWebhooksSlugRoute
+  '/api/public/oauth/callback/$connector': typeof ApiPublicOauthCallbackConnectorRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -488,6 +497,7 @@ export interface FileRoutesById {
   '/_authenticated/workers/': typeof AuthenticatedWorkersIndexRoute
   '/_authenticated/workflow/': typeof AuthenticatedWorkflowIndexRoute
   '/api/public/webhooks/$slug': typeof ApiPublicWebhooksSlugRoute
+  '/api/public/oauth/callback/$connector': typeof ApiPublicOauthCallbackConnectorRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -542,6 +552,7 @@ export interface FileRouteTypes {
     | '/workers/'
     | '/workflow/'
     | '/api/public/webhooks/$slug'
+    | '/api/public/oauth/callback/$connector'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -594,6 +605,7 @@ export interface FileRouteTypes {
     | '/workers'
     | '/workflow'
     | '/api/public/webhooks/$slug'
+    | '/api/public/oauth/callback/$connector'
   id:
     | '__root__'
     | '/_authenticated'
@@ -648,6 +660,7 @@ export interface FileRouteTypes {
     | '/_authenticated/workers/'
     | '/_authenticated/workflow/'
     | '/api/public/webhooks/$slug'
+    | '/api/public/oauth/callback/$connector'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -658,6 +671,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiPublicWebhooksSlugRoute: typeof ApiPublicWebhooksSlugRoute
+  ApiPublicOauthCallbackConnectorRoute: typeof ApiPublicOauthCallbackConnectorRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1026,6 +1040,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/oauth/callback/$connector': {
+      id: '/api/public/oauth/callback/$connector'
+      path: '/api/public/oauth/callback/$connector'
+      fullPath: '/api/public/oauth/callback/$connector'
+      preLoaderRoute: typeof ApiPublicOauthCallbackConnectorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1147,6 +1168,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiPublicWebhooksSlugRoute: ApiPublicWebhooksSlugRoute,
+  ApiPublicOauthCallbackConnectorRoute: ApiPublicOauthCallbackConnectorRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

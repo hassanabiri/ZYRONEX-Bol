@@ -119,6 +119,8 @@ export type PendingAuthorization = {
  */
 export type OAuthStore = {
   saveState: (input: PendingAuthorization & { stateHash: string; expiresAt: string }) => Promise<void>;
+  /** Read-only lookup used to resolve the workspace before consuming. */
+  peekState?: (stateHash: string, nowMs: number) => Promise<PendingAuthorization | null>;
   /** Atomically consumes a state: a second call for the same state must fail. */
   consumeState: (stateHash: string, nowMs: number) => Promise<PendingAuthorization | null>;
   upsertAccount: (
