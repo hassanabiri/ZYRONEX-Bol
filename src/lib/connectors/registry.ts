@@ -9,7 +9,7 @@ import type { ConnectorAdapter } from "@/lib/connectors/types";
  * new adapter file plus one line here — the runtime, dispatcher and Integration
  * Center stay untouched.
  */
-const ADAPTERS: ConnectorAdapter[] = [httpConnector, slackConnector, googleConnector];
+const ADAPTERS: ConnectorAdapter[] = [httpConnector, slackConnector, googleConnector, sallaConnector];
 
 const byId = new Map(ADAPTERS.map((adapter) => [adapter.id, adapter]));
 
