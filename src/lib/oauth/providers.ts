@@ -38,6 +38,25 @@ const SPECS: Record<string, OAuthProviderSpec> = {
       return team?.id ? { accountIdentifier: team.id, accountLabel: team.name ?? team.id } : {};
     },
   },
+  // Salla — official Salla App OAuth2 (Authorization Code, "Easy mode" off).
+  salla: {
+    connector: "salla",
+    label: "Salla",
+    authorizationUrl: "https://accounts.salla.sa/oauth2/auth",
+    tokenUrl: "https://accounts.salla.sa/oauth2/token",
+    revokeUrl: "https://accounts.salla.sa/oauth2/token/revoke",
+    scopes: ["offline_access", "settings.read", "orders.read_write", "products.read_write", "customers.read_write"],
+    usePkce: true,
+    refreshable: true,
+    // Salla only issues a refresh token when offline access is requested.
+    authorizationParams: { access_type: "offline" },
+    identify: (token) => {
+      const store = (token["store"] ?? token["merchant"]) as { id?: string | number; name?: string } | string | undefined;
+      if (typeof store === "string") return { accountIdentifier: store, accountLabel: store };
+      const id = store?.id !== undefined ? String(store.id) : undefined;
+      return id ? { accountIdentifier: id, accountLabel: store?.name ?? `Salla store ${id}` } : {};
+    },
+  },
 };
 
 /** Aliases mirror the connector registry so catalog ids resolve to one spec. */

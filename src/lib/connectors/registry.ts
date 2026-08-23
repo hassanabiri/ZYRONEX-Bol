@@ -1,5 +1,6 @@
 import { googleConnector } from "@/lib/connectors/adapters/google";
 import { httpConnector } from "@/lib/connectors/adapters/http";
+import { sallaConnector } from "@/lib/connectors/adapters/salla";
 import { slackConnector } from "@/lib/connectors/adapters/slack";
 import type { ConnectorAdapter } from "@/lib/connectors/types";
 
@@ -8,7 +9,7 @@ import type { ConnectorAdapter } from "@/lib/connectors/types";
  * new adapter file plus one line here — the runtime, dispatcher and Integration
  * Center stay untouched.
  */
-const ADAPTERS: ConnectorAdapter[] = [httpConnector, slackConnector, googleConnector];
+const ADAPTERS: ConnectorAdapter[] = [httpConnector, slackConnector, googleConnector, sallaConnector];
 
 const byId = new Map(ADAPTERS.map((adapter) => [adapter.id, adapter]));
 

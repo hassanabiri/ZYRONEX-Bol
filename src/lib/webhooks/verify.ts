@@ -135,10 +135,46 @@ const googleVerifier: WebhookVerifier = (input) => {
   return { ok: true, ...meta };
 };
 
+/**
+ * Salla: official webhook security strategies.
+ * - `signature`: `x-salla-signature` = hex HMAC-SHA256 of the raw body.
+ * - `token`: `authorization` header equals the configured token.
+ * The event id is derived from the official envelope `{ event, merchant, data }`.
+ */
+const sallaVerifier: WebhookVerifier = (input) => {
+  const body = record(input.payload);
+  const data = record(body["data"]);
+  const eventType = firstString(input.headers["x-salla-event"], body["event"]);
+  const meta = {
+    eventId: firstString(
+      input.headers["x-salla-webhook-id"],
+      data["id"] !== undefined ? `${eventType ?? "event"}:${String(data["id"])}:${String(body["created_at"] ?? "")}` : undefined,
+      body["id"],
+    ),
+    eventType,
+  };
+
+  if (!input.secret) return { ok: false, reason: "missing_secret", message: "No Salla webhook secret is configured", ...meta };
+
+  const signature = input.headers["x-salla-signature"];
+  if (signature) {
+    const provided = signature.startsWith("sha256=") ? signature.slice(7) : signature;
+    if (!safeEqual(provided, hmacHex(input.secret, input.raw)))
+      return { ok: false, reason: "invalid_signature", message: "Salla signature does not match", ...meta };
+    return { ok: true, ...meta };
+  }
+
+  const token = input.headers["authorization"];
+  if (token && safeEqual(token.replace(/^Bearer\s+/i, ""), input.secret)) return { ok: true, ...meta };
+
+  return { ok: false, reason: "invalid_signature", message: "Salla security header is missing or invalid", ...meta };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
   google: googleVerifier,
+  salla: sallaVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */
