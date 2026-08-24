@@ -18,7 +18,11 @@ function jsonResponse(body: unknown, init: { status?: number; headers?: Record<s
   });
 }
 
-function run(input: Parameters<typeof runConnectorOperation>[0]["input"], fetchImpl: typeof fetch, credentials = creds) {
+function run(
+  input: Parameters<typeof runConnectorOperation>[0]["input"],
+  fetchImpl: typeof fetch,
+  credentials: Record<string, string> = creds,
+) {
   return runConnectorOperation({ adapter: sallaConnector, credentials, traceId: trace, input, fetchImpl });
 }
 
@@ -197,7 +201,7 @@ describe("salla failure handling", () => {
 
   it("fails closed when the store is not connected", async () => {
     const fetchImpl = vi.fn() as unknown as typeof fetch;
-    const result = await run({ operation: "list_orders" }, fetchImpl, {} as Record<string, string>);
+    const result = await run({ operation: "list_orders" }, fetchImpl, {});
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error.kind).toBe("auth");
   });
