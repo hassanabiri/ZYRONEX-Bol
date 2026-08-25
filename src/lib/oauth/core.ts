@@ -98,6 +98,7 @@ function parseTokenResponse(spec: OAuthProviderSpec, payload: Record<string, unk
     tokenType: typeof payload["token_type"] === "string" ? (payload["token_type"] as string) : "Bearer",
     scopes,
     expiresAt: Number.isFinite(expiresIn) && expiresIn > 0 ? new Date(nowMs + expiresIn * 1000).toISOString() : null,
+    ...(spec.credentialFields ? { extra: spec.credentialFields(payload) } : {}),
     raw: payload,
   };
 }
@@ -265,7 +266,12 @@ export async function ensureAccessToken(input: {
       body: { grant_type: "refresh_token", refresh_token: tokens.refreshToken },
     });
     // Providers commonly omit the refresh token on rotation — keep the old one.
-    const merged: OAuthTokenSet = { ...next, refreshToken: next.refreshToken ?? tokens.refreshToken };
+    const mergedExtra = { ...(tokens.extra ?? {}), ...(next.extra ?? {}) };
+    const merged: OAuthTokenSet = {
+      ...next,
+      refreshToken: next.refreshToken ?? tokens.refreshToken,
+      ...(Object.keys(mergedExtra).length ? { extra: mergedExtra } : {}),
+    };
     await store.writeTokens(account.id, merged);
     await store.updateAccount(account.id, {
       status: "connected",

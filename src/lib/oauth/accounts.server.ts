@@ -170,12 +170,18 @@ export function createSupabaseOAuthStore(): OAuthStore {
       if (!ciphertext) return null;
       const values = decryptCredentials(ciphertext);
       if (!values["access_token"]) return null;
+      // `x_` keys hold provider-specific credential fields (e.g. Zid's manager
+      // JWT) that were encrypted alongside the token set.
+      const extra: Record<string, string> = {};
+      for (const [key, value] of Object.entries(values))
+        if (key.startsWith("x_") && value) extra[key.slice(2)] = value;
       return {
         accessToken: values["access_token"],
         refreshToken: values["refresh_token"] || undefined,
         tokenType: values["token_type"] || "Bearer",
         scopes: values["scopes"] ? values["scopes"].split(" ").filter(Boolean) : [],
         expiresAt: values["expires_at"] || null,
+        ...(Object.keys(extra).length ? { extra } : {}),
       };
     },
 
@@ -238,6 +244,7 @@ async function writeTokenRow(client: Client, account: Pick<ConnectionAccount, "i
     ...(tokens.tokenType ? { token_type: tokens.tokenType } : {}),
     ...(tokens.scopes.length ? { scopes: tokens.scopes.join(" ") } : {}),
     ...(tokens.expiresAt ? { expires_at: tokens.expiresAt } : {}),
+    ...Object.fromEntries(Object.entries(tokens.extra ?? {}).map(([key, value]) => [`x_${key}`, value])),
   };
   const { error } = await client.from(CREDENTIALS).upsert(
     {
@@ -324,4 +331,19 @@ export async function getAccessTokenForAccount(workspaceId: string, accountId: s
   const { ensureAccessToken } = await import("@/lib/oauth/core");
   const result = await ensureAccessToken({ store, spec, client, account });
   return result.token;
+}
+
+/**
+ * Same guarantee as `getAccessTokenForAccount`, plus the provider-specific
+ * credential fields a connector needs (Zid's manager JWT, for example). Values
+ * stay inside the server call that requested them.
+ */
+export async function getConnectionCredentialsForAccount(
+  workspaceId: string,
+  accountId: string,
+): Promise<Record<string, string>> {
+  const store = createSupabaseOAuthStore();
+  const token = await getAccessTokenForAccount(workspaceId, accountId);
+  const tokens = await store.readTokens(accountId).catch(() => null);
+  return { access_token: token, ...(tokens?.extra ?? {}) };
 }
