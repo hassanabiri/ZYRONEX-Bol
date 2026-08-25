@@ -98,6 +98,7 @@ function parseTokenResponse(spec: OAuthProviderSpec, payload: Record<string, unk
     tokenType: typeof payload["token_type"] === "string" ? (payload["token_type"] as string) : "Bearer",
     scopes,
     expiresAt: Number.isFinite(expiresIn) && expiresIn > 0 ? new Date(nowMs + expiresIn * 1000).toISOString() : null,
+    ...(spec.credentialFields ? { extra: spec.credentialFields(payload) } : {}),
     raw: payload,
   };
 }
