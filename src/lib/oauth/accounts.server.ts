@@ -332,3 +332,18 @@ export async function getAccessTokenForAccount(workspaceId: string, accountId: s
   const result = await ensureAccessToken({ store, spec, client, account });
   return result.token;
 }
+
+/**
+ * Same guarantee as `getAccessTokenForAccount`, plus the provider-specific
+ * credential fields a connector needs (Zid's manager JWT, for example). Values
+ * stay inside the server call that requested them.
+ */
+export async function getConnectionCredentialsForAccount(
+  workspaceId: string,
+  accountId: string,
+): Promise<Record<string, string>> {
+  const store = createSupabaseOAuthStore();
+  const token = await getAccessTokenForAccount(workspaceId, accountId);
+  const tokens = await store.readTokens(accountId).catch(() => null);
+  return { access_token: token, ...(tokens?.extra ?? {}) };
+}
