@@ -104,8 +104,10 @@ export async function resolveIntegrationCredentials(
       .maybeSingle();
     const accountId = (account as { id?: string } | null)?.id;
     if (accountId) {
-      const { getAccessTokenForAccount } = await import("@/lib/oauth/accounts.server");
-      credentials["access_token"] = await getAccessTokenForAccount(workspaceId, accountId);
+      const { getConnectionCredentialsForAccount } = await import("@/lib/oauth/accounts.server");
+      // Includes the refreshed access token plus any provider-specific fields
+      // (e.g. Zid's manager JWT) the adapter declared.
+      Object.assign(credentials, await getConnectionCredentialsForAccount(workspaceId, accountId));
     }
   } catch (error) {
     if (error instanceof ConnectorError) throw error;
