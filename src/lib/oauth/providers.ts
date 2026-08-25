@@ -57,6 +57,26 @@ const SPECS: Record<string, OAuthProviderSpec> = {
       return id ? { accountIdentifier: id, accountLabel: store?.name ?? `Salla store ${id}` } : {};
     },
   },
+  // Zid — official Zid App OAuth2 (Authorization Code).
+  zid: {
+    connector: "zid",
+    label: "Zid",
+    authorizationUrl: "https://oauth.zid.sa/oauth/authorize",
+    tokenUrl: "https://oauth.zid.sa/oauth/token",
+    scopes: ["third_parties_apps_management"],
+    refreshable: true,
+    // Zid issues the manager JWT next to the access token; both are required on
+    // every API call and both stay in the encrypted vault.
+    credentialFields: (token) => {
+      const authorization = token["authorization"];
+      return typeof authorization === "string" && authorization ? { authorization } : {};
+    },
+    identify: (token) => {
+      const store = (token["store"] ?? token["merchant"]) as { id?: string | number; name?: string } | undefined;
+      const id = store?.id !== undefined ? String(store.id) : undefined;
+      return id ? { accountIdentifier: id, accountLabel: store?.name ?? `Zid store ${id}` } : {};
+    },
+  },
 };
 
 /** Aliases mirror the connector registry so catalog ids resolve to one spec. */
