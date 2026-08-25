@@ -170,12 +170,18 @@ export function createSupabaseOAuthStore(): OAuthStore {
       if (!ciphertext) return null;
       const values = decryptCredentials(ciphertext);
       if (!values["access_token"]) return null;
+      // `x_` keys hold provider-specific credential fields (e.g. Zid's manager
+      // JWT) that were encrypted alongside the token set.
+      const extra: Record<string, string> = {};
+      for (const [key, value] of Object.entries(values))
+        if (key.startsWith("x_") && value) extra[key.slice(2)] = value;
       return {
         accessToken: values["access_token"],
         refreshToken: values["refresh_token"] || undefined,
         tokenType: values["token_type"] || "Bearer",
         scopes: values["scopes"] ? values["scopes"].split(" ").filter(Boolean) : [],
         expiresAt: values["expires_at"] || null,
+        ...(Object.keys(extra).length ? { extra } : {}),
       };
     },
 
