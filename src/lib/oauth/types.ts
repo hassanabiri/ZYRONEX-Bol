@@ -66,6 +66,12 @@ export type OAuthProviderSpec = {
     accountIdentifier?: string;
     accountLabel?: string;
   };
+  /**
+   * Extra credential values a provider issues alongside the access token
+   * (e.g. Zid's manager JWT). Stored encrypted with the token set and handed to
+   * the connector adapter — never returned to the browser.
+   */
+  credentialFields?: (tokenResponse: Record<string, unknown>) => Record<string, string>;
 };
 
 export type OAuthClientCredentials = { clientId: string; clientSecret: string };
