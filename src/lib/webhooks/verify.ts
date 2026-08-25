@@ -170,11 +170,52 @@ const sallaVerifier: WebhookVerifier = (input) => {
   return { ok: false, reason: "invalid_signature", message: "Salla security header is missing or invalid", ...meta };
 };
 
+/**
+ * Zid: official webhook security options.
+ * - `x-zid-signature`: hex HMAC-SHA256 of the raw body (optionally `sha256=`).
+ * - subscriber token: the shared secret sent back on the `authorization` (or
+ *   `x-zid-token`) header configured when the webhook was subscribed.
+ * The event id combines the event name with the resource id so a redelivered
+ * event is idempotent in the Webhook Engine.
+ */
+const zidVerifier: WebhookVerifier = (input) => {
+  const body = record(input.payload);
+  const data = Object.keys(record(body["data"])).length > 0 ? record(body["data"]) : body;
+  const eventType = firstString(input.headers["x-zid-event"], body["event"], body["event_type"]);
+  const meta = {
+    eventId: firstString(
+      input.headers["x-zid-webhook-id"],
+      input.headers["x-zid-delivery-id"],
+      data["id"] !== undefined
+        ? `${eventType ?? "event"}:${String(data["id"])}:${String(data["updated_at"] ?? data["created_at"] ?? "")}`
+        : undefined,
+      body["id"],
+    ),
+    eventType,
+  };
+
+  if (!input.secret) return { ok: false, reason: "missing_secret", message: "No Zid webhook secret is configured", ...meta };
+
+  const signature = input.headers["x-zid-signature"];
+  if (signature) {
+    const provided = signature.startsWith("sha256=") ? signature.slice(7) : signature;
+    if (!safeEqual(provided, hmacHex(input.secret, input.raw)))
+      return { ok: false, reason: "invalid_signature", message: "Zid signature does not match", ...meta };
+    return { ok: true, ...meta };
+  }
+
+  const token = input.headers["x-zid-token"] ?? input.headers["authorization"];
+  if (token && safeEqual(token.replace(/^Bearer\s+/i, ""), input.secret)) return { ok: true, ...meta };
+
+  return { ok: false, reason: "invalid_signature", message: "Zid security header is missing or invalid", ...meta };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
   google: googleVerifier,
   salla: sallaVerifier,
+  zid: zidVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */
