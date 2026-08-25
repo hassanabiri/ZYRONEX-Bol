@@ -83,6 +83,8 @@ export type OAuthTokenSet = {
   tokenType?: string | undefined;
   scopes: string[];
   expiresAt: string | null;
+  /** Provider-specific credential values declared by `credentialFields`. */
+  extra?: Record<string, string>;
   raw?: Record<string, unknown>;
 };
 
