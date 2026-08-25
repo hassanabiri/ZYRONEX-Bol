@@ -244,6 +244,7 @@ async function writeTokenRow(client: Client, account: Pick<ConnectionAccount, "i
     ...(tokens.tokenType ? { token_type: tokens.tokenType } : {}),
     ...(tokens.scopes.length ? { scopes: tokens.scopes.join(" ") } : {}),
     ...(tokens.expiresAt ? { expires_at: tokens.expiresAt } : {}),
+    ...Object.fromEntries(Object.entries(tokens.extra ?? {}).map(([key, value]) => [`x_${key}`, value])),
   };
   const { error } = await client.from(CREDENTIALS).upsert(
     {
