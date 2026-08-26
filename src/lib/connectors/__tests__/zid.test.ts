@@ -334,7 +334,8 @@ describe("zid orders", () => {
     if (result.ok) {
       expect(result.items).toHaveLength(2);
       expect(result.pages).toBe(2);
-      expect(result.cursor).toBeNull();
+      // The page budget stops the walk; the cursor stays resumable.
+      expect(result.cursor).toBe("2");
     }
   });
 
