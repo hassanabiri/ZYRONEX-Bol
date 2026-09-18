@@ -25,12 +25,19 @@ export const Route = createFileRoute("/api/public/oauth/callback/$connector")({
     handlers: {
       GET: async ({ request, params }) => {
         const url = new URL(request.url);
+        // The full query string is forwarded because some providers (Shopify)
+        // sign it; it is verified server-side and never trusted as-is.
+        const query: Record<string, string> = {};
+        url.searchParams.forEach((value, key) => {
+          query[key] = value;
+        });
         const { handleOAuthCallback } = await import("@/lib/oauth/flow.server");
         const outcome = await handleOAuthCallback({
           connector: params.connector,
           state: url.searchParams.get("state"),
           code: url.searchParams.get("code"),
           error: url.searchParams.get("error"),
+          params: query,
         });
         return new Response(
           page(outcome.ok ? "Connected" : "Connection failed", outcome.message, outcome.ok),
