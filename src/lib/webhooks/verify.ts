@@ -210,12 +210,45 @@ const zidVerifier: WebhookVerifier = (input) => {
   return { ok: false, reason: "invalid_signature", message: "Zid security header is missing or invalid", ...meta };
 };
 
+/**
+ * Shopify: official webhook security — `X-Shopify-Hmac-Sha256` is the base64
+ * HMAC-SHA256 of the raw body computed with the app's client secret. The
+ * delivery id (`X-Shopify-Webhook-Id`) makes redeliveries idempotent.
+ */
+const shopifyVerifier: WebhookVerifier = (input) => {
+  const body = record(input.payload);
+  const eventType = firstString(input.headers["x-shopify-topic"], body["topic"]);
+  const meta = {
+    eventId: firstString(
+      input.headers["x-shopify-webhook-id"],
+      body["id"] !== undefined
+        ? `${eventType ?? "event"}:${String(body["id"])}:${String(body["updated_at"] ?? body["created_at"] ?? "")}`
+        : undefined,
+    ),
+    eventType,
+  };
+
+  if (!input.secret)
+    return { ok: false, reason: "missing_secret", message: "No Shopify webhook secret is configured", ...meta };
+
+  const signature = input.headers["x-shopify-hmac-sha256"];
+  if (!signature)
+    return { ok: false, reason: "invalid_signature", message: "Shopify signature header is missing", ...meta };
+
+  const expected = createHmac("sha256", input.secret).update(input.raw, "utf8").digest("base64");
+  if (!safeEqual(signature, expected))
+    return { ok: false, reason: "invalid_signature", message: "Shopify signature does not match", ...meta };
+
+  return { ok: true, ...meta };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
   google: googleVerifier,
   salla: sallaVerifier,
   zid: zidVerifier,
+  shopify: shopifyVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */

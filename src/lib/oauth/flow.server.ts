@@ -1,9 +1,9 @@
-import { randomUUID } from "node:crypto";
+import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 
 import { redactString } from "@/lib/connectors/errors";
 import { createSupabaseOAuthStore, loadClientCredentials } from "@/lib/oauth/accounts.server";
 import { beginAuthorization, completeAuthorization, disconnectAccount, hashState } from "@/lib/oauth/core";
-import { getOAuthProvider } from "@/lib/oauth/providers";
+import { getOAuthProvider, shopifyOAuthSpec } from "@/lib/oauth/providers";
 import { OAuthError, type ConnectionStatus } from "@/lib/oauth/types";
 
 /**
@@ -11,6 +11,39 @@ import { OAuthError, type ConnectionStatus } from "@/lib/oauth/types";
  * Everything the browser ever receives from here is a provider URL or a status
  * string — never a token, a client secret or a code verifier.
  */
+
+/**
+ * Shopify hosts OAuth on the merchant's own domain, so its spec is bound to the
+ * store before the flow starts. Every other connector uses its static spec.
+ */
+function resolveSpec(connector: string, params?: Record<string, string>) {
+  const spec = getOAuthProvider(connector);
+  if (spec?.connector === "shopify") {
+    const shop = params?.["shop"] ?? params?.["shop_domain"] ?? "";
+    if (!shop) throw new OAuthError("unsupported", "A Shopify store domain is required to connect");
+    return shopifyOAuthSpec(shop);
+  }
+  return spec;
+}
+
+/**
+ * Shopify signs its callback query string with the app's client secret. The
+ * signature is checked before the code is exchanged, so a forged redirect never
+ * reaches the token endpoint.
+ */
+function shopifyCallbackSigned(params: Record<string, string>, clientSecret: string): boolean {
+  const provided = params["hmac"];
+  if (!provided) return false;
+  const message = Object.keys(params)
+    .filter((key) => key !== "hmac" && key !== "signature")
+    .sort()
+    .map((key) => `${key}=${params[key]}`)
+    .join("&");
+  const expected = createHmac("sha256", clientSecret).update(message).digest("hex");
+  const left = Buffer.from(provided);
+  const right = Buffer.from(expected);
+  return left.length === right.length && timingSafeEqual(left, right);
+}
 
 export function callbackUrl(origin: string, connector: string) {
   return new URL(`/api/public/oauth/callback/${connector}`, origin).toString();
@@ -25,8 +58,10 @@ export async function startAuthorization(input: {
   scopes?: string[];
   origin: string;
   userId: string;
+  /** Connector-specific start values (e.g. Shopify's `shop` store domain). */
+  params?: Record<string, string>;
 }) {
-  const spec = getOAuthProvider(input.connector);
+  const spec = resolveSpec(input.connector, input.params);
   if (!spec) throw new OAuthError("unsupported", `"${input.connector}" does not support OAuth yet`);
   const provider = input.provider ?? input.connector;
   const client = await loadClientCredentials(input.workspaceId, provider, input.integrationId ?? null);
@@ -62,8 +97,15 @@ export async function handleOAuthCallback(input: {
   state: string | null;
   code: string | null;
   error: string | null;
+  /** Full callback query string; providers such as Shopify sign it. */
+  params?: Record<string, string>;
 }): Promise<CallbackOutcome> {
-  const spec = getOAuthProvider(input.connector);
+  let spec: ReturnType<typeof resolveSpec>;
+  try {
+    spec = resolveSpec(input.connector, input.params);
+  } catch {
+    return { ok: false, status: "failed", message: "This authorization link is no longer valid" };
+  }
   if (!spec) return { ok: false, status: "failed", message: "Unknown connector" };
   if (input.error)
     return { ok: false, status: "failed", message: redactString(`Authorization was declined: ${input.error}`) };
@@ -76,6 +118,8 @@ export async function handleOAuthCallback(input: {
 
   try {
     const client = await loadClientCredentials(pending.workspaceId, pending.provider, pending.integrationId);
+    if (spec.connector === "shopify" && !shopifyCallbackSigned(input.params ?? {}, client.clientSecret))
+      return { ok: false, status: "failed", message: "This authorization link could not be verified" };
     const { account } = await completeAuthorization({
       store,
       spec,

@@ -1,4 +1,8 @@
+import { normalizeShopDomain } from "@/lib/connectors/adapters/shopify";
 import type { OAuthProviderSpec } from "@/lib/oauth/types";
+
+/** Placeholder host in the Shopify template spec, bound per store at runtime. */
+const SHOPIFY_SHOP_TOKEN = "{shop}";
 
 /**
  * OAuth specs bound to the Connector Registry.
@@ -77,6 +81,29 @@ const SPECS: Record<string, OAuthProviderSpec> = {
       return id ? { accountIdentifier: id, accountLabel: store?.name ?? `Zid store ${id}` } : {};
     },
   },
+  // Shopify — official Shopify App OAuth2 (Authorization Code). Every endpoint
+  // lives on the merchant's own domain, so this entry is the template and
+  // `shopifyOAuthSpec(shop)` binds it to one store at authorize/callback time.
+  shopify: {
+    connector: "shopify",
+    label: "Shopify",
+    authorizationUrl: `https://${SHOPIFY_SHOP_TOKEN}/admin/oauth/authorize`,
+    tokenUrl: `https://${SHOPIFY_SHOP_TOKEN}/admin/oauth/access_token`,
+    scopes: [
+      "read_orders",
+      "write_orders",
+      "read_products",
+      "write_products",
+      "read_customers",
+      "write_customers",
+      "read_inventory",
+      "write_inventory",
+      "read_locations",
+    ],
+    scopeSeparator: ",",
+    // Shopify offline access tokens do not expire and are not refreshable.
+    refreshable: false,
+  },
 };
 
 /** Aliases mirror the connector registry so catalog ids resolve to one spec. */
@@ -93,6 +120,26 @@ export function registerOAuthProvider(spec: OAuthProviderSpec) {
 
 export function getOAuthProvider(connector: string): OAuthProviderSpec | undefined {
   return SPECS[connector] ?? SPECS[ALIASES[connector] ?? ""];
+}
+
+/**
+ * Binds the Shopify template spec to one merchant store.
+ *
+ * Shopify hosts authorize and token exchange on the store's own domain and
+ * never returns the store in the token body, so the domain is injected here and
+ * stored as an encrypted credential field the adapter later reads.
+ */
+export function shopifyOAuthSpec(shopDomain: string): OAuthProviderSpec {
+  const shop = normalizeShopDomain(shopDomain);
+  if (!shop) throw new Error("A valid Shopify store domain is required");
+  const base = SPECS["shopify"]!;
+  return {
+    ...base,
+    authorizationUrl: base.authorizationUrl.replace(SHOPIFY_SHOP_TOKEN, shop),
+    tokenUrl: base.tokenUrl.replace(SHOPIFY_SHOP_TOKEN, shop),
+    identify: () => ({ accountIdentifier: shop, accountLabel: shop }),
+    credentialFields: () => ({ shop_domain: shop }),
+  };
 }
 
 /**
