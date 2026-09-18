@@ -38,6 +38,8 @@ export const startOAuthConnection = createServerFn({ method: "POST" })
         provider: z.string().min(1).max(64).optional(),
         integrationId: z.string().uuid().nullable().default(null),
         scopes: z.array(z.string().max(200)).max(50).optional(),
+        // Connector-specific start values (e.g. Shopify's store domain).
+        params: z.record(z.string(), z.string().max(255)).optional(),
       })
       .parse(data),
   )
@@ -55,6 +57,7 @@ export const startOAuthConnection = createServerFn({ method: "POST" })
       userId: context.userId,
       ...(data.provider ? { provider: data.provider } : {}),
       ...(data.scopes ? { scopes: data.scopes } : {}),
+      ...(data.params ? { params: data.params } : {}),
     });
   });
 
