@@ -332,11 +332,10 @@ export const shopifyConnector: ConnectorAdapter = {
         retryable: false,
       });
 
-    // A short page means the collection is exhausted; otherwise the next page
-    // continues after the last id Shopify returned.
+    // Shopify REST pages with `since_id`: the next page continues after the last
+    // id returned, and an empty page ends the walk.
     const lastId = items.length ? asRecord(items[items.length - 1])["id"] : undefined;
-    const full = items.length >= DEFAULT_PAGE_SIZE;
-    const cursor = full && lastId !== undefined && lastId !== null ? String(lastId) : null;
+    const cursor = lastId === undefined || lastId === null ? null : String(lastId);
 
     return { items: items.map((item) => mapEntity(spec.entity, item)), cursor, raw: payload };
   },
