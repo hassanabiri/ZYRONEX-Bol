@@ -1,6 +1,7 @@
 import { googleConnector } from "@/lib/connectors/adapters/google";
 import { httpConnector } from "@/lib/connectors/adapters/http";
 import { sallaConnector } from "@/lib/connectors/adapters/salla";
+import { shopifyConnector } from "@/lib/connectors/adapters/shopify";
 import { slackConnector } from "@/lib/connectors/adapters/slack";
 import { zidConnector } from "@/lib/connectors/adapters/zid";
 import type { ConnectorAdapter } from "@/lib/connectors/types";
