@@ -77,6 +77,29 @@ const SPECS: Record<string, OAuthProviderSpec> = {
       return id ? { accountIdentifier: id, accountLabel: store?.name ?? `Zid store ${id}` } : {};
     },
   },
+  // Shopify — official Shopify App OAuth2 (Authorization Code). Every endpoint
+  // lives on the merchant's own domain, so this entry is the template and
+  // `shopifyOAuthSpec(shop)` binds it to one store at authorize/callback time.
+  shopify: {
+    connector: "shopify",
+    label: "Shopify",
+    authorizationUrl: `https://${SHOPIFY_SHOP_TOKEN}/admin/oauth/authorize`,
+    tokenUrl: `https://${SHOPIFY_SHOP_TOKEN}/admin/oauth/access_token`,
+    scopes: [
+      "read_orders",
+      "write_orders",
+      "read_products",
+      "write_products",
+      "read_customers",
+      "write_customers",
+      "read_inventory",
+      "write_inventory",
+      "read_locations",
+    ],
+    scopeSeparator: ",",
+    // Shopify offline access tokens do not expire and are not refreshable.
+    refreshable: false,
+  },
 };
 
 /** Aliases mirror the connector registry so catalog ids resolve to one spec. */
