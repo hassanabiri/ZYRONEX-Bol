@@ -17,6 +17,7 @@ const ADAPTERS: ConnectorAdapter[] = [
   googleConnector,
   sallaConnector,
   zidConnector,
+  shopifyConnector,
 ];
 
 const byId = new Map(ADAPTERS.map((adapter) => [adapter.id, adapter]));
