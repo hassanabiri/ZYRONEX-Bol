@@ -1,4 +1,8 @@
+import { normalizeShopDomain } from "@/lib/connectors/adapters/shopify";
 import type { OAuthProviderSpec } from "@/lib/oauth/types";
+
+/** Placeholder host in the Shopify template spec, bound per store at runtime. */
+const SHOPIFY_SHOP_TOKEN = "{shop}";
 
 /**
  * OAuth specs bound to the Connector Registry.
