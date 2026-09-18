@@ -123,6 +123,26 @@ export function getOAuthProvider(connector: string): OAuthProviderSpec | undefin
 }
 
 /**
+ * Binds the Shopify template spec to one merchant store.
+ *
+ * Shopify hosts authorize and token exchange on the store's own domain and
+ * never returns the store in the token body, so the domain is injected here and
+ * stored as an encrypted credential field the adapter later reads.
+ */
+export function shopifyOAuthSpec(shopDomain: string): OAuthProviderSpec {
+  const shop = normalizeShopDomain(shopDomain);
+  if (!shop) throw new Error("A valid Shopify store domain is required");
+  const base = SPECS["shopify"]!;
+  return {
+    ...base,
+    authorizationUrl: base.authorizationUrl.replace(SHOPIFY_SHOP_TOKEN, shop),
+    tokenUrl: base.tokenUrl.replace(SHOPIFY_SHOP_TOKEN, shop),
+    identify: () => ({ accountIdentifier: shop, accountLabel: shop }),
+    credentialFields: () => ({ shop_domain: shop }),
+  };
+}
+
+/**
  * Generic OAuth2 spec for a self-declared provider. Lets a workspace connect an
  * arbitrary OAuth2 service without shipping code for it.
  */
