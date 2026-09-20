@@ -61,6 +61,14 @@ export type RateLimitInfo = {
   resetAt?: string;
 };
 
+/** Context handed to `normalize` so page-number providers can advance. */
+export type NormalizeContext = {
+  /** The authorized call that produced this payload. */
+  call: ConnectorCall;
+  /** Cursor that was used for this page (null on the first page). */
+  cursor: string | null;
+};
+
 /** Adapter-normalized page: shape is identical for every provider. */
 export type NormalizedPage = {
   items: Record<string, unknown>[];
@@ -128,8 +136,13 @@ export type ConnectorAdapter = {
   buildCall: (input: ConnectorOperationInput) => ConnectorCall;
   /** Injects credentials into the call. Runs on the server only. */
   authorize: (call: ConnectorCall, credentials: Record<string, string>) => ConnectorCall;
-  /** Converts a provider payload into the normalized page shape. */
-  normalize: (operation: string, payload: unknown, status: number) => NormalizedPage;
+  /**
+   * Converts a provider payload into the normalized page shape.
+   * `context` carries the call that produced the payload plus the cursor that
+   * was used, for providers that page by page number rather than by row id.
+   * It is optional and purely additive — adapters may ignore it.
+   */
+  normalize: (operation: string, payload: unknown, status: number, context?: NormalizeContext) => NormalizedPage;
   /** Optional provider-specific error mapping (e.g. Slack's `ok:false` body). */
   mapError?: (
     status: number,

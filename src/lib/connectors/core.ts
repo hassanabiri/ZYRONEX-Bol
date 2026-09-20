@@ -11,6 +11,7 @@ import type {
   ConnectorHealth,
   ConnectorOperationInput,
   ConnectorResult,
+  NormalizeContext,
   NormalizedPage,
   RateLimitInfo,
 } from "@/lib/connectors/types";
@@ -152,10 +153,16 @@ function sanitize(text: string, credentials: Record<string, string>): string {
   return redactString(scrubCredentialValues(text, credentials));
 }
 
-function normalizeSafely(adapter: ConnectorAdapter, operation: string, payload: unknown, status: number): NormalizedPage {
+function normalizeSafely(
+  adapter: ConnectorAdapter,
+  operation: string,
+  payload: unknown,
+  status: number,
+  context: NormalizeContext,
+): NormalizedPage {
   let page: NormalizedPage;
   try {
-    page = adapter.normalize(operation, payload, status);
+    page = adapter.normalize(operation, payload, status, context);
   } catch (error) {
     throw new ConnectorError(
       "malformed_response",
@@ -239,7 +246,7 @@ export async function runConnectorOperation(options: ConnectorRunOptions): Promi
 
       lastStatus = outcome!.status;
       lastRateLimit = outcome!.rateLimit ?? lastRateLimit;
-      const page = normalizeSafely(adapter, input.operation, outcome!.payload, outcome!.status);
+      const page = normalizeSafely(adapter, input.operation, outcome!.payload, outcome!.status, { call, cursor });
       items.push(...page.items);
       pages += 1;
       cursor = page.cursor ?? null;
