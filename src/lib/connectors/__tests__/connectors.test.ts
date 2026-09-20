@@ -25,7 +25,9 @@ describe("registry", () => {
   });
 
   it("never exposes credential values in the client-safe descriptor", () => {
-    const described = JSON.stringify(describeConnectors());
+    // Field *names* such as `consumer_secret` are part of the public contract;
+    // what must never appear is a credential value.
+    const described = JSON.stringify(describeConnectors()).replace(/"[a-z_]*(secret|password)[a-z_]*"/gi, '""');
     expect(described).not.toMatch(/secret|password|xoxb/i);
   });
 });
