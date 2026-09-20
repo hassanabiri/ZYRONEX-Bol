@@ -246,7 +246,7 @@ export async function runConnectorOperation(options: ConnectorRunOptions): Promi
 
       lastStatus = outcome!.status;
       lastRateLimit = outcome!.rateLimit ?? lastRateLimit;
-      const page = normalizeSafely(adapter, input.operation, outcome!.payload, outcome!.status);
+      const page = normalizeSafely(adapter, input.operation, outcome!.payload, outcome!.status, { call, cursor });
       items.push(...page.items);
       pages += 1;
       cursor = page.cursor ?? null;
