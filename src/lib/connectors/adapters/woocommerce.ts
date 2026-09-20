@@ -287,8 +287,15 @@ export const woocommerceConnector: ConnectorAdapter = {
       throw new ConnectorError("malformed_response", "WooCommerce list response was not a collection", { retryable: false });
 
     const items = payload as unknown[];
-    // A short page means the walk is over; otherwise continue with page + 1.
-    const cursor = items.length === 0 ? null : String(items.length);
+    // WooCommerce pages by number: a short (or empty) page ends the walk,
+    // otherwise the cursor is simply the next page.
+    const query = context?.call.query ?? {};
+    const perPage = Number(query["per_page"] ?? DEFAULT_PAGE_SIZE);
+    const currentPage = Number(context?.cursor ?? query["page"] ?? 1);
+    const cursor =
+      items.length === 0 || !Number.isFinite(perPage) || items.length < perPage || !Number.isFinite(currentPage)
+        ? null
+        : String(currentPage + 1);
 
     return { items: items.map((item) => mapEntity(spec.entity, item)), cursor, raw: payload };
   },
