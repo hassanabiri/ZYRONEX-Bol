@@ -29,6 +29,8 @@ const ALIASES: Record<string, string> = {
   webhook: "http",
   custom_api: "http",
   rest: "http",
+  woo: "woocommerce",
+  wordpress_woocommerce: "woocommerce",
   google_drive: "google",
   google_sheets: "google",
   gmail: "google",

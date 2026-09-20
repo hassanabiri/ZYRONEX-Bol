@@ -242,6 +242,43 @@ const shopifyVerifier: WebhookVerifier = (input) => {
   return { ok: true, ...meta };
 };
 
+/**
+ * WooCommerce: official webhook security — `X-WC-Webhook-Signature` is the
+ * base64 HMAC-SHA256 of the raw body computed with the webhook's secret. The
+ * delivery id (`X-WC-Webhook-Delivery-ID`) makes redeliveries idempotent.
+ */
+const woocommerceVerifier: WebhookVerifier = (input) => {
+  const body = record(input.payload);
+  const eventType = firstString(
+    input.headers["x-wc-webhook-topic"],
+    input.headers["x-wc-webhook-resource"] && input.headers["x-wc-webhook-event"]
+      ? `${input.headers["x-wc-webhook-resource"]}.${input.headers["x-wc-webhook-event"]}`
+      : undefined,
+  );
+  const meta = {
+    eventId: firstString(
+      input.headers["x-wc-webhook-delivery-id"],
+      body["id"] !== undefined
+        ? `${eventType ?? "event"}:${String(body["id"])}:${String(body["date_modified_gmt"] ?? body["date_modified"] ?? "")}`
+        : undefined,
+    ),
+    eventType,
+  };
+
+  if (!input.secret)
+    return { ok: false, reason: "missing_secret", message: "No WooCommerce webhook secret is configured", ...meta };
+
+  const signature = input.headers["x-wc-webhook-signature"];
+  if (!signature)
+    return { ok: false, reason: "invalid_signature", message: "WooCommerce signature header is missing", ...meta };
+
+  const expected = createHmac("sha256", input.secret).update(input.raw, "utf8").digest("base64");
+  if (!safeEqual(signature, expected))
+    return { ok: false, reason: "invalid_signature", message: "WooCommerce signature does not match", ...meta };
+
+  return { ok: true, ...meta };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
