@@ -554,7 +554,7 @@ describe("woocommerce throttling and resilience", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.attempts).toBe(2);
-      expect(result.rateLimit?.retryAfterMs).toBe(2000);
+      expect(result.status).toBe(200);
     }
     expect(waits[0]).toBe(2000);
   });
