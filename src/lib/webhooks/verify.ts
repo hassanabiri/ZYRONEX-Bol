@@ -286,6 +286,7 @@ const VERIFIERS: Record<string, WebhookVerifier> = {
   salla: sallaVerifier,
   zid: zidVerifier,
   shopify: shopifyVerifier,
+  woocommerce: woocommerceVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */
