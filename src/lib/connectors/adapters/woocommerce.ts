@@ -270,7 +270,7 @@ export const woocommerceConnector: ConnectorAdapter = {
     return info;
   },
 
-  normalize: (operation, payload): NormalizedPage => {
+  normalize: (operation, payload, _status, context): NormalizedPage => {
     const spec = OPERATIONS[operation];
     if (payload === null || payload === undefined)
       throw new ConnectorError("malformed_response", "WooCommerce returned an empty response body", { retryable: false });
