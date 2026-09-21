@@ -1,3 +1,4 @@
+import { asRecord, assertRequiredParams, pickInto } from "@/lib/connectors/adapters/shared";
 import { ConnectorError } from "@/lib/connectors/errors";
 import { normalizeCustomer, normalizeOrder, normalizeProduct } from "@/lib/connectors/adapters/salla-map";
 import type { ConnectorAdapter, ConnectorCall, HttpMethod, NormalizedPage, RateLimitInfo } from "@/lib/connectors/types";
@@ -81,16 +82,6 @@ const OPERATIONS: Record<string, Spec> = {
   store_info: { method: "GET", path: "/oauth2/user/info" },
 };
 
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
-}
-
-function pickInto(params: Record<string, unknown>, keys: string[] | undefined): Record<string, unknown> {
-  if (!keys) return {};
-  const out: Record<string, unknown> = {};
-  for (const key of keys) if (params[key] !== undefined) out[key] = params[key];
-  return out;
-}
 
 function mapEntity(entity: Spec["entity"], value: unknown): Record<string, unknown> {
   if (entity === "order") return normalizeOrder(value) as unknown as Record<string, unknown>;
@@ -111,9 +102,7 @@ export const sallaConnector: ConnectorAdapter = {
     const spec = OPERATIONS[operation];
     if (!spec) throw new ConnectorError("unsupported", `Unknown Salla operation "${operation}"`, { retryable: false });
 
-    for (const key of spec.required ?? [])
-      if (params[key] === undefined || params[key] === null || params[key] === "")
-        throw new ConnectorError("invalid_request", `\`${key}\` is required for ${operation}`, { retryable: false });
+    assertRequiredParams(operation, params, spec.required);
 
     const path = spec.path.replace(/:([a-z_]+)/g, (_match, key: string) => encodeURIComponent(String(params[key])));
 
