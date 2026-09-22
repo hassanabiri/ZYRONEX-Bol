@@ -3,6 +3,7 @@ import { httpConnector } from "@/lib/connectors/adapters/http";
 import { sallaConnector } from "@/lib/connectors/adapters/salla";
 import { shopifyConnector } from "@/lib/connectors/adapters/shopify";
 import { slackConnector } from "@/lib/connectors/adapters/slack";
+import { whatsappConnector } from "@/lib/connectors/adapters/whatsapp";
 import { woocommerceConnector } from "@/lib/connectors/adapters/woocommerce";
 import { zidConnector } from "@/lib/connectors/adapters/zid";
 import type { ConnectorAdapter } from "@/lib/connectors/types";
