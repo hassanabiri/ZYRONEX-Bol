@@ -1,3 +1,5 @@
+import { timingSafeEqual } from "node:crypto";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/integrations/supabase/types";
@@ -250,6 +252,27 @@ export async function receiveWebhook(options: {
     headers: options.headers,
     store: createSupabaseWebhookStore(),
   });
+}
+
+/**
+ * Meta's subscription handshake (`hub.mode=subscribe`). Providers that verify an
+ * endpoint with a GET challenge answer here; every other connector keeps the
+ * existing 405. The verify token is compared against the endpoint's stored
+ * secret and never echoed back.
+ */
+export async function verifyWebhookChallenge(options: {
+  slug: string;
+  mode: string | null;
+  token: string | null;
+  challenge: string | null;
+}): Promise<{ ok: boolean; challenge: string }> {
+  if (options.mode !== "subscribe" || !options.token || !options.challenge) return { ok: false, challenge: "" };
+  const endpoint = await createSupabaseWebhookStore().findEndpoint(options.slug);
+  if (!endpoint || !endpoint.enabled || !endpoint.secret) return { ok: false, challenge: "" };
+  const expected = Buffer.from(endpoint.secret);
+  const provided = Buffer.from(options.token);
+  const match = expected.length === provided.length && timingSafeEqual(expected, provided);
+  return match ? { ok: true, challenge: options.challenge } : { ok: false, challenge: "" };
 }
 
 export function runWebhookRetrySweep(limit = 25) {

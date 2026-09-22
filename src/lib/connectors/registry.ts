@@ -21,6 +21,7 @@ const ADAPTERS: ConnectorAdapter[] = [
   zidConnector,
   shopifyConnector,
   woocommerceConnector,
+  whatsappConnector,
 ];
 
 const byId = new Map(ADAPTERS.map((adapter) => [adapter.id, adapter]));
@@ -36,6 +37,8 @@ const ALIASES: Record<string, string> = {
   google_sheets: "google",
   gmail: "google",
   google_calendar: "google",
+  whatsapp_cloud: "whatsapp",
+  whatsapp_business: "whatsapp",
 };
 
 export function registerConnector(adapter: ConnectorAdapter) {
