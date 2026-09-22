@@ -279,6 +279,50 @@ const woocommerceVerifier: WebhookVerifier = (input) => {
   return { ok: true, ...meta };
 };
 
+/**
+ * WhatsApp Business Cloud (Meta): official webhook security — `X-Hub-Signature-256`
+ * is `sha256=<hex HMAC-SHA256 of the raw body>` computed with the Meta app
+ * secret. Meta retries a delivery until it gets a 200, so the event id is the
+ * message id (or the message id + status), which makes redeliveries idempotent.
+ */
+const whatsappVerifier: WebhookVerifier = (input) => {
+  const body = record(input.payload);
+  const entry = record(Array.isArray(body["entry"]) ? body["entry"][0] : undefined);
+  const change = record(Array.isArray(entry["changes"]) ? entry["changes"][0] : undefined);
+  const value = record(change["value"]);
+  const message = record(Array.isArray(value["messages"]) ? value["messages"][0] : undefined);
+  const status = record(Array.isArray(value["statuses"]) ? value["statuses"][0] : undefined);
+
+  const eventType = firstString(
+    Object.keys(message).length > 0 ? "message.received" : undefined,
+    Object.keys(status).length > 0 ? "message.status" : undefined,
+    change["field"],
+  );
+  const meta = {
+    eventId: firstString(
+      message["id"],
+      status["id"] !== undefined
+        ? `${String(status["id"])}:${String(status["status"] ?? "")}:${String(status["timestamp"] ?? "")}`
+        : undefined,
+      entry["id"] !== undefined ? `${String(entry["id"])}:${String(entry["time"] ?? "")}` : undefined,
+    ),
+    eventType,
+  };
+
+  if (!input.secret)
+    return { ok: false, reason: "missing_secret", message: "No WhatsApp app secret is configured", ...meta };
+
+  const signature = input.headers["x-hub-signature-256"];
+  if (!signature)
+    return { ok: false, reason: "invalid_signature", message: "WhatsApp signature header is missing", ...meta };
+
+  const provided = signature.startsWith("sha256=") ? signature.slice(7) : signature;
+  if (!safeEqual(provided, hmacHex(input.secret, input.raw)))
+    return { ok: false, reason: "invalid_signature", message: "WhatsApp signature does not match", ...meta };
+
+  return { ok: true, ...meta };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
@@ -287,6 +331,7 @@ const VERIFIERS: Record<string, WebhookVerifier> = {
   zid: zidVerifier,
   shopify: shopifyVerifier,
   woocommerce: woocommerceVerifier,
+  whatsapp: whatsappVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */

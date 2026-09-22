@@ -39,7 +39,28 @@ export const Route = createFileRoute("/api/public/webhooks/$slug")({
           return json(500, { ok: false, status: "rejected", message: "Webhook could not be processed" });
         }
       },
-      GET: async () => json(405, { ok: false, status: "rejected", message: "Use POST" }),
+      // Subscription handshake (Meta/WhatsApp). Any other GET stays a 405.
+      GET: async ({ request, params }) => {
+        const url = new URL(request.url);
+        if (url.searchParams.get("hub.mode") !== "subscribe")
+          return json(405, { ok: false, status: "rejected", message: "Use POST" });
+        try {
+          const { verifyWebhookChallenge } = await import("@/lib/webhooks/ingress.server");
+          const outcome = await verifyWebhookChallenge({
+            slug: params.slug,
+            mode: url.searchParams.get("hub.mode"),
+            token: url.searchParams.get("hub.verify_token"),
+            challenge: url.searchParams.get("hub.challenge"),
+          });
+          if (!outcome.ok) return json(403, { ok: false, status: "rejected", error: "invalid_signature" });
+          return new Response(outcome.challenge, {
+            status: 200,
+            headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
+          });
+        } catch {
+          return json(500, { ok: false, status: "rejected", message: "Challenge could not be processed" });
+        }
+      },
     },
   },
 });

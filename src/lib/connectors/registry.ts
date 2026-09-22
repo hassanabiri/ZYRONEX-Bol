@@ -3,6 +3,7 @@ import { httpConnector } from "@/lib/connectors/adapters/http";
 import { sallaConnector } from "@/lib/connectors/adapters/salla";
 import { shopifyConnector } from "@/lib/connectors/adapters/shopify";
 import { slackConnector } from "@/lib/connectors/adapters/slack";
+import { whatsappConnector } from "@/lib/connectors/adapters/whatsapp";
 import { woocommerceConnector } from "@/lib/connectors/adapters/woocommerce";
 import { zidConnector } from "@/lib/connectors/adapters/zid";
 import type { ConnectorAdapter } from "@/lib/connectors/types";
@@ -20,6 +21,7 @@ const ADAPTERS: ConnectorAdapter[] = [
   zidConnector,
   shopifyConnector,
   woocommerceConnector,
+  whatsappConnector,
 ];
 
 const byId = new Map(ADAPTERS.map((adapter) => [adapter.id, adapter]));
@@ -35,6 +37,8 @@ const ALIASES: Record<string, string> = {
   google_sheets: "google",
   gmail: "google",
   google_calendar: "google",
+  whatsapp_cloud: "whatsapp",
+  whatsapp_business: "whatsapp",
 };
 
 export function registerConnector(adapter: ConnectorAdapter) {
