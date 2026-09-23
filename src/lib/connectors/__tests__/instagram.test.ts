@@ -264,15 +264,20 @@ describe("instagram authentication", () => {
     if (!result.ok) expect(result.error.message).toMatch(/account ID is missing/i);
   });
 
-  it("accepts ig_user_id as the documented alternative identifier", async () => {
-    const { calls, fetchImpl } = capture({ id: IG_ID, username: "zyronex" });
-    const result = await run({ operation: "get_account" }, fetchImpl, {
+  it("accepts ig_user_id as the documented alternative identifier", () => {
+    const call = instagramConnector.authorize(instagramConnector.buildCall({ operation: "get_account" }), {
       access_token: "token",
-      instagram_account_id: "",
       ig_user_id: IG_ID,
     });
-    expect(result.ok).toBe(true);
-    expect(calls[0]?.url).toContain(`/${IG_ID}`);
+    expect(call.url).toContain(`/${IG_ID}`);
+  });
+
+  it("still enforces the declared required credentials at the vault boundary", async () => {
+    const fetchImpl = vi.fn() as unknown as typeof fetch;
+    const result = await run({ operation: "get_account" }, fetchImpl, { access_token: "token" });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.message).toMatch(/instagram_account_id/);
+    expect(fetchImpl).not.toHaveBeenCalled();
   });
 
   it("rejects an identifier that could rewrite the request path", () => {
