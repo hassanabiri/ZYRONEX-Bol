@@ -1,3 +1,4 @@
+import { INSTAGRAM_API_VERSION } from "@/lib/connectors/adapters/instagram";
 import { normalizeShopDomain } from "@/lib/connectors/adapters/shopify";
 import type { OAuthProviderSpec } from "@/lib/oauth/types";
 
@@ -104,6 +105,35 @@ const SPECS: Record<string, OAuthProviderSpec> = {
     // Shopify offline access tokens do not expire and are not refreshable.
     refreshable: false,
   },
+  // Instagram — official Facebook Login for Business (Instagram professional
+  // accounts). Meta issues long-lived tokens through the documented
+  // `fb_exchange_token` grant, not an OAuth2 refresh token, so the account is
+  // re-authorized rather than refreshed.
+  instagram: {
+    connector: "instagram",
+    label: "Instagram",
+    authorizationUrl: `https://www.facebook.com/${INSTAGRAM_API_VERSION}/dialog/oauth`,
+    tokenUrl: `https://graph.facebook.com/${INSTAGRAM_API_VERSION}/oauth/access_token`,
+    scopes: [
+      "instagram_basic",
+      "instagram_manage_messages",
+      "instagram_manage_comments",
+      "instagram_content_publish",
+      "instagram_manage_insights",
+      "pages_show_list",
+      "pages_manage_metadata",
+    ],
+    scopeSeparator: ",",
+    refreshable: false,
+    // Meta long-lived user tokens last 60 days when the response omits it.
+    defaultExpiresInSeconds: 60 * 24 * 60 * 60,
+    identify: (token) => {
+      const id = token["user_id"] ?? token["instagram_account_id"];
+      return id !== undefined && id !== null
+        ? { accountIdentifier: String(id), accountLabel: `Instagram account ${String(id)}` }
+        : {};
+    },
+  },
 };
 
 /** Aliases mirror the connector registry so catalog ids resolve to one spec. */
@@ -112,6 +142,9 @@ const ALIASES: Record<string, string> = {
   google_drive: "google",
   google_sheets: "google",
   google_calendar: "google",
+  instagram_business: "instagram",
+  instagram_graph: "instagram",
+  instagram_messaging: "instagram",
 };
 
 export function registerOAuthProvider(spec: OAuthProviderSpec) {
