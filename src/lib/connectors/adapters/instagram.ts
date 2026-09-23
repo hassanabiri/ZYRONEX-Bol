@@ -359,9 +359,14 @@ export const instagramConnector: ConnectorAdapter = {
     if (usageHeader) {
       try {
         const parsed = JSON.parse(usageHeader) as unknown;
+        const flat = asRecord(parsed);
+        // `X-App-Usage` is a flat object; `X-Business-Use-Case-Usage` maps an
+        // account id to an array of per-account usage objects.
         const first = Array.isArray(parsed)
           ? parsed[0]
-          : Object.values(asRecord(parsed)).flatMap((value) => (Array.isArray(value) ? value : [value]))[0];
+          : flat["call_count"] !== undefined
+            ? flat
+            : Object.values(flat).flatMap((value) => (Array.isArray(value) ? value : [value]))[0];
         const usage = asRecord(first);
         const used = Number(usage["call_count"]);
         if (Number.isFinite(used)) {
