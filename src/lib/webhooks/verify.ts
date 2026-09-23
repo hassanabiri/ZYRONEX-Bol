@@ -323,6 +323,63 @@ const whatsappVerifier: WebhookVerifier = (input) => {
   return { ok: true, ...meta };
 };
 
+/**
+ * Instagram (Meta): official webhook security — `X-Hub-Signature-256` is
+ * `sha256=<hex HMAC-SHA256 of the raw body>` computed with the Meta app secret.
+ * Meta retries a delivery until it gets a 200, so the event id is the message
+ * id (`entry[].messaging[].message.mid`) or the changed object id, which makes
+ * redeliveries idempotent. `entry[].time` also feeds replay protection.
+ */
+const instagramVerifier: WebhookVerifier = (input) => {
+  const body = record(input.payload);
+  const entry = record(Array.isArray(body["entry"]) ? body["entry"][0] : undefined);
+  const messaging = record(Array.isArray(entry["messaging"]) ? entry["messaging"][0] : undefined);
+  const message = record(messaging["message"]);
+  const reaction = record(messaging["reaction"]);
+  const change = record(Array.isArray(entry["changes"]) ? entry["changes"][0] : undefined);
+  const value = record(change["value"]);
+
+  const eventType = firstString(
+    Object.keys(message).length > 0 ? "message.received" : undefined,
+    Object.keys(reaction).length > 0 ? "message.reaction" : undefined,
+    change["field"] === "comments" ? "comment.created" : undefined,
+    change["field"],
+    Object.keys(messaging).length > 0 ? "messaging" : undefined,
+  );
+  const meta = {
+    eventId: firstString(
+      message["mid"],
+      reaction["mid"] !== undefined
+        ? `${String(reaction["mid"])}:${String(reaction["action"] ?? "")}:${String(messaging["timestamp"] ?? "")}`
+        : undefined,
+      value["id"] !== undefined
+        ? `${eventType ?? "event"}:${String(value["id"])}:${String(value["timestamp"] ?? entry["time"] ?? "")}`
+        : undefined,
+      entry["id"] !== undefined ? `${String(entry["id"])}:${String(entry["time"] ?? "")}` : undefined,
+    ),
+    eventType,
+  };
+
+  if (!input.secret)
+    return { ok: false, reason: "missing_secret", message: "No Instagram app secret is configured", ...meta };
+
+  const signature = input.headers["x-hub-signature-256"];
+  if (!signature)
+    return { ok: false, reason: "invalid_signature", message: "Instagram signature header is missing", ...meta };
+
+  const provided = signature.startsWith("sha256=") ? signature.slice(7) : signature;
+  if (!safeEqual(provided, hmacHex(input.secret, input.raw)))
+    return { ok: false, reason: "invalid_signature", message: "Instagram signature does not match", ...meta };
+
+  // Meta sends `entry[].time` in seconds; outside the window it is a replay.
+  const entryTime = Number(entry["time"]);
+  const timestampMs = Number.isFinite(entryTime) ? (entryTime > 1e11 ? entryTime : entryTime * 1000) : undefined;
+  if (replayed(timestampMs, input))
+    return { ok: false, reason: "replay", message: "Instagram event is outside the replay window", ...meta };
+
+  return { ok: true, ...(timestampMs === undefined ? {} : { timestampMs }), ...meta };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
@@ -332,6 +389,7 @@ const VERIFIERS: Record<string, WebhookVerifier> = {
   shopify: shopifyVerifier,
   woocommerce: woocommerceVerifier,
   whatsapp: whatsappVerifier,
+  instagram: instagramVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */
