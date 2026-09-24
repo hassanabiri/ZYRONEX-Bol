@@ -380,6 +380,51 @@ const instagramVerifier: WebhookVerifier = (input) => {
   return { ok: true, ...(timestampMs === undefined ? {} : { timestampMs }), ...meta };
 };
 
+/**
+ * Facebook Pages (Meta): official webhook security — `X-Hub-Signature-256` is
+ * `sha256=<hex HMAC-SHA256 of the raw body>` with the Meta app secret. Page
+ * `feed` changes carry `item` + `verb` + the object id, which yields a stable
+ * event id so Meta redeliveries are deduplicated; `entry[].time` feeds replay
+ * protection.
+ */
+const facebookPagesVerifier: WebhookVerifier = (input) => {
+  const body = record(input.payload);
+  const entry = record(Array.isArray(body["entry"]) ? body["entry"][0] : undefined);
+  const change = record(Array.isArray(entry["changes"]) ? entry["changes"][0] : undefined);
+  const value = record(change["value"]);
+  const field = typeof change["field"] === "string" ? change["field"] : undefined;
+  const item = typeof value["item"] === "string" ? value["item"] : undefined;
+  const verb = typeof value["verb"] === "string" ? value["verb"] : undefined;
+  const eventType = firstString(field && item ? `${field}.${item}.${verb ?? "event"}` : undefined, field);
+  const objectId = firstString(value["comment_id"], value["post_id"], value["id"]);
+  const actor = firstString(record(value["from"])["id"]);
+  const meta = {
+    eventId: firstString(
+      objectId !== undefined
+        ? `${eventType ?? "event"}:${objectId}:${item === "reaction" ? `${actor ?? ""}:${String(value["reaction_type"] ?? "")}:` : ""}${String(value["created_time"] ?? entry["time"] ?? "")}`
+        : undefined,
+      entry["id"] !== undefined ? `${String(entry["id"])}:${String(entry["time"] ?? "")}` : undefined,
+    ),
+    eventType,
+  };
+
+  if (!input.secret)
+    return { ok: false, reason: "missing_secret", message: "No Facebook app secret is configured", ...meta };
+  const signature = input.headers["x-hub-signature-256"];
+  if (!signature)
+    return { ok: false, reason: "invalid_signature", message: "Facebook signature header is missing", ...meta };
+  const provided = signature.startsWith("sha256=") ? signature.slice(7) : signature;
+  if (!safeEqual(provided, hmacHex(input.secret, input.raw)))
+    return { ok: false, reason: "invalid_signature", message: "Facebook signature does not match", ...meta };
+
+  const entryTime = Number(entry["time"]);
+  const timestampMs = Number.isFinite(entryTime) ? (entryTime > 1e11 ? entryTime : entryTime * 1000) : undefined;
+  if (replayed(timestampMs, input))
+    return { ok: false, reason: "replay", message: "Facebook event is outside the replay window", ...meta };
+
+  return { ok: true, ...(timestampMs === undefined ? {} : { timestampMs }), ...meta };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
@@ -390,6 +435,7 @@ const VERIFIERS: Record<string, WebhookVerifier> = {
   woocommerce: woocommerceVerifier,
   whatsapp: whatsappVerifier,
   instagram: instagramVerifier,
+  facebook_pages: facebookPagesVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */

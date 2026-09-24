@@ -1,3 +1,4 @@
+import { facebookPagesConnector } from "@/lib/connectors/adapters/facebook-pages";
 import { googleConnector } from "@/lib/connectors/adapters/google";
 import { httpConnector } from "@/lib/connectors/adapters/http";
 import { instagramConnector } from "@/lib/connectors/adapters/instagram";
@@ -24,6 +25,7 @@ const ADAPTERS: ConnectorAdapter[] = [
   woocommerceConnector,
   whatsappConnector,
   instagramConnector,
+  facebookPagesConnector,
 ];
 
 const byId = new Map(ADAPTERS.map((adapter) => [adapter.id, adapter]));
@@ -44,6 +46,9 @@ const ALIASES: Record<string, string> = {
   instagram_business: "instagram",
   instagram_graph: "instagram",
   instagram_messaging: "instagram",
+  facebook: "facebook_pages",
+  facebook_page: "facebook_pages",
+  meta_pages: "facebook_pages",
 };
 
 export function registerConnector(adapter: ConnectorAdapter) {

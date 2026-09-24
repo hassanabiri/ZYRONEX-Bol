@@ -134,6 +134,37 @@ const SPECS: Record<string, OAuthProviderSpec> = {
         : {};
     },
   },
+  // Facebook Pages — official Facebook Login for Business. The exchanged token
+  // is a user token; Page tokens are discovered through `/me/accounts`.
+  facebook_pages: {
+    connector: "facebook_pages",
+    label: "Facebook Pages",
+    authorizationUrl: `https://www.facebook.com/${INSTAGRAM_API_VERSION}/dialog/oauth`,
+    tokenUrl: `https://graph.facebook.com/${INSTAGRAM_API_VERSION}/oauth/access_token`,
+    scopes: [
+      "pages_show_list",
+      "pages_read_engagement",
+      "pages_read_user_content",
+      "pages_manage_posts",
+      "pages_manage_engagement",
+      "pages_manage_metadata",
+      "read_insights",
+    ],
+    scopeSeparator: ",",
+    refreshable: false,
+    defaultExpiresInSeconds: 60 * 24 * 60 * 60,
+    // Keep the user token for page discovery; the page token is bound later.
+    credentialFields: (token) => {
+      const value = token["access_token"];
+      return typeof value === "string" && value ? { user_access_token: value } : {};
+    },
+    identify: (token) => {
+      const id = token["page_id"] ?? token["user_id"];
+      return id !== undefined && id !== null
+        ? { accountIdentifier: String(id), accountLabel: `Facebook Page ${String(id)}` }
+        : {};
+    },
+  },
 };
 
 /** Aliases mirror the connector registry so catalog ids resolve to one spec. */
@@ -145,6 +176,9 @@ const ALIASES: Record<string, string> = {
   instagram_business: "instagram",
   instagram_graph: "instagram",
   instagram_messaging: "instagram",
+  facebook: "facebook_pages",
+  facebook_page: "facebook_pages",
+  meta_pages: "facebook_pages",
 };
 
 export function registerOAuthProvider(spec: OAuthProviderSpec) {
