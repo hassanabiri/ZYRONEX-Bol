@@ -165,6 +165,28 @@ const SPECS: Record<string, OAuthProviderSpec> = {
         : {};
     },
   },
+  // Messenger — official Facebook Login for Business with pages_messaging.
+  // The exchanged token is a user token; the Page token is bound per Page.
+  messenger: {
+    connector: "messenger",
+    label: "Messenger",
+    authorizationUrl: `https://www.facebook.com/${INSTAGRAM_API_VERSION}/dialog/oauth`,
+    tokenUrl: `https://graph.facebook.com/${INSTAGRAM_API_VERSION}/oauth/access_token`,
+    scopes: ["pages_show_list", "pages_messaging", "pages_manage_metadata", "pages_read_engagement"],
+    scopeSeparator: ",",
+    refreshable: false,
+    defaultExpiresInSeconds: 60 * 24 * 60 * 60,
+    credentialFields: (token) => {
+      const value = token["access_token"];
+      return typeof value === "string" && value ? { user_access_token: value } : {};
+    },
+    identify: (token) => {
+      const id = token["page_id"] ?? token["user_id"];
+      return id !== undefined && id !== null
+        ? { accountIdentifier: String(id), accountLabel: `Messenger Page ${String(id)}` }
+        : {};
+    },
+  },
 };
 
 /** Aliases mirror the connector registry so catalog ids resolve to one spec. */
@@ -179,6 +201,8 @@ const ALIASES: Record<string, string> = {
   facebook: "facebook_pages",
   facebook_page: "facebook_pages",
   meta_pages: "facebook_pages",
+  facebook_messenger: "messenger",
+  messenger_platform: "messenger",
 };
 
 export function registerOAuthProvider(spec: OAuthProviderSpec) {
