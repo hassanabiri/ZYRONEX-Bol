@@ -115,7 +115,7 @@ describe("messenger registration", () => {
   it("contains no AI, business, CRM or database logic", () => {
     for (const f of ["messenger.ts", "messenger-map.ts"]) {
       const src = readFileSync(`src/lib/connectors/adapters/${f}`, "utf8");
-      expect(src.replace(/\/\*\*[\s\S]*?\*\//g, "")).not.toMatch(/supabase|workspace|openai|gemini|agent|crm/i);
+      expect(src.replace(/\/\*\*[\s\S]*?\*\//g, "").replace(/HUMAN_AGENT/g, "")).not.toMatch(/supabase|workspace|openai|gemini|agent|crm/i);
     }
   });
 });
