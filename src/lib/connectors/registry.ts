@@ -2,6 +2,7 @@ import { facebookPagesConnector } from "@/lib/connectors/adapters/facebook-pages
 import { googleConnector } from "@/lib/connectors/adapters/google";
 import { httpConnector } from "@/lib/connectors/adapters/http";
 import { instagramConnector } from "@/lib/connectors/adapters/instagram";
+import { messengerConnector } from "@/lib/connectors/adapters/messenger";
 import { sallaConnector } from "@/lib/connectors/adapters/salla";
 import { shopifyConnector } from "@/lib/connectors/adapters/shopify";
 import { slackConnector } from "@/lib/connectors/adapters/slack";
@@ -26,6 +27,7 @@ const ADAPTERS: ConnectorAdapter[] = [
   whatsappConnector,
   instagramConnector,
   facebookPagesConnector,
+  messengerConnector,
 ];
 
 const byId = new Map(ADAPTERS.map((adapter) => [adapter.id, adapter]));
@@ -49,6 +51,8 @@ const ALIASES: Record<string, string> = {
   facebook: "facebook_pages",
   facebook_page: "facebook_pages",
   meta_pages: "facebook_pages",
+  facebook_messenger: "messenger",
+  messenger_platform: "messenger",
 };
 
 export function registerConnector(adapter: ConnectorAdapter) {

@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { getConnector } from "@/lib/connectors/registry";
+import { messengerEventType } from "@/lib/connectors/adapters/messenger-map";
 import type { WebhookVerification, WebhookVerifier, WebhookVerifierInput } from "@/lib/webhooks/types";
 
 /**
@@ -425,6 +426,55 @@ const facebookPagesVerifier: WebhookVerifier = (input) => {
   return { ok: true, ...(timestampMs === undefined ? {} : { timestampMs }), ...meta };
 };
 
+/**
+ * Messenger (Meta Messenger Platform): official webhook security —
+ * `X-Hub-Signature-256` = `sha256=<hex HMAC-SHA256 of the raw body>` with the
+ * Meta app secret. Event ids come only from official identifiers (message mid,
+ * delivery mids/watermark, read watermark, reaction mid+action, postback mid),
+ * so Meta redeliveries are deduplicated by the central engine. The messaging
+ * item `timestamp` (ms) — or `entry[].time` — feeds replay protection.
+ */
+const messengerVerifier: WebhookVerifier = (input) => {
+  const body = record(input.payload);
+  const entry = record(Array.isArray(body["entry"]) ? body["entry"][0] : undefined);
+  const item = record(Array.isArray(entry["messaging"]) ? entry["messaging"][0] : undefined);
+  const eventType = Object.keys(item).length > 0 ? messengerEventType(item) : undefined;
+  const message = record(item["message"]);
+  const delivery = record(item["delivery"]);
+  const read = record(item["read"]);
+  const reaction = record(item["reaction"]);
+  const postback = record(item["postback"]);
+  const sender = firstString(record(item["sender"])["id"]) ?? "";
+  const mids = Array.isArray(delivery["mids"]) ? delivery["mids"].map(String).join(",") : "";
+  const meta = {
+    eventId: firstString(
+      message["mid"] !== undefined ? `${eventType}:${String(message["mid"])}` : undefined,
+      Object.keys(delivery).length > 0 ? `message.delivered:${sender}:${mids}:${String(delivery["watermark"] ?? "")}` : undefined,
+      Object.keys(read).length > 0 ? `message.read:${sender}:${String(read["watermark"] ?? "")}` : undefined,
+      reaction["mid"] !== undefined
+        ? `message.reaction:${String(reaction["mid"])}:${String(reaction["action"] ?? "")}:${String(reaction["reaction"] ?? "")}`
+        : undefined,
+      postback["mid"] !== undefined ? `postback:${String(postback["mid"])}` : undefined,
+      entry["id"] !== undefined ? `${eventType ?? "event"}:${String(entry["id"])}:${sender}:${String(item["timestamp"] ?? entry["time"] ?? "")}` : undefined,
+    ),
+    eventType,
+  };
+
+  if (!input.secret) return { ok: false, reason: "missing_secret", message: "No Messenger app secret is configured", ...meta };
+  const signature = input.headers["x-hub-signature-256"];
+  if (!signature) return { ok: false, reason: "invalid_signature", message: "Messenger signature header is missing", ...meta };
+  const provided = signature.startsWith("sha256=") ? signature.slice(7) : signature;
+  if (!safeEqual(provided, hmacHex(input.secret, input.raw)))
+    return { ok: false, reason: "invalid_signature", message: "Messenger signature does not match", ...meta };
+
+  const raw = Number(item["timestamp"] ?? entry["time"]);
+  const timestampMs = Number.isFinite(raw) ? (raw > 1e11 ? raw : raw * 1000) : undefined;
+  if (replayed(timestampMs, input))
+    return { ok: false, reason: "replay", message: "Messenger event is outside the replay window", ...meta };
+
+  return { ok: true, ...(timestampMs === undefined ? {} : { timestampMs }), ...meta };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
@@ -436,6 +486,7 @@ const VERIFIERS: Record<string, WebhookVerifier> = {
   whatsapp: whatsappVerifier,
   instagram: instagramVerifier,
   facebook_pages: facebookPagesVerifier,
+  messenger: messengerVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */
