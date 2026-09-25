@@ -163,7 +163,7 @@ const BASE_PROVIDERS: ProviderDefinition[] = [
     scopes: ["pages_show_list", "pages_messaging", "pages_manage_metadata", "pages_read_engagement"],
     credentialFields: [
       { key: "access_token", label: "Page access token", secret: true },
-      { key: "page_id", label: "Facebook Page ID" },
+      { key: "page_id", label: "Facebook Page ID", secret: false },
       { key: "app_secret", label: "Meta app secret", secret: true },
       { key: "verify_token", label: "Webhook verify token", secret: true },
     ],
