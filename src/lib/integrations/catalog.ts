@@ -149,9 +149,12 @@ const BASE_PROVIDERS: ProviderDefinition[] = [
     name: "Telegram",
     category: "communication",
     authType: "api_key",
-    description: "Telegram bot channel with webhook delivery.",
+    description: "Official Telegram Bot API: messages, replies, media, keyboards, callback queries and webhook updates.",
     scopes: ["messages.read", "messages.send"],
-    credentialFields: [{ key: "bot_token", label: "Bot token", secret: true }],
+    credentialFields: [
+      { key: "bot_token", label: "Bot token", secret: true },
+      { key: "webhook_secret_token", label: "Webhook secret token", secret: true },
+    ],
     supportsWebhooks: true,
   },
   {
@@ -777,7 +780,7 @@ const BASE_PROVIDERS: ProviderDefinition[] = [
  */
 const PROVIDER_META: Record<string, Partial<ProviderDefinition>> = {
   whatsapp: { capabilities: ["Messages", "Conversations", "Media", "Notifications", "Webhooks"] },
-  telegram: { capabilities: ["Messages", "Conversations", "Media", "Webhooks"] },
+  telegram: { capabilities: ["Messages", "Replies", "Media", "Automation", "Webhooks"] },
   messenger: {
     capabilities: ["Messages", "Conversations", "Replies", "Automation", "Webhooks"],
     connectionGroup: "meta",
