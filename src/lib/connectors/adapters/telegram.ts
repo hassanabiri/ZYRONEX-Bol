@@ -233,8 +233,8 @@ function assertChatId(value: unknown, label = "chat_id") {
 /** Media inputs: an existing file_id or a public https URL (no multipart). */
 function assertInputFile(value: unknown, label: string) {
   if (typeof value !== "string" || value.trim() === "") invalid(`\`${label}\` must be a file_id or an https URL`);
-  if (/^[a-z]+:\/\//i.test(value) && !/^https:\/\//i.test(value)) invalid(`\`${label}\` URL must use https`);
   if (/^attach:\/\//i.test(value)) invalid(`\`${label}\` multipart attach:// uploads are not supported`);
+  if (/^[a-z]+:\/\//i.test(value) && !/^https:\/\//i.test(value)) invalid(`\`${label}\` URL must use https`);
 }
 
 /** Inline / reply keyboards follow the official ReplyMarkup object shapes. */
