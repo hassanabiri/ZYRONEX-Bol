@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { getConnector } from "@/lib/connectors/registry";
 import { messengerEventType } from "@/lib/connectors/adapters/messenger-map";
+import { telegramEventType, telegramUpdateDateSeconds } from "@/lib/connectors/adapters/telegram-map";
 import type { WebhookVerification, WebhookVerifier, WebhookVerifierInput } from "@/lib/webhooks/types";
 
 /**
@@ -475,6 +476,43 @@ const messengerVerifier: WebhookVerifier = (input) => {
   return { ok: true, ...(timestampMs === undefined ? {} : { timestampMs }), ...meta };
 };
 
+/** Telegram keeps undelivered updates for at most 24 hours (Bot API docs). */
+const TELEGRAM_MAX_UPDATE_AGE_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Telegram Bot API webhooks carry no body signature. The official mechanism
+ * is `X-Telegram-Bot-Api-Secret-Token`, echoing the `secret_token` given to
+ * `setWebhook`. Replay protection = constant-time secret check + dedupe on the
+ * official monotonic `update_id` + rejecting payloads older than Telegram's own
+ * 24h retention (Telegram legitimately retries, so the short generic window
+ * would drop valid redeliveries).
+ */
+const telegramVerifier: WebhookVerifier = (input) => {
+  const body = record(input.payload);
+  const updateId = body["update_id"];
+  const eventType = telegramEventType(body);
+  const meta = {
+    eventId: typeof updateId === "number" && Number.isInteger(updateId) ? `update:${updateId}` : undefined,
+    eventType,
+  };
+
+  if (!input.secret) return { ok: false, reason: "missing_secret", message: "No Telegram webhook secret token is configured", ...meta };
+  const provided = input.headers["x-telegram-bot-api-secret-token"];
+  if (!provided) return { ok: false, reason: "invalid_signature", message: "Telegram secret token header is missing", ...meta };
+  if (!safeEqual(provided, input.secret))
+    return { ok: false, reason: "invalid_signature", message: "Telegram secret token does not match", ...meta };
+
+  if (!meta.eventId) return { ok: false, reason: "malformed_payload", message: "Telegram update has no update_id", ...meta };
+  if (!eventType) return { ok: false, reason: "unsupported_event", message: "Telegram update type is not recognised", ...meta };
+
+  const seconds = telegramUpdateDateSeconds(body);
+  const timestampMs = seconds === undefined ? undefined : seconds * 1000;
+  if (timestampMs !== undefined && input.nowMs - timestampMs > TELEGRAM_MAX_UPDATE_AGE_MS)
+    return { ok: false, reason: "replay", message: "Telegram update is older than the 24h delivery window", ...meta };
+
+  return { ok: true, ...(timestampMs === undefined ? {} : { timestampMs }), ...meta };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
@@ -487,6 +525,7 @@ const VERIFIERS: Record<string, WebhookVerifier> = {
   instagram: instagramVerifier,
   facebook_pages: facebookPagesVerifier,
   messenger: messengerVerifier,
+  telegram: telegramVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */

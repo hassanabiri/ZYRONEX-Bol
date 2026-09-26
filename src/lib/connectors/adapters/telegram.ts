@@ -349,7 +349,7 @@ export const telegramConnector: ConnectorAdapter = {
     const message = `Telegram error ${code}: ${description}`;
     if (code === 401) return { kind: "auth", message, retryable: false };
     if (code === 403) return { kind: "forbidden", message, retryable: false };
-    if (code === 404) return { kind: /not found/i.test(description) && status === 404 ? "auth" : "not_found", message, retryable: false };
+    if (code === 404) return { kind: "not_found", message, retryable: false };
     if (code === 429) return { kind: "rate_limit", message, retryable: true };
     if (code === 409) return { kind: "invalid_request", message, retryable: false };
     if (code >= 500) return { kind: "provider", message, retryable: true };
