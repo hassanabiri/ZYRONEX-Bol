@@ -1,7 +1,8 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, createPublicKey, timingSafeEqual, verify as cryptoVerify } from "node:crypto";
 
 import { getConnector } from "@/lib/connectors/registry";
 import { messengerEventType } from "@/lib/connectors/adapters/messenger-map";
+import { discordEventId, discordEventType } from "@/lib/connectors/adapters/discord-map";
 import { telegramEventType, telegramUpdateDateSeconds } from "@/lib/connectors/adapters/telegram-map";
 import type { WebhookVerification, WebhookVerifier, WebhookVerifierInput } from "@/lib/webhooks/types";
 
@@ -513,6 +514,47 @@ const telegramVerifier: WebhookVerifier = (input) => {
   return { ok: true, ...(timestampMs === undefined ? {} : { timestampMs }), ...meta };
 };
 
+/** DER prefix of an Ed25519 SubjectPublicKeyInfo (RFC 8410). */
+const ED25519_SPKI_PREFIX = Buffer.from("302a300506032b6570032100", "hex");
+
+function ed25519Valid(publicKeyHex: string, message: string, signatureHex: string): boolean {
+  if (!/^[0-9a-f]{64}$/i.test(publicKeyHex) || !/^[0-9a-f]{128}$/i.test(signatureHex)) return false;
+  try {
+    const key = createPublicKey({
+      key: Buffer.concat([ED25519_SPKI_PREFIX, Buffer.from(publicKeyHex, "hex")]),
+      format: "der",
+      type: "spki",
+    });
+    return cryptoVerify(null, Buffer.from(message), key, Buffer.from(signatureHex, "hex"));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Discord Interactions endpoint + Webhook Events. Official security: Ed25519
+ * signature (`X-Signature-Ed25519`) over `X-Signature-Timestamp + rawBody`,
+ * verified with the application's public key (stored as the endpoint secret).
+ * Replay protection = signed timestamp inside the endpoint replay window +
+ * dedupe on the official interaction id / Webhook Event identity.
+ */
+const discordVerifier: WebhookVerifier = (input) => {
+  const meta = { eventId: discordEventId(input.payload), eventType: discordEventType(input.payload) };
+  if (!input.secret) return { ok: false, reason: "missing_secret", message: "No Discord application public key is configured", ...meta };
+  const signature = input.headers["x-signature-ed25519"];
+  const timestamp = input.headers["x-signature-timestamp"];
+  if (!signature || !timestamp) return { ok: false, reason: "invalid_signature", message: "Discord signature headers are missing", ...meta };
+  if (!ed25519Valid(input.secret.trim(), timestamp + input.raw, signature))
+    return { ok: false, reason: "invalid_signature", message: "Discord signature does not match", ...meta };
+
+  const timestampMs = Number(timestamp) * 1000;
+  if (!Number.isFinite(timestampMs)) return { ok: false, reason: "invalid_signature", message: "Discord signature timestamp is not a number", ...meta };
+  if (replayed(timestampMs, input)) return { ok: false, reason: "replay", message: "Discord request is outside the replay window", ...meta };
+  if (!meta.eventType) return { ok: false, reason: "unsupported_event", message: "Discord event type is not recognised", ...meta };
+
+  return { ok: true, timestampMs, ...meta };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
@@ -526,6 +568,7 @@ const VERIFIERS: Record<string, WebhookVerifier> = {
   facebook_pages: facebookPagesVerifier,
   messenger: messengerVerifier,
   telegram: telegramVerifier,
+  discord: discordVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */
