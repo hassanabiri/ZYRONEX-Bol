@@ -10,3 +10,6 @@
 - [x] Phase 13: Telegram connector (official Bot API: getMe/bot profile, send text/reply/media/location/contact/poll, edit/delete, keyboards + callback queries, getFile, chats, getUpdates offset, set/get/delete webhook; secret-token verifier + 24h replay window + update_id dedupe; 146 tests) — complete; 685/685 green. Next connector awaiting approval
 - [ ] Technical Debt backlog (deferred by the user, system works without them): unify the idempotency strategy across connectors; unify the store/account key naming (store_url / store_domain / shop_domain); stop re-reading standard rate-limit headers in per-adapter readRateLimit; runtime backoff ignores retry-after carried in error bodies (e.g. Telegram parameters.retry_after)
 - [ ] UI polish: make marketing site + internal app far more attractive to convert visitors
+- [x] Phase 14: Discord connector (official API v10 adapter: identity, guilds, channels, messages, replies, edit/delete, embeds, threads, reactions, interaction replies; Ed25519 verifier for Interactions + Webhook Events; 136 tests) — complete
+- [ ] Tech debt: Discord Gateway (MESSAGE_CREATE etc.) needs a persistent WebSocket host — not available in the serverless runtime
+- [ ] Tech debt: unified ingress cannot return provider-specific bodies (Discord interaction PONG / type 4, 204 for Webhook Events)

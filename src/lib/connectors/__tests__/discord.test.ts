@@ -625,7 +625,8 @@ describe("discord error normalization", () => {
   });
   it("marks documented gaps as UNSUPPORTED_OPERATION", async () => {
     const r = await run({ operation: "gateway_events" }, capture({}).fetchImpl);
-    expect(!r.ok && r.error.message).toMatch(/UNSUPPORTED_OPERATION/);
+    expect(!r.ok && r.error.kind).toBe("unsupported");
+    expect(() => discordConnector.buildCall({ operation: "gateway_events" })).toThrow(/UNSUPPORTED_OPERATION/);
   });
   it("rejects malformed payloads", async () => {
     const r = await run({ operation: "list_messages", params: { channel_id: CH } }, capture({ not: "a list" }).fetchImpl);
