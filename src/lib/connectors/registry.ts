@@ -1,3 +1,4 @@
+import { discordConnector } from "@/lib/connectors/adapters/discord";
 import { facebookPagesConnector } from "@/lib/connectors/adapters/facebook-pages";
 import { googleConnector } from "@/lib/connectors/adapters/google";
 import { httpConnector } from "@/lib/connectors/adapters/http";
@@ -30,6 +31,7 @@ const ADAPTERS: ConnectorAdapter[] = [
   facebookPagesConnector,
   messengerConnector,
   telegramConnector,
+  discordConnector,
 ];
 
 const byId = new Map(ADAPTERS.map((adapter) => [adapter.id, adapter]));
@@ -56,6 +58,7 @@ const ALIASES: Record<string, string> = {
   facebook_messenger: "messenger",
   messenger_platform: "messenger",
   telegram_bot: "telegram",
+  discord_bot: "discord",
 };
 
 export function registerConnector(adapter: ConnectorAdapter) {

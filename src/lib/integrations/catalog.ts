@@ -233,9 +233,13 @@ const BASE_PROVIDERS: ProviderDefinition[] = [
     name: "Discord",
     category: "communication",
     authType: "api_key",
-    description: "Discord guild messaging bot.",
-    scopes: ["bot", "messages.send"],
-    credentialFields: [{ key: "bot_token", label: "Bot token", secret: true }],
+    description: "Official Discord API v10: guilds, channels, messages, replies, embeds, threads, reactions and signed interaction/webhook events.",
+    scopes: ["bot", "applications.commands"],
+    credentialFields: [
+      { key: "bot_token", label: "Bot token", secret: true },
+      { key: "application_id", label: "Application ID", secret: false },
+      { key: "public_key", label: "Application public key (event signatures)", secret: false },
+    ],
     supportsWebhooks: true,
   },
   // Productivity
