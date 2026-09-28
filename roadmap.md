@@ -13,3 +13,8 @@
 - [x] Phase 14: Discord connector (official API v10 adapter: identity, guilds, channels, messages, replies, edit/delete, embeds, threads, reactions, interaction replies; Ed25519 verifier for Interactions + Webhook Events; 136 tests) — complete
 - [ ] Tech debt: Discord Gateway (MESSAGE_CREATE etc.) needs a persistent WebSocket host — not available in the serverless runtime
 - [ ] Tech debt: unified ingress cannot return provider-specific bodies (Discord interaction PONG / type 4, 204 for Webhook Events)
+
+## Phase 15 — Slack Connector (done, awaiting approval)
+- [x] Official Slack Web API adapter + Events API verifier on the existing framework (944/944 tests)
+- Backlog: shared ingress cannot echo Slack url_verification challenge or answer slash/interactive payloads in-body
+- Backlog: runtime ignores Retry-After from failed 429 responses (same shared item as Telegram retry_after)
