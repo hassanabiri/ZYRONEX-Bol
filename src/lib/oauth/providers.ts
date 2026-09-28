@@ -36,11 +36,27 @@ const SPECS: Record<string, OAuthProviderSpec> = {
     authorizationUrl: "https://slack.com/oauth/v2/authorize",
     tokenUrl: "https://slack.com/api/oauth.v2.access",
     revokeUrl: "https://slack.com/api/auth.revoke",
-    scopes: ["channels:read", "chat:write"],
+    // Official bot-token scopes for the Slack connector operations.
+    scopes: [
+      "channels:read", "channels:history", "channels:manage", "channels:join",
+      "groups:read", "groups:history", "groups:write", "im:read", "im:history", "im:write", "mpim:read", "mpim:history",
+      "chat:write", "reactions:read", "reactions:write", "users:read", "users:read.email", "team:read", "files:read", "files:write",
+    ],
+    scopeSeparator: ",",
+    // Slack returns a refresh token only when token rotation is enabled.
     refreshable: true,
+    // Bot/app ids are identifiers, not secrets; kept with the vault token set.
+    credentialFields: (token) => {
+      const out: Record<string, string> = {};
+      if (typeof token["bot_user_id"] === "string") out["bot_user_id"] = token["bot_user_id"];
+      if (typeof token["app_id"] === "string") out["app_id"] = token["app_id"];
+      return out;
+    },
     identify: (token) => {
       const team = token["team"] as { id?: string; name?: string } | undefined;
-      return team?.id ? { accountIdentifier: team.id, accountLabel: team.name ?? team.id } : {};
+      const enterprise = token["enterprise"] as { id?: string; name?: string } | undefined;
+      if (team?.id) return { accountIdentifier: team.id, accountLabel: team.name ?? team.id };
+      return enterprise?.id ? { accountIdentifier: enterprise.id, accountLabel: enterprise.name ?? enterprise.id } : {};
     },
   },
   // Salla — official Salla App OAuth2 (Authorization Code, "Easy mode" off).
