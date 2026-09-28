@@ -1,3 +1,4 @@
+import { slackEventId, slackEventType } from "@/lib/connectors/adapters/slack-map";
 import { createHmac, createPublicKey, timingSafeEqual, verify as cryptoVerify } from "node:crypto";
 
 import { getConnector } from "@/lib/connectors/registry";
@@ -97,8 +98,10 @@ const genericVerifier: WebhookVerifier = (input) => {
 const slackVerifier: WebhookVerifier = (input) => {
   const body = record(input.payload);
   const meta = {
-    eventId: firstString(body["event_id"], input.headers["x-slack-request-timestamp"]),
-    eventType: firstString(record(body["event"])["type"], body["type"]),
+    // Official `event_id` is stable across Slack retries (X-Slack-Retry-Num);
+    // envelopes without one fall back to the ingress raw-body fingerprint.
+    eventId: slackEventId(body),
+    eventType: slackEventType(body),
   };
   if (!input.secret) return { ok: false, reason: "missing_secret", message: "No signing secret is configured", ...meta };
 
