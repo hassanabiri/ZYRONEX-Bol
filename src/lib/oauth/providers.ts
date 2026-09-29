@@ -30,6 +30,32 @@ const SPECS: Record<string, OAuthProviderSpec> = {
       return email ? { accountIdentifier: email, accountLabel: email } : {};
     },
   },
+  google_mail: {
+    connector: "google_mail",
+    label: "Gmail",
+    authorizationUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+    tokenUrl: "https://oauth2.googleapis.com/token",
+    revokeUrl: "https://oauth2.googleapis.com/revoke",
+    // Least privilege: gmail.modify covers read, send, drafts, labels and trash.
+    // Permanent delete needs https://mail.google.com/, requested only per connection when asked.
+    scopes: ["openid", "email", "https://www.googleapis.com/auth/gmail.modify"],
+    usePkce: true,
+    refreshable: true,
+    authorizationParams: { access_type: "offline", prompt: "consent", include_granted_scopes: "true" },
+    identify: (token) => {
+      const email = typeof token["email"] === "string" ? (token["email"] as string) : undefined;
+      if (email) return { accountIdentifier: email, accountLabel: email };
+      const idToken = typeof token["id_token"] === "string" ? (token["id_token"] as string) : "";
+      try {
+        const claims = JSON.parse(Buffer.from(idToken.split(".")[1] ?? "", "base64url").toString("utf8")) as Record<string, unknown>;
+        const mail = typeof claims["email"] === "string" ? claims["email"] : undefined;
+        const sub = typeof claims["sub"] === "string" ? claims["sub"] : undefined;
+        return mail ? { accountIdentifier: mail, accountLabel: mail } : sub ? { accountIdentifier: sub, accountLabel: sub } : {};
+      } catch {
+        return {};
+      }
+    },
+  },
   slack: {
     connector: "slack",
     label: "Slack",

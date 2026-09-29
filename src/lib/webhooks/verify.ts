@@ -4,6 +4,7 @@ import { createHmac, createPublicKey, timingSafeEqual, verify as cryptoVerify } 
 import { getConnector } from "@/lib/connectors/registry";
 import { messengerEventType } from "@/lib/connectors/adapters/messenger-map";
 import { discordEventId, discordEventType } from "@/lib/connectors/adapters/discord-map";
+import { parseGmailPush } from "@/lib/connectors/adapters/gmail-map";
 import { telegramEventType, telegramUpdateDateSeconds } from "@/lib/connectors/adapters/telegram-map";
 import type { WebhookVerification, WebhookVerifier, WebhookVerifierInput } from "@/lib/webhooks/types";
 
@@ -139,6 +140,50 @@ const googleVerifier: WebhookVerifier = (input) => {
   if (!token || !safeEqual(token, input.secret))
     return { ok: false, reason: "invalid_signature", message: "Channel token does not match", ...meta };
   return { ok: true, ...meta };
+};
+
+/**
+ * Gmail push notifications via Cloud Pub/Sub push subscriptions.
+ * The envelope is only a change signal ({ emailAddress, historyId }).
+ * Authentication: the push OIDC token's audience must equal the endpoint
+ * secret (a private audience configured on the subscription), with a Google
+ * issuer and an unexpired token. Dedupe uses the official Pub/Sub messageId;
+ * replay protection uses publishTime. JWKS signature verification is tracked
+ * as technical debt (needs an async key fetch the sync contract cannot do).
+ */
+const gmailVerifier: WebhookVerifier = (input) => {
+  const push = parseGmailPush(input.payload);
+  const meta = {
+    eventId: push.messageId ? `pubsub:${push.messageId}` : undefined,
+    eventType: "gmail.mailbox_changed",
+  };
+  if (!input.secret) return { ok: false, reason: "missing_secret", message: "No push audience is configured", ...meta };
+  if (!push.messageId || !push.emailAddress || !push.historyId)
+    return { ok: false, reason: "malformed_payload", message: "Not a Gmail Pub/Sub push envelope", ...meta };
+
+  const auth = input.headers["authorization"] ?? "";
+  const jwt = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+  let claims: Record<string, unknown> = {};
+  try {
+    claims = record(JSON.parse(Buffer.from(jwt.split(".")[1] ?? "", "base64url").toString("utf8")));
+  } catch {
+    claims = {};
+  }
+  const aud = typeof claims["aud"] === "string" ? claims["aud"] : "";
+  if (!jwt || !aud || !safeEqual(aud, input.secret))
+    return { ok: false, reason: "invalid_signature", message: "Push token audience does not match", ...meta };
+  const iss = String(claims["iss"] ?? "");
+  if (iss !== "https://accounts.google.com" && iss !== "accounts.google.com")
+    return { ok: false, reason: "invalid_signature", message: "Push token issuer is not Google", ...meta };
+  const exp = Number(claims["exp"]);
+  if (!Number.isFinite(exp) || exp * 1000 <= input.nowMs)
+    return { ok: false, reason: "invalid_signature", message: "Push token is expired", ...meta };
+
+  const timestampMs = push.publishTime ? Date.parse(push.publishTime) : NaN;
+  if (!Number.isFinite(timestampMs)) return { ok: false, reason: "malformed_payload", message: "publishTime is missing", ...meta };
+  if (replayed(timestampMs, input))
+    return { ok: false, reason: "replay", message: "Push publishTime is outside the replay window", ...meta };
+  return { ok: true, timestampMs, ...meta };
 };
 
 /**
@@ -562,6 +607,7 @@ const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
   google: googleVerifier,
+  google_mail: gmailVerifier,
   salla: sallaVerifier,
   zid: zidVerifier,
   shopify: shopifyVerifier,
