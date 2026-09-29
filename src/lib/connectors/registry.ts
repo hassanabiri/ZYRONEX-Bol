@@ -1,5 +1,6 @@
 import { discordConnector } from "@/lib/connectors/adapters/discord";
 import { facebookPagesConnector } from "@/lib/connectors/adapters/facebook-pages";
+import { gmailConnector } from "@/lib/connectors/adapters/gmail";
 import { googleConnector } from "@/lib/connectors/adapters/google";
 import { httpConnector } from "@/lib/connectors/adapters/http";
 import { instagramConnector } from "@/lib/connectors/adapters/instagram";
@@ -22,6 +23,7 @@ const ADAPTERS: ConnectorAdapter[] = [
   httpConnector,
   slackConnector,
   googleConnector,
+  gmailConnector,
   sallaConnector,
   zidConnector,
   shopifyConnector,
