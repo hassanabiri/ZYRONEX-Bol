@@ -18,3 +18,9 @@
 - [x] Official Slack Web API adapter + Events API verifier on the existing framework (944/944 tests)
 - Backlog: shared ingress cannot echo Slack url_verification challenge or answer slash/interactive payloads in-body
 - Backlog: runtime ignores Retry-After from failed 429 responses (same shared item as Telegram retry_after)
+
+## Phase 16 — Gmail Connector (done, awaiting approval)
+- [x] Official Gmail API v1 adapter `google_mail` (messages, reply/forward, threads, labels, drafts, attachments JSON, search, history, watch/stop) + Pub/Sub push verifier; 148 tests
+- Backlog: Pub/Sub push OIDC JWT signature (Google JWKS) needs async key fetch — shared verifier contract is sync; audience/issuer/expiry checked
+- Backlog: catalog id `gmail` still aliases the generic `google` adapter (pinned by existing tests); switching it to `google_mail` is a one-line change awaiting approval
+- Backlog: runtime ignores Retry-After from failed 429 responses (same shared item as Telegram/Slack)
