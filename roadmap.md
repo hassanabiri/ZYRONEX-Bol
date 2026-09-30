@@ -24,3 +24,9 @@
 - Backlog: Pub/Sub push OIDC JWT signature (Google JWKS) needs async key fetch — shared verifier contract is sync; audience/issuer/expiry checked
 - Backlog: catalog id `gmail` still aliases the generic `google` adapter (pinned by existing tests); switching it to `google_mail` is a one-line change awaiting approval
 - Backlog: runtime ignores Retry-After from failed 429 responses (same shared item as Telegram/Slack)
+
+## Phase 17 — Microsoft Graph (Outlook) Connector (done, awaiting approval)
+- [x] One official Microsoft Graph v1.0 adapter `microsoft_graph` (aliases outlook / microsoft_365 / microsoft_calendar): identity, mail, folders, drafts, JSON attachments ≤3 MB, search, calendars/events, contacts, delta, subscriptions + clientState notification verifier
+- Backlog: shared ingress cannot echo Graph `validationToken` (text/plain within 10s) — subscriptions cannot be validated in production until the ingress supports provider-specific bodies (same item as Slack/Discord)
+- Backlog: runtime ignores Retry-After from failed 429 responses (same shared item as Telegram/Slack/Gmail)
+- Backlog: rich notifications (encrypted resource data) need certificate management; basic notifications only
