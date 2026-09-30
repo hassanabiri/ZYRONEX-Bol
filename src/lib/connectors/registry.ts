@@ -4,6 +4,7 @@ import { gmailConnector } from "@/lib/connectors/adapters/gmail";
 import { googleConnector } from "@/lib/connectors/adapters/google";
 import { httpConnector } from "@/lib/connectors/adapters/http";
 import { instagramConnector } from "@/lib/connectors/adapters/instagram";
+import { microsoftGraphConnector } from "@/lib/connectors/adapters/microsoft-graph";
 import { messengerConnector } from "@/lib/connectors/adapters/messenger";
 import { sallaConnector } from "@/lib/connectors/adapters/salla";
 import { shopifyConnector } from "@/lib/connectors/adapters/shopify";
@@ -34,6 +35,7 @@ const ADAPTERS: ConnectorAdapter[] = [
   messengerConnector,
   telegramConnector,
   discordConnector,
+  microsoftGraphConnector,
 ];
 
 const byId = new Map(ADAPTERS.map((adapter) => [adapter.id, adapter]));
@@ -61,6 +63,10 @@ const ALIASES: Record<string, string> = {
   messenger_platform: "messenger",
   telegram_bot: "telegram",
   discord_bot: "discord",
+  outlook: "microsoft_graph",
+  microsoft_outlook: "microsoft_graph",
+  microsoft_365: "microsoft_graph",
+  microsoft_calendar: "microsoft_graph",
 };
 
 export function registerConnector(adapter: ConnectorAdapter) {

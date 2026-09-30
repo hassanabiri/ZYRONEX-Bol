@@ -4,6 +4,7 @@ import { createHmac, createPublicKey, timingSafeEqual, verify as cryptoVerify } 
 import { getConnector } from "@/lib/connectors/registry";
 import { messengerEventType } from "@/lib/connectors/adapters/messenger-map";
 import { discordEventId, discordEventType } from "@/lib/connectors/adapters/discord-map";
+import { graphNotificationEventId, graphNotificationEventType, parseGraphNotifications } from "@/lib/connectors/adapters/microsoft-graph-map";
 import { parseGmailPush } from "@/lib/connectors/adapters/gmail-map";
 import { telegramEventType, telegramUpdateDateSeconds } from "@/lib/connectors/adapters/telegram-map";
 import type { WebhookVerification, WebhookVerifier, WebhookVerifierInput } from "@/lib/webhooks/types";
@@ -603,6 +604,34 @@ const discordVerifier: WebhookVerifier = (input) => {
   return { ok: true, timestampMs, ...meta };
 };
 
+/**
+ * Microsoft Graph change notifications. Official validation for basic
+ * notifications = every item's `clientState` equals the secret set on the
+ * subscription (the endpoint secret). Replay protection: notifications for an
+ * already-expired subscription are rejected. Dedupe uses official fields only
+ * (subscriptionId + changeType/lifecycleEvent + resource id + etag).
+ * Subscription validation (`validationToken` echo) needs a text/plain body the
+ * shared ingress cannot return — tracked as technical debt.
+ */
+const microsoftGraphVerifier: WebhookVerifier = (input) => {
+  const list = parseGraphNotifications(input.payload);
+  const meta = { eventId: graphNotificationEventId(list), eventType: graphNotificationEventType(list) };
+  if (!input.secret) return { ok: false, reason: "missing_secret", message: "No Graph clientState is configured", ...meta };
+  if (!list.length)
+    return { ok: false, reason: "unsupported_event", message: "Not a Graph notification collection (validationToken requests need an in-body echo)", ...meta };
+  for (const n of list) {
+    if (!n.clientState || !safeEqual(n.clientState, input.secret))
+      return { ok: false, reason: "invalid_signature", message: "Graph clientState does not match", ...meta };
+  }
+  if (!meta.eventId || !meta.eventType) return { ok: false, reason: "malformed_payload", message: "Graph notification is missing official identifiers", ...meta };
+  for (const n of list) {
+    const exp = n.subscriptionExpiration ? Date.parse(n.subscriptionExpiration) : NaN;
+    if (Number.isFinite(exp) && exp < input.nowMs - input.replayWindowMs)
+      return { ok: false, reason: "replay", message: "Notification belongs to an expired subscription", ...meta };
+  }
+  return { ok: true, ...meta };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
@@ -618,6 +647,7 @@ const VERIFIERS: Record<string, WebhookVerifier> = {
   messenger: messengerVerifier,
   telegram: telegramVerifier,
   discord: discordVerifier,
+  microsoft_graph: microsoftGraphVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */
