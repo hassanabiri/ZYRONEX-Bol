@@ -258,9 +258,9 @@ const BASE_PROVIDERS: ProviderDefinition[] = [
     name: "Outlook",
     category: "productivity",
     authType: "oauth2",
-    description: "Outlook mail and calendar access.",
-    scopes: ["Mail.Read", "Mail.Send"],
-    credentialFields: oauth(),
+    description: "Outlook mail, calendar and contacts through Microsoft Graph.",
+    scopes: ["User.Read", "Mail.ReadWrite", "Mail.Send", "Calendars.ReadWrite", "Contacts.ReadWrite", "offline_access"],
+    credentialFields: oauth([{ key: "client_state", label: "Change notification clientState", secret: true, optional: true }]),
     supportsSync: true,
   },
   {

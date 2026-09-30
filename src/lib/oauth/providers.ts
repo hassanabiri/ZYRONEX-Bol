@@ -229,6 +229,32 @@ const SPECS: Record<string, OAuthProviderSpec> = {
         : {};
     },
   },
+  // Microsoft Graph — official Microsoft identity platform v2.0 (auth code + PKCE).
+  // The `common` authority serves every Entra ID tenant and personal accounts;
+  // the tenant is read per account from the id_token (`tid`), never assumed.
+  microsoft_graph: {
+    connector: "microsoft_graph",
+    label: "Microsoft (Outlook)",
+    authorizationUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+    tokenUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+    // Least privilege for the supported operations; offline_access issues the refresh token.
+    scopes: ["openid", "profile", "email", "offline_access", "User.Read", "Mail.ReadWrite", "Mail.Send", "Calendars.ReadWrite", "Contacts.ReadWrite"],
+    usePkce: true,
+    refreshable: true,
+    authorizationParams: { response_mode: "query", prompt: "select_account" },
+    credentialFields: (token) => {
+      const tid = microsoftClaims(token)["tid"];
+      return typeof tid === "string" && tid ? { tenant_id: tid } : {};
+    },
+    identify: (token) => {
+      const claims = microsoftClaims(token);
+      const tid = typeof claims["tid"] === "string" ? claims["tid"] : undefined;
+      const oid = typeof claims["oid"] === "string" ? claims["oid"] : typeof claims["sub"] === "string" ? claims["sub"] : undefined;
+      const label = [claims["preferred_username"], claims["email"], claims["name"]].find((v) => typeof v === "string") as string | undefined;
+      // tenant + object id: the same person in two tenants is two accounts.
+      return oid ? { accountIdentifier: tid ? `${tid}:${oid}` : oid, accountLabel: label ?? oid } : {};
+    },
+  },
 };
 
 /** Aliases mirror the connector registry so catalog ids resolve to one spec. */
@@ -245,7 +271,22 @@ const ALIASES: Record<string, string> = {
   meta_pages: "facebook_pages",
   facebook_messenger: "messenger",
   messenger_platform: "messenger",
+  outlook: "microsoft_graph",
+  microsoft_outlook: "microsoft_graph",
+  microsoft_365: "microsoft_graph",
+  microsoft_calendar: "microsoft_graph",
 };
+
+/** Reads the unverified id_token payload returned by the token endpoint over TLS. */
+function microsoftClaims(token: Record<string, unknown>): Record<string, unknown> {
+  const idToken = typeof token["id_token"] === "string" ? (token["id_token"] as string) : "";
+  try {
+    const claims = JSON.parse(Buffer.from(idToken.split(".")[1] ?? "", "base64url").toString("utf8")) as unknown;
+    return claims && typeof claims === "object" ? (claims as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
+}
 
 export function registerOAuthProvider(spec: OAuthProviderSpec) {
   SPECS[spec.connector] = spec;
