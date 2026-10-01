@@ -2,6 +2,7 @@ import { discordConnector } from "@/lib/connectors/adapters/discord";
 import { facebookPagesConnector } from "@/lib/connectors/adapters/facebook-pages";
 import { gmailConnector } from "@/lib/connectors/adapters/gmail";
 import { googleConnector } from "@/lib/connectors/adapters/google";
+import { googleDriveConnector } from "@/lib/connectors/adapters/google-drive";
 import { httpConnector } from "@/lib/connectors/adapters/http";
 import { instagramConnector } from "@/lib/connectors/adapters/instagram";
 import { microsoftGraphConnector } from "@/lib/connectors/adapters/microsoft-graph";
@@ -36,6 +37,7 @@ const ADAPTERS: ConnectorAdapter[] = [
   telegramConnector,
   discordConnector,
   microsoftGraphConnector,
+  googleDriveConnector,
 ];
 
 const byId = new Map(ADAPTERS.map((adapter) => [adapter.id, adapter]));

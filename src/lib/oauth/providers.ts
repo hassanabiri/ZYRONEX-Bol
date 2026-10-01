@@ -229,6 +229,28 @@ const SPECS: Record<string, OAuthProviderSpec> = {
         : {};
     },
   },
+  // Google Drive — official Google OAuth 2.0 (auth code + PKCE). Registered as
+  // `google_drive_api`; the `google_drive` alias keeps resolving to generic Google.
+  google_drive_api: {
+    connector: "google_drive_api",
+    label: "Google Drive",
+    authorizationUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+    tokenUrl: "https://oauth2.googleapis.com/token",
+    revokeUrl: "https://oauth2.googleapis.com/revoke",
+    // Least privilege by default: metadata reads + per-file access for app-created files.
+    // drive.readonly (export / shared drives) and drive (arbitrary file writes) are requested per connection only.
+    scopes: ["openid", "email", "https://www.googleapis.com/auth/drive.metadata.readonly", "https://www.googleapis.com/auth/drive.file"],
+    usePkce: true,
+    refreshable: true,
+    authorizationParams: { access_type: "offline", prompt: "consent", include_granted_scopes: "true" },
+    identify: (token) => {
+      const claims = microsoftClaims(token);
+      const email = typeof token["email"] === "string" ? (token["email"] as string) : typeof claims["email"] === "string" ? (claims["email"] as string) : undefined;
+      const sub = typeof claims["sub"] === "string" ? (claims["sub"] as string) : undefined;
+      // Google `sub` is the stable account id; email is the label.
+      return sub ? { accountIdentifier: sub, accountLabel: email ?? sub } : email ? { accountIdentifier: email, accountLabel: email } : {};
+    },
+  },
   // Microsoft Graph — official Microsoft identity platform v2.0 (auth code + PKCE).
   // The `common` authority serves every Entra ID tenant and personal accounts;
   // the tenant is read per account from the id_token (`tid`), never assumed.
