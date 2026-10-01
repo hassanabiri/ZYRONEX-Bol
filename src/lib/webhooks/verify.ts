@@ -6,6 +6,7 @@ import { messengerEventType } from "@/lib/connectors/adapters/messenger-map";
 import { discordEventId, discordEventType } from "@/lib/connectors/adapters/discord-map";
 import { graphNotificationEventId, graphNotificationEventType, parseGraphNotifications } from "@/lib/connectors/adapters/microsoft-graph-map";
 import { parseGmailPush } from "@/lib/connectors/adapters/gmail-map";
+import { DRIVE_RESOURCE_STATES, parseDrivePushHeaders } from "@/lib/connectors/adapters/google-drive-map";
 import { telegramEventType, telegramUpdateDateSeconds } from "@/lib/connectors/adapters/telegram-map";
 import type { WebhookVerification, WebhookVerifier, WebhookVerifierInput } from "@/lib/webhooks/types";
 
@@ -632,6 +633,32 @@ const microsoftGraphVerifier: WebhookVerifier = (input) => {
   return { ok: true, ...meta };
 };
 
+/**
+ * Google Drive push notifications (channels via changes.watch / files.watch).
+ * The body is empty; the official verification is `X-Goog-Channel-Token`
+ * matching the token set on the channel (the endpoint secret). Dedupe uses the
+ * official channel id + `X-Goog-Message-Number`; notifications for an expired
+ * channel are rejected as replay. The first `sync` message only needs a 2xx,
+ * which the shared ingress already returns.
+ */
+const googleDriveVerifier: WebhookVerifier = (input) => {
+  const push = parseDrivePushHeaders(input.headers);
+  const meta = {
+    eventId: push.channelId && push.messageNumber ? `drive:${push.channelId}:${push.messageNumber}` : undefined,
+    eventType: push.resourceState ? `drive.${push.resourceState}` : undefined,
+  };
+  if (!input.secret) return { ok: false, reason: "missing_secret", message: "No Drive channel token is configured", ...meta };
+  if (!push.token || !safeEqual(push.token, input.secret))
+    return { ok: false, reason: "invalid_signature", message: "Drive channel token does not match", ...meta };
+  if (!push.channelId || !push.resourceId || !push.messageNumber || !push.resourceState)
+    return { ok: false, reason: "malformed_payload", message: "Drive notification is missing official X-Goog headers", ...meta };
+  if (!(DRIVE_RESOURCE_STATES as readonly string[]).includes(push.resourceState))
+    return { ok: false, reason: "unsupported_event", message: "Drive resource state is not recognised", ...meta };
+  if (push.expirationMs !== undefined && push.expirationMs < input.nowMs - input.replayWindowMs)
+    return { ok: false, reason: "replay", message: "Notification belongs to an expired Drive channel", ...meta };
+  return { ok: true, ...meta };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
@@ -648,6 +675,7 @@ const VERIFIERS: Record<string, WebhookVerifier> = {
   telegram: telegramVerifier,
   discord: discordVerifier,
   microsoft_graph: microsoftGraphVerifier,
+  google_drive_api: googleDriveVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */

@@ -30,3 +30,9 @@
 - Backlog: shared ingress cannot echo Graph `validationToken` (text/plain within 10s) — subscriptions cannot be validated in production until the ingress supports provider-specific bodies (same item as Slack/Discord)
 - Backlog: runtime ignores Retry-After from failed 429 responses (same shared item as Telegram/Slack/Gmail)
 - Backlog: rich notifications (encrypted resource data) need certificate management; basic notifications only
+
+## Google Drive Connector (done — awaiting approval)
+- Technical debt: `google_drive` catalog alias still resolves to the generic Google connector; the dedicated connector is `google_drive_api` (same pattern as Gmail).
+- Technical debt: binary download / binary export / content upload need a binary transport in the shared runtime.
+- Technical debt: failed-429 Retry-After not consumed by runtime (shared with Gmail/Slack/Telegram/Graph).
+- Technical debt: channel renewal before expiration needs a shared scheduler.
