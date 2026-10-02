@@ -6,6 +6,8 @@ import { messengerEventType } from "@/lib/connectors/adapters/messenger-map";
 import { discordEventId, discordEventType } from "@/lib/connectors/adapters/discord-map";
 import { graphNotificationEventId, graphNotificationEventType, parseGraphNotifications } from "@/lib/connectors/adapters/microsoft-graph-map";
 import { parseGmailPush } from "@/lib/connectors/adapters/gmail-map";
+import { createHash } from "node:crypto";
+import { hubSpotBatchEventId, hubSpotBatchEventType, parseHubSpotEvents } from "@/lib/connectors/adapters/hubspot-map";
 import { DRIVE_RESOURCE_STATES, parseDrivePushHeaders } from "@/lib/connectors/adapters/google-drive-map";
 import { telegramEventType, telegramUpdateDateSeconds } from "@/lib/connectors/adapters/telegram-map";
 import type { WebhookVerification, WebhookVerifier, WebhookVerifierInput } from "@/lib/webhooks/types";
@@ -659,6 +661,37 @@ const googleDriveVerifier: WebhookVerifier = (input) => {
   return { ok: true, ...meta };
 };
 
+/**
+ * HubSpot Webhooks API. Official v1 signature: `X-HubSpot-Signature` =
+ * hex SHA-256 of (app client secret + raw body), version `v1`. The v3
+ * signature also signs the HTTP method and full request URI, which the shared
+ * verifier input does not carry — tracked as technical debt; a request that
+ * only carries v3 is rejected rather than trusted. Replay: every event's
+ * official `occurredAt` (and `X-HubSpot-Request-Timestamp` when sent) must be
+ * inside the replay window. Dedupe uses official portalId + subscriptionId +
+ * eventId for every event in the batch.
+ */
+const hubspotVerifier: WebhookVerifier = (input) => {
+  const events = parseHubSpotEvents(input.payload);
+  const meta = { eventId: hubSpotBatchEventId(events), eventType: hubSpotBatchEventType(events) };
+  if (!input.secret) return { ok: false, reason: "missing_secret", message: "No HubSpot app client secret is configured", ...meta };
+  const version = (input.headers["x-hubspot-signature-version"] ?? "v1").toLowerCase();
+  const provided = input.headers["x-hubspot-signature"];
+  if (version !== "v1" || !provided)
+    return { ok: false, reason: "invalid_signature", message: "HubSpot v1 signature is required (v3 needs the request URI)", ...meta };
+  const expected = createHash("sha256").update(input.secret + input.raw).digest("hex");
+  if (!safeEqual(provided.toLowerCase(), expected)) return { ok: false, reason: "invalid_signature", message: "HubSpot signature does not match", ...meta };
+  if (!events.length) return { ok: false, reason: "malformed_payload", message: "HubSpot webhook body is not an event array", ...meta };
+  if (!meta.eventId || !meta.eventType)
+    return { ok: false, reason: "malformed_payload", message: "HubSpot events are missing official identifiers", ...meta };
+  const headerTs = Number(input.headers["x-hubspot-request-timestamp"]);
+  if (input.headers["x-hubspot-request-timestamp"] !== undefined && replayed(Number.isFinite(headerTs) ? headerTs : -Infinity, input))
+    return { ok: false, reason: "replay", message: "HubSpot request timestamp is outside the replay window", ...meta };
+  const oldest = Math.min(...events.map((e) => e.occurredAt ?? input.nowMs));
+  if (replayed(oldest, input)) return { ok: false, reason: "replay", message: "HubSpot event is outside the replay window", ...meta };
+  return { ok: true, timestampMs: oldest, ...meta };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
@@ -676,6 +709,7 @@ const VERIFIERS: Record<string, WebhookVerifier> = {
   discord: discordVerifier,
   microsoft_graph: microsoftGraphVerifier,
   google_drive_api: googleDriveVerifier,
+  hubspot: hubspotVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */

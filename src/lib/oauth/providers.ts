@@ -251,6 +251,29 @@ const SPECS: Record<string, OAuthProviderSpec> = {
       return sub ? { accountIdentifier: sub, accountLabel: email ?? sub } : email ? { accountIdentifier: email, accountLabel: email } : {};
     },
   },
+  // HubSpot — official OAuth 2.0 authorization code flow. HubSpot does not
+  // document PKCE for public apps, so state protection is the CSRF guard.
+  // Scopes are least-privilege reads; write scopes are requested per connection.
+  hubspot: {
+    connector: "hubspot",
+    label: "HubSpot",
+    authorizationUrl: "https://app.hubspot.com/oauth/authorize",
+    tokenUrl: "https://api.hubapi.com/oauth/v1/token",
+    scopes: ["oauth", "crm.objects.contacts.read", "crm.objects.companies.read", "crm.objects.deals.read"],
+    usePkce: false,
+    refreshable: true,
+    // Portal (hub) id is an identifier, not a secret; kept with the vault token set.
+    credentialFields: (token) => {
+      const hub = token["hub_id"] ?? token["hubId"];
+      return hub !== undefined && hub !== null && hub !== "" ? { portal_id: String(hub) } : {};
+    },
+    identify: (token) => {
+      const hub = token["hub_id"] ?? token["hubId"];
+      if (hub === undefined || hub === null || hub === "") return {};
+      const domain = typeof token["hub_domain"] === "string" ? (token["hub_domain"] as string) : undefined;
+      return { accountIdentifier: `hub:${String(hub)}`, accountLabel: domain ?? `HubSpot portal ${String(hub)}` };
+    },
+  },
   // Microsoft Graph — official Microsoft identity platform v2.0 (auth code + PKCE).
   // The `common` authority serves every Entra ID tenant and personal accounts;
   // the tenant is read per account from the id_token (`tid`), never assumed.
@@ -293,6 +316,7 @@ const ALIASES: Record<string, string> = {
   meta_pages: "facebook_pages",
   facebook_messenger: "messenger",
   messenger_platform: "messenger",
+  hubspot_crm: "hubspot",
   outlook: "microsoft_graph",
   microsoft_outlook: "microsoft_graph",
   microsoft_365: "microsoft_graph",
