@@ -43,3 +43,9 @@
 - Technical debt: portal identity relies on `hub_id` in the token response; otherwise confirm with get_account_details after connect.
 - Technical debt: migrate v3/v4 paths to HubSpot date-versioned paths (single version table in the adapter).
 - Technical debt: failed-429 Retry-After not consumed by runtime (shared).
+
+## Salesforce CRM Connector (done — awaiting approval)
+- [x] Adapter `salesforce` (REST v62.0), OAuth production + sandbox with PKCE, org-bound accounts, 241 tests.
+- Technical debt: Salesforce omits `expires_in`; a 1h fallback forces early refresh.
+- Technical debt: Outbound Messages need a SOAP <Ack> reply the shared ingress cannot send; Platform Events / CDC / Pub/Sub need a persistent streaming host.
+- Technical debt: Retry-After after the final failed 429 (shared runtime item).
