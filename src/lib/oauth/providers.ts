@@ -1,4 +1,6 @@
 import { INSTAGRAM_API_VERSION } from "@/lib/connectors/adapters/instagram";
+import { assertSalesforceInstanceUrl } from "@/lib/connectors/adapters/salesforce";
+import { parseSalesforceIdentityUrl } from "@/lib/connectors/adapters/salesforce-map";
 import { normalizeShopDomain } from "@/lib/connectors/adapters/shopify";
 import type { OAuthProviderSpec } from "@/lib/oauth/types";
 
@@ -274,6 +276,11 @@ const SPECS: Record<string, OAuthProviderSpec> = {
       return { accountIdentifier: `hub:${String(hub)}`, accountLabel: domain ?? `HubSpot portal ${String(hub)}` };
     },
   },
+  // Salesforce — official OAuth 2.0 web server flow with PKCE. Production orgs
+  // authorize at login.salesforce.com, sandboxes at test.salesforce.com; both
+  // map to the same `salesforce` connector and the org's own instance_url.
+  salesforce: salesforceSpec("login.salesforce.com", "Salesforce"),
+  salesforce_sandbox: salesforceSpec("test.salesforce.com", "Salesforce (Sandbox)"),
   // Microsoft Graph — official Microsoft identity platform v2.0 (auth code + PKCE).
   // The `common` authority serves every Entra ID tenant and personal accounts;
   // the tenant is read per account from the id_token (`tid`), never assumed.
@@ -317,6 +324,7 @@ const ALIASES: Record<string, string> = {
   facebook_messenger: "messenger",
   messenger_platform: "messenger",
   hubspot_crm: "hubspot",
+  salesforce_crm: "salesforce",
   outlook: "microsoft_graph",
   microsoft_outlook: "microsoft_graph",
   microsoft_365: "microsoft_graph",
@@ -396,4 +404,47 @@ export function describeOAuthProviders() {
     refreshable: spec.refreshable !== false,
     revocable: Boolean(spec.revokeUrl),
   }));
+}
+
+/**
+ * Salesforce OAuth spec for one login host. Salesforce omits `expires_in`
+ * (session lifetime is an org setting), so a conservative 1h fallback forces
+ * an early refresh instead of a 401. instance_url and the identity URL are
+ * identifiers, stored with the vault token set; the account is bound to the
+ * official org id + user id so every org is an independent connection.
+ */
+function salesforceSpec(loginHost: string, label: string): OAuthProviderSpec {
+  return {
+    connector: "salesforce",
+    label,
+    authorizationUrl: `https://${loginHost}/services/oauth2/authorize`,
+    tokenUrl: `https://${loginHost}/services/oauth2/token`,
+    revokeUrl: `https://${loginHost}/services/oauth2/revoke`,
+    scopes: ["api", "refresh_token", "id"],
+    usePkce: true,
+    refreshable: true,
+    defaultExpiresInSeconds: 3600,
+    credentialFields: (token) => {
+      const out: Record<string, string> = {};
+      try {
+        out["instance_url"] = assertSalesforceInstanceUrl(token["instance_url"]);
+      } catch {
+        // An invalid or missing instance_url is never stored; calls then fail with an auth error.
+      }
+      const identity = parseSalesforceIdentityUrl(token["id"]);
+      if (identity) Object.assign(out, { identity_url: String(token["id"]), org_id: identity.orgId, user_id: identity.userId });
+      return out;
+    },
+    identify: (token) => {
+      const identity = parseSalesforceIdentityUrl(token["id"]);
+      if (!identity) return {};
+      let host = "";
+      try {
+        host = new URL(String(token["instance_url"])).hostname;
+      } catch {
+        host = "";
+      }
+      return { accountIdentifier: `org:${identity.orgId}:user:${identity.userId}`, accountLabel: host ? `${host} (${identity.orgId})` : `Salesforce org ${identity.orgId}` };
+    },
+  };
 }
