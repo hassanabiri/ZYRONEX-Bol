@@ -36,3 +36,10 @@
 - Technical debt: binary download / binary export / content upload need a binary transport in the shared runtime.
 - Technical debt: failed-429 Retry-After not consumed by runtime (shared with Gmail/Slack/Telegram/Graph).
 - Technical debt: channel renewal before expiration needs a shared scheduler.
+
+## HubSpot CRM Connector (done — awaiting approval)
+- Technical debt: webhook v3 signature needs HTTP method + full URI, not in the shared verifier input; v1 (client secret + body) is verified instead.
+- Technical debt: HubSpot refresh-token revocation is DELETE /oauth/v1/refresh-tokens/{token}; shared revoke only supports POST form, so disconnect is local-only.
+- Technical debt: portal identity relies on `hub_id` in the token response; otherwise confirm with get_account_details after connect.
+- Technical debt: migrate v3/v4 paths to HubSpot date-versioned paths (single version table in the adapter).
+- Technical debt: failed-429 Retry-After not consumed by runtime (shared).
