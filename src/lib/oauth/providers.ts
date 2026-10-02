@@ -405,3 +405,46 @@ export function describeOAuthProviders() {
     revocable: Boolean(spec.revokeUrl),
   }));
 }
+
+/**
+ * Salesforce OAuth spec for one login host. Salesforce omits `expires_in`
+ * (session lifetime is an org setting), so a conservative 1h fallback forces
+ * an early refresh instead of a 401. instance_url and the identity URL are
+ * identifiers, stored with the vault token set; the account is bound to the
+ * official org id + user id so every org is an independent connection.
+ */
+function salesforceSpec(loginHost: string, label: string): OAuthProviderSpec {
+  return {
+    connector: "salesforce",
+    label,
+    authorizationUrl: `https://${loginHost}/services/oauth2/authorize`,
+    tokenUrl: `https://${loginHost}/services/oauth2/token`,
+    revokeUrl: `https://${loginHost}/services/oauth2/revoke`,
+    scopes: ["api", "refresh_token", "id"],
+    usePkce: true,
+    refreshable: true,
+    defaultExpiresInSeconds: 3600,
+    credentialFields: (token) => {
+      const out: Record<string, string> = {};
+      try {
+        out["instance_url"] = assertSalesforceInstanceUrl(token["instance_url"]);
+      } catch {
+        // An invalid or missing instance_url is never stored; calls then fail with an auth error.
+      }
+      const identity = parseSalesforceIdentityUrl(token["id"]);
+      if (identity) Object.assign(out, { identity_url: String(token["id"]), org_id: identity.orgId, user_id: identity.userId });
+      return out;
+    },
+    identify: (token) => {
+      const identity = parseSalesforceIdentityUrl(token["id"]);
+      if (!identity) return {};
+      let host = "";
+      try {
+        host = new URL(String(token["instance_url"])).hostname;
+      } catch {
+        host = "";
+      }
+      return { accountIdentifier: `org:${identity.orgId}:user:${identity.userId}`, accountLabel: host ? `${host} (${identity.orgId})` : `Salesforce org ${identity.orgId}` };
+    },
+  };
+}

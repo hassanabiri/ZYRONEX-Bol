@@ -6,6 +6,7 @@ import { googleDriveConnector } from "@/lib/connectors/adapters/google-drive";
 import { httpConnector } from "@/lib/connectors/adapters/http";
 import { hubspotConnector } from "@/lib/connectors/adapters/hubspot";
 import { instagramConnector } from "@/lib/connectors/adapters/instagram";
+import { salesforceConnector } from "@/lib/connectors/adapters/salesforce";
 import { microsoftGraphConnector } from "@/lib/connectors/adapters/microsoft-graph";
 import { messengerConnector } from "@/lib/connectors/adapters/messenger";
 import { sallaConnector } from "@/lib/connectors/adapters/salla";
@@ -40,6 +41,7 @@ const ADAPTERS: ConnectorAdapter[] = [
   microsoftGraphConnector,
   googleDriveConnector,
   hubspotConnector,
+  salesforceConnector,
 ];
 
 const byId = new Map(ADAPTERS.map((adapter) => [adapter.id, adapter]));
@@ -68,6 +70,8 @@ const ALIASES: Record<string, string> = {
   telegram_bot: "telegram",
   discord_bot: "discord",
   hubspot_crm: "hubspot",
+  salesforce_crm: "salesforce",
+  salesforce_sandbox: "salesforce",
   outlook: "microsoft_graph",
   microsoft_outlook: "microsoft_graph",
   microsoft_365: "microsoft_graph",
