@@ -1,4 +1,6 @@
 import { INSTAGRAM_API_VERSION } from "@/lib/connectors/adapters/instagram";
+import { assertSalesforceInstanceUrl } from "@/lib/connectors/adapters/salesforce";
+import { parseSalesforceIdentityUrl } from "@/lib/connectors/adapters/salesforce-map";
 import { normalizeShopDomain } from "@/lib/connectors/adapters/shopify";
 import type { OAuthProviderSpec } from "@/lib/oauth/types";
 
@@ -274,6 +276,11 @@ const SPECS: Record<string, OAuthProviderSpec> = {
       return { accountIdentifier: `hub:${String(hub)}`, accountLabel: domain ?? `HubSpot portal ${String(hub)}` };
     },
   },
+  // Salesforce — official OAuth 2.0 web server flow with PKCE. Production orgs
+  // authorize at login.salesforce.com, sandboxes at test.salesforce.com; both
+  // map to the same `salesforce` connector and the org's own instance_url.
+  salesforce: salesforceSpec("login.salesforce.com", "Salesforce"),
+  salesforce_sandbox: salesforceSpec("test.salesforce.com", "Salesforce (Sandbox)"),
   // Microsoft Graph — official Microsoft identity platform v2.0 (auth code + PKCE).
   // The `common` authority serves every Entra ID tenant and personal accounts;
   // the tenant is read per account from the id_token (`tid`), never assumed.
@@ -317,6 +324,7 @@ const ALIASES: Record<string, string> = {
   facebook_messenger: "messenger",
   messenger_platform: "messenger",
   hubspot_crm: "hubspot",
+  salesforce_crm: "salesforce",
   outlook: "microsoft_graph",
   microsoft_outlook: "microsoft_graph",
   microsoft_365: "microsoft_graph",
