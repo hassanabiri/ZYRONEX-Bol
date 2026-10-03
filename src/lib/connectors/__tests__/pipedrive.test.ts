@@ -375,7 +375,7 @@ describe("pipedrive search", () => {
   for (const [op, path] of [["search_persons", "/api/v2/persons/search"], ["search_organizations", "/api/v2/organizations/search"], ["search_deals", "/api/v2/deals/search"], ["search_products", "/api/v2/products/search"], ["search_items", "/api/v2/itemSearch"]])
     it(`${op} → ${path}`, async () => {
       const { calls, fetchImpl } = capture(ok({ items: [{ result_score: 0.9, item: { id: 1, type: "person", name: "A" } }] }));
-      const r = await run({ operation: op, params: { term: "acme", fields: ["name", "email"] } }, fetchImpl);
+      const r = await run({ operation: op!, params: { term: "acme", fields: ["name", "email"] } }, fetchImpl);
       expect(urlOf(calls[0]!).pathname).toBe(path);
       expect(urlOf(calls[0]!).searchParams.get("fields")).toBe("name,email");
       expect(r.ok && r.items[0]).toMatchObject({ id: 1, result_score: 0.9 });
