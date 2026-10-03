@@ -6,6 +6,7 @@ import { googleDriveConnector } from "@/lib/connectors/adapters/google-drive";
 import { httpConnector } from "@/lib/connectors/adapters/http";
 import { hubspotConnector } from "@/lib/connectors/adapters/hubspot";
 import { instagramConnector } from "@/lib/connectors/adapters/instagram";
+import { pipedriveConnector } from "@/lib/connectors/adapters/pipedrive";
 import { salesforceConnector } from "@/lib/connectors/adapters/salesforce";
 import { microsoftGraphConnector } from "@/lib/connectors/adapters/microsoft-graph";
 import { messengerConnector } from "@/lib/connectors/adapters/messenger";
@@ -42,6 +43,7 @@ const ADAPTERS: ConnectorAdapter[] = [
   googleDriveConnector,
   hubspotConnector,
   salesforceConnector,
+  pipedriveConnector,
 ];
 
 const byId = new Map(ADAPTERS.map((adapter) => [adapter.id, adapter]));
@@ -72,6 +74,7 @@ const ALIASES: Record<string, string> = {
   hubspot_crm: "hubspot",
   salesforce_crm: "salesforce",
   salesforce_sandbox: "salesforce",
+  pipedrive_crm: "pipedrive",
   outlook: "microsoft_graph",
   microsoft_outlook: "microsoft_graph",
   microsoft_365: "microsoft_graph",

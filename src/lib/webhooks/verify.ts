@@ -7,6 +7,7 @@ import { discordEventId, discordEventType } from "@/lib/connectors/adapters/disc
 import { graphNotificationEventId, graphNotificationEventType, parseGraphNotifications } from "@/lib/connectors/adapters/microsoft-graph-map";
 import { parseGmailPush } from "@/lib/connectors/adapters/gmail-map";
 import { createHash } from "node:crypto";
+import { parsePipedriveWebhookMeta } from "@/lib/connectors/adapters/pipedrive-map";
 import { hubSpotBatchEventId, hubSpotBatchEventType, parseHubSpotEvents } from "@/lib/connectors/adapters/hubspot-map";
 import { DRIVE_RESOURCE_STATES, parseDrivePushHeaders } from "@/lib/connectors/adapters/google-drive-map";
 import { telegramEventType, telegramUpdateDateSeconds } from "@/lib/connectors/adapters/telegram-map";
@@ -692,6 +693,31 @@ const hubspotVerifier: WebhookVerifier = (input) => {
   return { ok: true, timestampMs: oldest, ...meta };
 };
 
+/**
+ * Pipedrive Webhooks v2. Pipedrive does not sign deliveries; the official
+ * authenticity mechanism is HTTP Basic auth configured on the webhook
+ * (`http_auth_user` / `http_auth_password`). The endpoint secret holds
+ * `user:password` and is compared in constant time. `meta.id` is the official
+ * unique event id; `meta.timestamp` bounds replays. v1 payloads are rejected.
+ */
+const pipedriveVerifier: WebhookVerifier = (input) => {
+  const meta = parsePipedriveWebhookMeta(input.payload);
+  const out = {
+    ...(meta.id ? { eventId: meta.id } : {}),
+    ...(meta.entity && meta.action ? { eventType: `${meta.entity}.${meta.action}` } : {}),
+  };
+  if (!input.secret) return { ok: false, reason: "missing_secret", message: "No Pipedrive webhook Basic credentials are configured", ...out };
+  const header = input.headers["authorization"] ?? "";
+  const m = /^Basic\s+([A-Za-z0-9+/=]+)$/i.exec(header.trim());
+  const provided = m ? Buffer.from(m[1]!, "base64").toString("utf8") : "";
+  if (!provided || !safeEqual(provided, input.secret)) return { ok: false, reason: "invalid_signature", message: "Pipedrive webhook Basic credentials do not match", ...out };
+  if (meta.version !== "2.0") return { ok: false, reason: "unsupported_event", message: "Only Pipedrive Webhooks v2 are supported", ...out };
+  if (!meta.id || !meta.entity || !meta.action) return { ok: false, reason: "malformed_payload", message: "Pipedrive event is missing meta.id/entity/action", ...out };
+  if (meta.timestampMs === undefined) return { ok: false, reason: "malformed_payload", message: "Pipedrive event is missing meta.timestamp", ...out };
+  if (replayed(meta.timestampMs, input)) return { ok: false, reason: "replay", message: "Pipedrive event is outside the replay window", ...out };
+  return { ok: true, timestampMs: meta.timestampMs, ...out };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
@@ -710,6 +736,7 @@ const VERIFIERS: Record<string, WebhookVerifier> = {
   microsoft_graph: microsoftGraphVerifier,
   google_drive_api: googleDriveVerifier,
   hubspot: hubspotVerifier,
+  pipedrive: pipedriveVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */
