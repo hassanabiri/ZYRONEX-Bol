@@ -49,3 +49,8 @@
 - Technical debt: Salesforce omits `expires_in`; a 1h fallback forces early refresh.
 - Technical debt: Outbound Messages need a SOAP <Ack> reply the shared ingress cannot send; Platform Events / CDC / Pub/Sub need a persistent streaming host.
 - Technical debt: Retry-After after the final failed 429 (shared runtime item).
+
+## Pipedrive CRM Connector (done — awaiting approval)
+- [x] Adapter `pipedrive` (API v2 + v1 where needed), OAuth with Basic client auth, company-bound accounts, Webhooks v2 verifier, 200 tests.
+- Technical debt: account identity is the company subdomain (token response carries no numeric company id).
+- Technical debt: webhooks are unsigned; authenticity relies on HTTP Basic credentials only.
