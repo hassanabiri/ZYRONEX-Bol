@@ -1,6 +1,8 @@
 import { INSTAGRAM_API_VERSION } from "@/lib/connectors/adapters/instagram";
 import { assertSalesforceInstanceUrl } from "@/lib/connectors/adapters/salesforce";
 import { parseSalesforceIdentityUrl } from "@/lib/connectors/adapters/salesforce-map";
+import { assertPipedriveApiDomain } from "@/lib/connectors/adapters/pipedrive";
+import { pipedriveCompanyDomain } from "@/lib/connectors/adapters/pipedrive-map";
 import { normalizeShopDomain } from "@/lib/connectors/adapters/shopify";
 import type { OAuthProviderSpec } from "@/lib/oauth/types";
 
@@ -281,6 +283,31 @@ const SPECS: Record<string, OAuthProviderSpec> = {
   // map to the same `salesforce` connector and the org's own instance_url.
   salesforce: salesforceSpec("login.salesforce.com", "Salesforce"),
   salesforce_sandbox: salesforceSpec("test.salesforce.com", "Salesforce (Sandbox)"),
+  // Pipedrive — official OAuth 2.0 authorization code flow (no PKCE documented;
+  // state is the CSRF guard). Scopes are configured on the Marketplace app, not
+  // per request. Client credentials go in the Basic header as documented.
+  pipedrive: {
+    connector: "pipedrive",
+    label: "Pipedrive",
+    authorizationUrl: "https://oauth.pipedrive.com/oauth/authorize",
+    tokenUrl: "https://oauth.pipedrive.com/oauth/token",
+    revokeUrl: "https://oauth.pipedrive.com/oauth/revoke",
+    scopes: [],
+    usePkce: false,
+    clientAuth: "basic",
+    refreshable: true,
+    credentialFields: (token) => {
+      try {
+        return { api_domain: assertPipedriveApiDomain(token["api_domain"]) };
+      } catch {
+        return {};
+      }
+    },
+    identify: (token) => {
+      const company = pipedriveCompanyDomain(token["api_domain"]);
+      return company ? { accountIdentifier: `company:${company}`, accountLabel: `${company}.pipedrive.com` } : {};
+    },
+  },
   // Microsoft Graph — official Microsoft identity platform v2.0 (auth code + PKCE).
   // The `common` authority serves every Entra ID tenant and personal accounts;
   // the tenant is read per account from the id_token (`tid`), never assumed.
@@ -325,6 +352,7 @@ const ALIASES: Record<string, string> = {
   messenger_platform: "messenger",
   hubspot_crm: "hubspot",
   salesforce_crm: "salesforce",
+  pipedrive_crm: "pipedrive",
   outlook: "microsoft_graph",
   microsoft_outlook: "microsoft_graph",
   microsoft_365: "microsoft_graph",
