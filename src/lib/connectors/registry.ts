@@ -17,6 +17,7 @@ import { telegramConnector } from "@/lib/connectors/adapters/telegram";
 import { whatsappConnector } from "@/lib/connectors/adapters/whatsapp";
 import { woocommerceConnector } from "@/lib/connectors/adapters/woocommerce";
 import { zidConnector } from "@/lib/connectors/adapters/zid";
+import { zendeskConnector } from "@/lib/connectors/adapters/zendesk";
 import type { ConnectorAdapter } from "@/lib/connectors/types";
 
 /**
@@ -44,6 +45,7 @@ const ADAPTERS: ConnectorAdapter[] = [
   hubspotConnector,
   salesforceConnector,
   pipedriveConnector,
+  zendeskConnector,
 ];
 
 const byId = new Map(ADAPTERS.map((adapter) => [adapter.id, adapter]));
@@ -75,6 +77,7 @@ const ALIASES: Record<string, string> = {
   salesforce_crm: "salesforce",
   salesforce_sandbox: "salesforce",
   pipedrive_crm: "pipedrive",
+  zendesk_support: "zendesk",
   outlook: "microsoft_graph",
   microsoft_outlook: "microsoft_graph",
   microsoft_365: "microsoft_graph",
