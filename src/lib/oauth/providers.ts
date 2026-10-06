@@ -4,10 +4,12 @@ import { parseSalesforceIdentityUrl } from "@/lib/connectors/adapters/salesforce
 import { assertPipedriveApiDomain } from "@/lib/connectors/adapters/pipedrive";
 import { pipedriveCompanyDomain } from "@/lib/connectors/adapters/pipedrive-map";
 import { normalizeShopDomain } from "@/lib/connectors/adapters/shopify";
+import { zendeskSubdomain } from "@/lib/connectors/adapters/zendesk-map";
 import type { OAuthProviderSpec } from "@/lib/oauth/types";
 
 /** Placeholder host in the Shopify template spec, bound per store at runtime. */
 const SHOPIFY_SHOP_TOKEN = "{shop}";
+const ZENDESK_SUB_TOKEN = "{subdomain}";
 
 /**
  * OAuth specs bound to the Connector Registry.
@@ -308,6 +310,21 @@ const SPECS: Record<string, OAuthProviderSpec> = {
       return company ? { accountIdentifier: `company:${company}`, accountLabel: `${company}.pipedrive.com` } : {};
     },
   },
+  // Zendesk — official OAuth 2.0 authorization code flow with PKCE on the
+  // account's own subdomain. `zendeskOAuthSpec(subdomain)` binds the endpoints;
+  // this base entry only carries a placeholder host and is never called as-is.
+  zendesk: {
+    connector: "zendesk",
+    label: "Zendesk",
+    authorizationUrl: `https://${ZENDESK_SUB_TOKEN}.zendesk.com/oauth/authorizations/new`,
+    tokenUrl: `https://${ZENDESK_SUB_TOKEN}.zendesk.com/oauth/tokens`,
+    // Least privilege by default; write scopes are requested per connection.
+    scopes: ["read"],
+    usePkce: true,
+    // Shared refresh resolves the token endpoint statically; per-subdomain
+    // refresh is tracked as technical debt, so tokens are not auto-refreshed.
+    refreshable: false,
+  },
   // Microsoft Graph — official Microsoft identity platform v2.0 (auth code + PKCE).
   // The `common` authority serves every Entra ID tenant and personal accounts;
   // the tenant is read per account from the id_token (`tid`), never assumed.
@@ -353,6 +370,7 @@ const ALIASES: Record<string, string> = {
   hubspot_crm: "hubspot",
   salesforce_crm: "salesforce",
   pipedrive_crm: "pipedrive",
+  zendesk_support: "zendesk",
   outlook: "microsoft_graph",
   microsoft_outlook: "microsoft_graph",
   microsoft_365: "microsoft_graph",
@@ -395,6 +413,19 @@ export function shopifyOAuthSpec(shopDomain: string): OAuthProviderSpec {
     tokenUrl: base.tokenUrl.replace(SHOPIFY_SHOP_TOKEN, shop),
     identify: () => ({ accountIdentifier: shop, accountLabel: shop }),
     credentialFields: () => ({ shop_domain: shop }),
+  };
+}
+
+export function zendeskOAuthSpec(subdomain: string): OAuthProviderSpec {
+  const sub = zendeskSubdomain(subdomain);
+  if (!sub) throw new Error("A valid Zendesk subdomain is required");
+  const base = SPECS["zendesk"]!;
+  return {
+    ...base,
+    authorizationUrl: base.authorizationUrl.replace(ZENDESK_SUB_TOKEN, sub),
+    tokenUrl: base.tokenUrl.replace(ZENDESK_SUB_TOKEN, sub),
+    identify: () => ({ accountIdentifier: `subdomain:${sub}`, accountLabel: `${sub}.zendesk.com` }),
+    credentialFields: () => ({ subdomain: sub }),
   };
 }
 

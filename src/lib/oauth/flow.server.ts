@@ -3,7 +3,7 @@ import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { redactString } from "@/lib/connectors/errors";
 import { createSupabaseOAuthStore, loadClientCredentials } from "@/lib/oauth/accounts.server";
 import { beginAuthorization, completeAuthorization, disconnectAccount, hashState } from "@/lib/oauth/core";
-import { getOAuthProvider, shopifyOAuthSpec } from "@/lib/oauth/providers";
+import { getOAuthProvider, shopifyOAuthSpec, zendeskOAuthSpec } from "@/lib/oauth/providers";
 import { OAuthError, type ConnectionStatus } from "@/lib/oauth/types";
 
 /**
@@ -22,6 +22,12 @@ function resolveSpec(connector: string, params?: Record<string, string>) {
     const shop = params?.["shop"] ?? params?.["shop_domain"] ?? "";
     if (!shop) throw new OAuthError("unsupported", "A Shopify store domain is required to connect");
     return shopifyOAuthSpec(shop);
+  }
+  // Zendesk OAuth endpoints live on the account's own subdomain. At start the
+  // subdomain comes from the start params; at callback it is re-bound from the
+  // stored integration (never from the callback query string).
+  if (spec?.connector === "zendesk" && params?.["subdomain"] && params["__zendesk_bound"] === "1") {
+    return zendeskOAuthSpec(params["subdomain"]);
   }
   return spec;
 }
@@ -61,7 +67,17 @@ export async function startAuthorization(input: {
   /** Connector-specific start values (e.g. Shopify's `shop` store domain). */
   params?: Record<string, string>;
 }) {
-  const spec = resolveSpec(input.connector, input.params);
+  const startParams = input.params ? { ...input.params } : undefined;
+  if (getOAuthProvider(input.connector)?.connector === "zendesk") {
+    if (!startParams?.["subdomain"]) throw new OAuthError("unsupported", "A Zendesk subdomain is required to connect");
+    if (!input.integrationId) throw new OAuthError("unsupported", "Zendesk OAuth needs the workspace Zendesk integration (it holds the account OAuth client)");
+    const bound = await zendeskSubdomainFor(input.workspaceId, input.integrationId);
+    if (bound !== startParams["subdomain"].toLowerCase().replace(/\.zendesk\.com$/, "").replace(/^https:\/\//, ""))
+      throw new OAuthError("workspace_mismatch", "The Zendesk subdomain does not match the workspace integration");
+    startParams["subdomain"] = bound;
+    startParams["__zendesk_bound"] = "1";
+  }
+  const spec = resolveSpec(input.connector, startParams);
   if (!spec) throw new OAuthError("unsupported", `"${input.connector}" does not support OAuth yet`);
   const provider = input.provider ?? input.connector;
   const client = await loadClientCredentials(input.workspaceId, provider, input.integrationId ?? null);
@@ -91,6 +107,20 @@ export type CallbackOutcome = {
   message: string;
 };
 
+/** Reads the validated Zendesk subdomain from the workspace's own integration config. */
+async function zendeskSubdomainFor(workspaceId: string, integrationId: string): Promise<string | null> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("integrations")
+    .select("config")
+    .eq("id", integrationId)
+    .eq("workspace_id", workspaceId)
+    .maybeSingle();
+  const config = (data as { config?: Record<string, unknown> } | null)?.config ?? {};
+  const { zendeskSubdomain } = await import("@/lib/connectors/adapters/zendesk-map");
+  return zendeskSubdomain(config["subdomain"]);
+}
+
 /** Step 2 — callback. Validates state, exchanges the code, stores the account. */
 export async function handleOAuthCallback(input: {
   connector: string;
@@ -118,6 +148,11 @@ export async function handleOAuthCallback(input: {
 
   try {
     const client = await loadClientCredentials(pending.workspaceId, pending.provider, pending.integrationId);
+    if (spec.connector === "zendesk") {
+      const sub = pending.integrationId ? await zendeskSubdomainFor(pending.workspaceId, pending.integrationId) : null;
+      if (!sub) return { ok: false, status: "failed", message: "This authorization link could not be verified" };
+      spec = zendeskOAuthSpec(sub);
+    }
     if (spec.connector === "shopify" && !shopifyCallbackSigned(input.params ?? {}, client.clientSecret))
       return { ok: false, status: "failed", message: "This authorization link could not be verified" };
     const { account } = await completeAuthorization({
