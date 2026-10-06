@@ -54,3 +54,8 @@
 - [x] Adapter `pipedrive` (API v2 + v1 where needed), OAuth with Basic client auth, company-bound accounts, Webhooks v2 verifier, 200 tests.
 - Technical debt: account identity is the company subdomain (token response carries no numeric company id).
 - Technical debt: webhooks are unsigned; authenticity relies on HTTP Basic credentials only.
+
+## Zendesk Support Connector (done — awaiting approval)
+- [x] Adapter `zendesk` (alias `zendesk_support`), official Support API v2, OAuth (PKCE, per-subdomain) + API token, signed webhooks verifier, tests.
+- Technical debt: OAuth refresh/revoke not wired (shared flow resolves token endpoint statically; Zendesk revoke is DELETE /api/v2/oauth/tokens/current).
+- Technical debt: binary uploads/downloads need a binary transport.
