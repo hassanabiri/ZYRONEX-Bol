@@ -83,7 +83,7 @@ export function assertZendeskId(value: unknown, field = "id"): string {
 }
 
 export function assertCursor(paging: Paging, value: string): string {
-  if (paging === "page" ? !/^[1-9]\d{0,4}$/.test(value) : !/^[A-Za-z0-9+/=_.-]{1,2048}$/.test(value))
+  if (paging === "page" ? !/^[1-9]\d{0,4}$/.test(value) : !/^[A-Za-z0-9+/=_.-]{1,2048}$/.test(value) || value.includes(".."))
     throw invalid("Pagination cursor is not an official Zendesk cursor");
   return value;
 }
