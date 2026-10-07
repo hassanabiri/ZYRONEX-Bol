@@ -325,6 +325,19 @@ const SPECS: Record<string, OAuthProviderSpec> = {
     // refresh is tracked as technical debt, so tokens are not auto-refreshed.
     refreshable: false,
   },
+  // Intercom — official OAuth authorization code flow. Permissions are set on
+  // the app in the Developer Hub (no scope parameter); no PKCE, refresh or
+  // revoke endpoint is documented. Tokens are issued by the US auth host.
+  intercom: {
+    connector: "intercom",
+    label: "Intercom",
+    authorizationUrl: "https://app.intercom.com/oauth",
+    tokenUrl: "https://api.intercom.io/auth/eagle/token",
+    scopes: [],
+    usePkce: false,
+    refreshable: false,
+    // The token response carries no workspace id; binding uses /me (see roadmap debt).
+  },
   // Microsoft Graph — official Microsoft identity platform v2.0 (auth code + PKCE).
   // The `common` authority serves every Entra ID tenant and personal accounts;
   // the tenant is read per account from the id_token (`tid`), never assumed.
@@ -371,6 +384,7 @@ const ALIASES: Record<string, string> = {
   salesforce_crm: "salesforce",
   pipedrive_crm: "pipedrive",
   zendesk_support: "zendesk",
+  intercom_support: "intercom",
   outlook: "microsoft_graph",
   microsoft_outlook: "microsoft_graph",
   microsoft_365: "microsoft_graph",

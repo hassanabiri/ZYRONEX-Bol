@@ -59,3 +59,9 @@
 - [x] Adapter `zendesk` (alias `zendesk_support`), official Support API v2, OAuth (PKCE, per-subdomain) + API token, signed webhooks verifier, tests.
 - Technical debt: OAuth refresh/revoke not wired (shared flow resolves token endpoint statically; Zendesk revoke is DELETE /api/v2/oauth/tokens/current).
 - Technical debt: binary uploads/downloads need a binary transport.
+
+## Intercom Connector (done — awaiting approval)
+- [x] Adapter `intercom` (alias `intercom_support`), REST API v2.11, regional hosts (us/eu/au), OAuth + access token, X-Hub-Signature verifier, tests.
+- Technical debt: OAuth token response has no workspace id; account binding needs a post-connect /me lookup the shared flow does not perform.
+- Technical debt: OAuth flow uses the US token host; EU/AU workspaces connect with an access token + region.
+- Technical debt: binary attachment upload/download; webhook topics managed only in the Intercom Developer Hub.

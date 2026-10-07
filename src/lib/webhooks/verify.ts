@@ -9,6 +9,7 @@ import { parseGmailPush } from "@/lib/connectors/adapters/gmail-map";
 import { createHash } from "node:crypto";
 import { parsePipedriveWebhookMeta } from "@/lib/connectors/adapters/pipedrive-map";
 import { parseZendeskWebhookEvent } from "@/lib/connectors/adapters/zendesk-map";
+import { parseIntercomNotification } from "@/lib/connectors/adapters/intercom-map";
 import { hubSpotBatchEventId, hubSpotBatchEventType, parseHubSpotEvents } from "@/lib/connectors/adapters/hubspot-map";
 import { DRIVE_RESOURCE_STATES, parseDrivePushHeaders } from "@/lib/connectors/adapters/google-drive-map";
 import { telegramEventType, telegramUpdateDateSeconds } from "@/lib/connectors/adapters/telegram-map";
@@ -745,6 +746,26 @@ const zendeskVerifier: WebhookVerifier = (input) => {
   return { ok: true, timestampMs: event.timeMs ?? ts, ...out };
 };
 
+/**
+ * Intercom webhooks. Official signing: `X-Hub-Signature: sha1=<hex>` where the
+ * digest is HMAC-SHA1 of the raw body keyed with the app's client secret.
+ * Dedupe key is the notification `id`; `created_at` bounds replays.
+ */
+const intercomVerifier: WebhookVerifier = (input) => {
+  const n = parseIntercomNotification(input.payload);
+  const out = { ...(n.id ? { eventId: n.id } : {}), ...(n.topic ? { eventType: n.topic } : {}) };
+  if (!input.secret) return { ok: false, reason: "missing_secret", message: "No Intercom client secret is configured", ...out };
+  const header = (input.headers["x-hub-signature"] ?? "").trim();
+  const m = /^sha1=([0-9a-f]{40})$/i.exec(header);
+  if (!m) return { ok: false, reason: "invalid_signature", message: "Intercom signature header is missing", ...out };
+  const expected = createHmac("sha1", input.secret).update(input.raw, "utf8").digest("hex");
+  if (!safeEqual(m[1]!.toLowerCase(), expected)) return { ok: false, reason: "invalid_signature", message: "Intercom signature does not match", ...out };
+  if (!n.id || !n.topic) return { ok: false, reason: "malformed_payload", message: "Intercom notification is missing id/topic", ...out };
+  if (n.createdAtMs === undefined) return { ok: false, reason: "malformed_payload", message: "Intercom notification is missing created_at", ...out };
+  if (replayed(n.createdAtMs, input)) return { ok: false, reason: "replay", message: "Intercom notification is outside the replay window", ...out };
+  return { ok: true, timestampMs: n.createdAtMs, ...out };
+};
+
 const VERIFIERS: Record<string, WebhookVerifier> = {
   http: genericVerifier,
   slack: slackVerifier,
@@ -765,6 +786,7 @@ const VERIFIERS: Record<string, WebhookVerifier> = {
   hubspot: hubspotVerifier,
   pipedrive: pipedriveVerifier,
   zendesk: zendeskVerifier,
+  intercom: intercomVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */

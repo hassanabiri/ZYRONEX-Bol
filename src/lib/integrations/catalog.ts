@@ -827,7 +827,7 @@ const PROVIDER_META: Record<string, Partial<ProviderDefinition>> = {
   pipedrive: { capabilities: ["Contacts", "Leads", "Deals", "Activities", "Webhooks"] },
   zendesk: { capabilities: ["Tickets", "Comments", "Users", "Organizations", "Search", "Webhooks"] },
   freshdesk: { capabilities: ["Tickets", "Contacts", "Comments", "Status", "Notifications"] },
-  intercom: { capabilities: ["Conversations", "Contacts", "Notes", "AI handoff", "Webhooks"] },
+  intercom: { capabilities: ["Conversations", "Contacts", "Companies", "Notes", "Tags", "Webhooks"] },
   gmail: { capabilities: ["Email", "Notifications", "Sync"], connectionGroup: "google" },
   outlook: {
     capabilities: ["Email", "Calendar", "Notifications", "Sync"],
