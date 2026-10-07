@@ -52,7 +52,7 @@ function run(input: Parameters<typeof runConnectorOperation>[0]["input"], fetchI
 }
 const build = (operation: string, params: Record<string, unknown> = {}, cursor?: string) => intercomConnector.buildCall({ operation, params, ...(cursor ? { cursor } : {}) });
 const path = (operation: string, params: Record<string, unknown> = {}) => new URL(build(operation, params).url).pathname;
-const body = (operation: string, params: Record<string, unknown> = {}, cursor?: string) => build(operation, params, cursor).body as Record<string, any>;
+const body = (operation: string, params: Record<string, unknown> = {}, cursor?: string) => build(operation, params, cursor).body as any;
 const headerOf = (c: { init: RequestInit }, k: string) => (c.init.headers as Record<string, string>)[k];
 
 // ---------------------------------------------------------------------------
