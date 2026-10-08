@@ -19,6 +19,7 @@ import { woocommerceConnector } from "@/lib/connectors/adapters/woocommerce";
 import { zidConnector } from "@/lib/connectors/adapters/zid";
 import { zendeskConnector } from "@/lib/connectors/adapters/zendesk";
 import { intercomConnector } from "@/lib/connectors/adapters/intercom";
+import { microsoftTeamsConnector } from "@/lib/connectors/adapters/microsoft-teams";
 import type { ConnectorAdapter } from "@/lib/connectors/types";
 
 /**
@@ -48,6 +49,7 @@ const ADAPTERS: ConnectorAdapter[] = [
   pipedriveConnector,
   zendeskConnector,
   intercomConnector,
+  microsoftTeamsConnector,
 ];
 
 const byId = new Map(ADAPTERS.map((adapter) => [adapter.id, adapter]));
@@ -81,6 +83,8 @@ const ALIASES: Record<string, string> = {
   pipedrive_crm: "pipedrive",
   zendesk_support: "zendesk",
   intercom_support: "intercom",
+  teams: "microsoft_teams",
+  ms_teams: "microsoft_teams",
   outlook: "microsoft_graph",
   microsoft_outlook: "microsoft_graph",
   microsoft_365: "microsoft_graph",

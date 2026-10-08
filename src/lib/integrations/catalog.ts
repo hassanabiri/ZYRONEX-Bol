@@ -274,6 +274,16 @@ const BASE_PROVIDERS: ProviderDefinition[] = [
     supportsSync: true,
   },
   {
+    id: "microsoft_teams",
+    name: "Microsoft Teams",
+    category: "communication",
+    authType: "oauth2",
+    description: "Teams, channels, chats, messages, members and online meetings.",
+    scopes: ["User.Read", "Team.ReadBasic.All", "Channel.ReadBasic.All", "ChannelMessage.Send", "Chat.ReadWrite", "ChatMessage.Send", "OnlineMeetings.ReadWrite", "offline_access"],
+    credentialFields: oauth(),
+    supportsSync: true,
+  },
+  {
     id: "google_workspace",
     name: "Google Workspace",
     category: "productivity",

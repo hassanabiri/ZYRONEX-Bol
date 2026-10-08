@@ -787,6 +787,8 @@ const VERIFIERS: Record<string, WebhookVerifier> = {
   pipedrive: pipedriveVerifier,
   zendesk: zendeskVerifier,
   intercom: intercomVerifier,
+  // Teams change notifications share the Graph notification/clientState model.
+  microsoft_teams: microsoftGraphVerifier,
 };
 
 /** Resolves a verifier through the connector registry, aliases included. */

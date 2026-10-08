@@ -65,3 +65,9 @@
 - Technical debt: OAuth token response has no workspace id; account binding needs a post-connect /me lookup the shared flow does not perform.
 - Technical debt: OAuth flow uses the US token host; EU/AU workspaces connect with an access token + region.
 - Technical debt: binary attachment upload/download; webhook topics managed only in the Intercom Developer Hub.
+
+## Microsoft Teams Connector (done — awaiting approval)
+- [x] Adapter `microsoft_teams` (aliases `teams`, `ms_teams`), Graph v1.0 Teams APIs, reuses Graph host, error/throttle mapping, OAuth spec and notification verifier; tests.
+- Technical debt: change-notification subscriptions blocked by the shared validationToken echo; resource-data notifications need certificate decryption.
+- Technical debt: create/archive team return 202 with the async operation in the Location header, which the normalized result does not surface.
+- Technical debt: admin-consent permissions (channel messages read, members, settings) are requested per connection, not in the default consent.
