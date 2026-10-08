@@ -5,6 +5,7 @@ import { assertPipedriveApiDomain } from "@/lib/connectors/adapters/pipedrive";
 import { pipedriveCompanyDomain } from "@/lib/connectors/adapters/pipedrive-map";
 import { normalizeShopDomain } from "@/lib/connectors/adapters/shopify";
 import { zendeskSubdomain } from "@/lib/connectors/adapters/zendesk-map";
+import { TEAMS_DEFAULT_SCOPES } from "@/lib/connectors/adapters/microsoft-teams";
 import type { OAuthProviderSpec } from "@/lib/oauth/types";
 
 /** Placeholder host in the Shopify template spec, bound per store at runtime. */
@@ -385,6 +386,8 @@ const ALIASES: Record<string, string> = {
   pipedrive_crm: "pipedrive",
   zendesk_support: "zendesk",
   intercom_support: "intercom",
+  teams: "microsoft_teams",
+  ms_teams: "microsoft_teams",
   outlook: "microsoft_graph",
   microsoft_outlook: "microsoft_graph",
   microsoft_365: "microsoft_graph",
@@ -405,6 +408,11 @@ function microsoftClaims(token: Record<string, unknown>): Record<string, unknown
 export function registerOAuthProvider(spec: OAuthProviderSpec) {
   SPECS[spec.connector] = spec;
 }
+
+// Microsoft Teams reuses the Microsoft Graph identity-platform spec verbatim
+// (authority, PKCE, refresh, tenant/oid identity) — only the scope set and the
+// connector id differ. No second Microsoft OAuth system.
+SPECS["microsoft_teams"] = { ...SPECS["microsoft_graph"]!, connector: "microsoft_teams", label: "Microsoft Teams", scopes: TEAMS_DEFAULT_SCOPES };
 
 export function getOAuthProvider(connector: string): OAuthProviderSpec | undefined {
   return SPECS[connector] ?? SPECS[ALIASES[connector] ?? ""];
