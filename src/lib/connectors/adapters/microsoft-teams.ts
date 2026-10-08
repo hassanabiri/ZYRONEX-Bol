@@ -422,7 +422,7 @@ export const microsoftTeamsConnector: ConnectorAdapter = {
     return { ...call, headers: { ...call.headers, authorization: `Bearer ${token}` } };
   },
 
-  normalize: (operation, payload, status, _context?: NormalizeContext): NormalizedPage => {
+  normalize: (operation, payload, status, context?: NormalizeContext): NormalizedPage => {
     const spec = OPERATIONS[operation];
     if (!spec) throw new ConnectorError("unsupported", `Unknown Microsoft Teams operation "${operation}"`, { retryable: false });
     if (spec.kind === "deleted") return { items: [{ deleted: true, operation }], cursor: null };
@@ -431,7 +431,10 @@ export const microsoftTeamsConnector: ConnectorAdapter = {
     if (typeof payload !== "object") throw new ConnectorError("malformed_response", "Microsoft Graph returned a non-JSON body", { retryable: false });
     if (spec.kind === "search") {
       const r = normalizeSearchHits(payload);
-      return { items: r.items, cursor: null, raw: payload };
+      const req = asRecord((asRecord(context?.call.body)["requests"] as unknown[] | undefined)?.[0]);
+      const from = Number(req["from"] ?? 0);
+      const next = r.moreResults && r.items.length ? from + r.items.length : null;
+      return { items: r.items, cursor: next !== null && next < 100000 ? String(next) : null, raw: payload };
     }
     const body = asRecord(payload);
     if (!spec.list) return { items: [normalizeByKind(spec.kind, body)], cursor: null, raw: payload };
