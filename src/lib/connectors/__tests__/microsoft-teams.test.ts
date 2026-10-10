@@ -5,6 +5,7 @@ import {
   TEAMS_ADMIN_CONSENT_SCOPES,
   TEAMS_DEFAULT_SCOPES,
   TEAMS_OPERATIONS,
+  TEAMS_OPTIONAL_SCOPES,
   UNSUPPORTED_OPERATIONS,
   assertTeamsGraphUrl,
   microsoftTeamsConnector,
@@ -122,7 +123,7 @@ describe("teams OAuth reuse", () => {
   });
   it("default consent contains no Mail or Calendar scopes", () => expect(spec.scopes.filter((s) => /Mail|Calendars/.test(s))).toEqual([]));
   it("default consent contains only documented delegated scopes", () =>
-    expect(spec.scopes).toEqual(["openid", "profile", "email", "offline_access", "User.Read", "Team.ReadBasic.All", "Channel.ReadBasic.All", "ChannelMessage.Send", "Chat.ReadWrite", "ChatMessage.Send", "OnlineMeetings.ReadWrite"]));
+    expect(spec.scopes).toEqual(["openid", "profile", "email", "offline_access", "User.Read", "Team.ReadBasic.All", "Channel.ReadBasic.All", "ChannelMessage.Send", "Chat.ReadWrite", "Chat.Read", "ChatMessage.Send", "OnlineMeetings.ReadWrite"]));
 });
 
 // ---------------------------------------------------------------------------
@@ -442,4 +443,34 @@ describe("teams: isolation", () => {
     expect(String(calls[0]!.init.body)).not.toContain(TOKEN);
   });
   it("URLs never contain credentials", () => expect(microsoftTeamsConnector.authorize(build("list_chats"), creds).url).not.toContain(TOKEN));
+});
+
+// ---------------------------------------------------------------------------
+describe("teams: official v1.0 compatibility fixes", () => {
+  const TC2 = { team_id: TEAM, channel_id: CHANNEL };
+  it("update_team rejects discoverySettings (not a v1.0 team property)", () =>
+    expect(() => build("update_team", { team_id: TEAM, fields: { discoverySettings: { showInTeamsSearchAndSuggestions: true } } })).toThrow(/updatable/));
+  for (const k of ["displayName", "description", "visibility", "memberSettings", "guestSettings", "messagingSettings", "funSettings"])
+    it(`update_team still accepts ${k}`, () => expect(build("update_team", { team_id: TEAM, fields: { [k]: {} } }).method).toBe("PATCH"));
+  it("search_messages declares Chat.Read", () => expect(teamsScopeFor("search_messages")).toBe("Chat.Read"));
+  it("Chat.Read is in the default consent (no admin consent)", () => expect(TEAMS_DEFAULT_SCOPES).toContain("Chat.Read"));
+  it("Team.Create is optional, not admin-consent", () => {
+    expect(TEAMS_OPTIONAL_SCOPES).toEqual(["Team.Create"]);
+    expect(TEAMS_ADMIN_CONSENT_SCOPES).not.toContain("Team.Create");
+    expect(TEAMS_DEFAULT_SCOPES).not.toContain("Team.Create");
+  });
+  for (const s of ["Channel.Create", "ChannelMessage.ReadWrite", "ChannelMessage.Read.All"])
+    it(`${s} is listed as admin-consent`, () => expect(TEAMS_ADMIN_CONSENT_SCOPES).toContain(s));
+  it("operation scopes stay unchanged", () => {
+    expect(teamsScopeFor("create_team")).toBe("Team.Create");
+    expect(teamsScopeFor("create_channel")).toBe("Channel.Create");
+    expect(teamsScopeFor("update_channel_message")).toBe("ChannelMessage.ReadWrite");
+  });
+  it("add_channel_member rejects guest", () => expect(() => build("add_channel_member", { ...TC2, user_id: "u", roles: ["guest"] })).toThrow(/owner or empty/));
+  it("add_channel_member accepts owner", () => expect(body("add_channel_member", { ...TC2, user_id: "u", roles: ["owner"] }).roles).toEqual(["owner"]));
+  it("add_channel_member accepts empty roles", () => expect(body("add_channel_member", { ...TC2, user_id: "u" }).roles).toEqual([]));
+  it("add_team_member behaviour is unchanged (guest not proven invalid)", () => expect(body("add_team_member", { team_id: TEAM, user_id: "u", roles: ["guest"] }).roles).toEqual(["guest"]));
+  it("list_channel_message_replies keeps $top (documented max 50)", () =>
+    expect(url("list_channel_message_replies", { ...TC2, message_id: "1", limit: 99 }).searchParams.get("$top")).toBe("50"));
+  it("chat softDelete path unchanged", () => expect(path("soft_delete_chat_message", { chat_id: CHAT, message_id: "1" })).toBe(`/me/chats/${CHAT}/messages/1/softDelete`));
 });
