@@ -50,7 +50,8 @@ export const TEAMS_SCOPES = {
   chat_members_write: "ChatMember.ReadWrite",
   chat_messages_send: "ChatMessage.Send",
   meetings: "OnlineMeetings.ReadWrite",
-  search: "ChannelMessage.Read.All",
+  // POST /search/query (v1.0) lists Chat.Read as the delegated permission for chatMessage search.
+  search: "Chat.Read",
 } as const;
 type ScopeKey = keyof typeof TEAMS_SCOPES;
 
@@ -58,13 +59,17 @@ type ScopeKey = keyof typeof TEAMS_SCOPES;
 export const TEAMS_DEFAULT_SCOPES = [
   "openid", "profile", "email", "offline_access",
   "User.Read", "Team.ReadBasic.All", "Channel.ReadBasic.All", "ChannelMessage.Send",
-  "Chat.ReadWrite", "ChatMessage.Send", "OnlineMeetings.ReadWrite",
+  "Chat.ReadWrite", "Chat.Read", "ChatMessage.Send", "OnlineMeetings.ReadWrite",
 ];
+
+/** Delegated permissions without admin consent, requested per connection only (Team.Create: AdminConsentRequired = No). */
+export const TEAMS_OPTIONAL_SCOPES = ["Team.Create"];
 
 /** Delegated permissions that require tenant admin consent (requested per connection only). */
 export const TEAMS_ADMIN_CONSENT_SCOPES = [
   "TeamSettings.ReadWrite.All", "TeamMember.Read.All", "TeamMember.ReadWrite.All", "ChannelSettings.ReadWrite.All",
   "Channel.Delete.All", "ChannelMember.Read.All", "ChannelMember.ReadWrite.All", "ChannelMessage.Read.All",
+  "Channel.Create", "ChannelMessage.ReadWrite",
 ];
 
 export const UNSUPPORTED_OPERATIONS: Record<string, string> = {
@@ -144,10 +149,13 @@ function messageBody(p: Params): Record<string, unknown> {
   };
 }
 
-function memberBody(p: Params): Record<string, unknown> {
+function memberBody(p: Params, ownerOnly = false): Record<string, unknown> {
   const user = teamsId(p, "user_id");
   const roles = p["roles"] ?? [];
-  if (!Array.isArray(roles) || roles.some((r) => r !== "owner" && r !== "guest")) throw invalid("`roles` may only contain owner or guest");
+  if (ownerOnly) {
+    // channel-post-members (v1.0): roles "Must be owner or empty".
+    if (!Array.isArray(roles) || roles.some((r) => r !== "owner")) throw invalid("`roles` must be owner or empty for channel members");
+  } else if (!Array.isArray(roles) || roles.some((r) => r !== "owner" && r !== "guest")) throw invalid("`roles` may only contain owner or guest");
   return {
     "@odata.type": "#microsoft.graph.aadUserConversationMember",
     roles,
@@ -190,7 +198,7 @@ const OPERATIONS: Record<string, Spec> = {
     verb: "PATCH", path: (p) => T(p), kind: "accepted", scope: "team_settings", required: ["team_id", "fields"],
     body: (p) => {
       const f = asRecord(p["fields"]);
-      const allowed = ["displayName", "description", "visibility", "memberSettings", "guestSettings", "messagingSettings", "funSettings", "discoverySettings"];
+      const allowed = ["displayName", "description", "visibility", "memberSettings", "guestSettings", "messagingSettings", "funSettings"];
       for (const k of Object.keys(f)) if (!allowed.includes(k)) throw invalid(`\`${k}\` is not an updatable team property`);
       if (!Object.keys(f).length) throw invalid("`fields` must not be empty");
       return f;
@@ -243,7 +251,7 @@ const OPERATIONS: Record<string, Spec> = {
   // ---- Channel members (private/shared channels) -------------------------------
   list_channel_members: { verb: "GET", path: (p) => `${C(p)}/members`, kind: "member", scope: "channel_members_read", required: ["team_id", "channel_id"], list: true },
   get_channel_member: { verb: "GET", path: (p) => `${C(p)}/members/${teamsId(p, "membership_id")}`, kind: "member", scope: "channel_members_read", required: ["team_id", "channel_id", "membership_id"] },
-  add_channel_member: { verb: "POST", path: (p) => `${C(p)}/members`, kind: "member", scope: "channel_members_write", required: ["team_id", "channel_id", "user_id"], body: memberBody },
+  add_channel_member: { verb: "POST", path: (p) => `${C(p)}/members`, kind: "member", scope: "channel_members_write", required: ["team_id", "channel_id", "user_id"], body: (p) => memberBody(p, true) }, // Graph allows this only for private/shared channels.
   remove_channel_member: { verb: "DELETE", path: (p) => `${C(p)}/members/${teamsId(p, "membership_id")}`, kind: "deleted", scope: "channel_members_write", required: ["team_id", "channel_id", "membership_id"] },
 
   // ---- Channel messages -----------------------------------------------------------
