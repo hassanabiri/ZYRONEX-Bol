@@ -169,6 +169,25 @@ function isoDate(p: Params, field: string): string {
   return v;
 }
 
+/**
+ * Graph async operations (HTTP 202) return a monitoring URL in Location or
+ * Content-Location, often relative (e.g. /teams('id')/operations('id')).
+ * Returned only when it resolves to Microsoft Graph v1.0.
+ */
+export function operationUrl(headers?: Headers): { operation_url?: string } {
+  for (const name of ["location", "content-location"]) {
+    const raw = headers?.get(name)?.trim();
+    if (!raw) continue;
+    const candidate = raw.startsWith("/") ? `${GRAPH_API_BASE}${raw.startsWith("/v1.0/") ? raw.slice(5) : raw}` : raw;
+    try {
+      return { operation_url: assertTeamsGraphUrl(candidate) };
+    } catch {
+      /* not a valid Graph URL — try the next header */
+    }
+  }
+  return {};
+}
+
 const T = (p: Params) => `/teams/${teamsId(p, "team_id")}`;
 const C = (p: Params) => `${T(p)}/channels/${teamsId(p, "channel_id")}`;
 const CH = (p: Params) => `/chats/${teamsId(p, "chat_id")}`;
@@ -435,7 +454,10 @@ export const microsoftTeamsConnector: ConnectorAdapter = {
     if (!spec) throw new ConnectorError("unsupported", `Unknown Microsoft Teams operation "${operation}"`, { retryable: false });
     if (spec.kind === "deleted") return { items: [{ deleted: true, operation }], cursor: null };
     if (spec.kind === "accepted" || status === 202 || status === 204 || payload === null || payload === undefined)
-      return { items: [{ ok: true, accepted: status === 202, operation }], cursor: null };
+      return {
+        items: [{ ok: true, accepted: status === 202, operation, ...(status === 202 ? operationUrl(context?.headers) : {}) }],
+        cursor: null,
+      };
     if (typeof payload !== "object") throw new ConnectorError("malformed_response", "Microsoft Graph returned a non-JSON body", { retryable: false });
     if (spec.kind === "search") {
       const r = normalizeSearchHits(payload);
