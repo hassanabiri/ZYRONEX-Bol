@@ -67,6 +67,8 @@ export type NormalizeContext = {
   call: ConnectorCall;
   /** Cursor that was used for this page (null on the first page). */
   cursor: string | null;
+  /** Response headers of this page (optional, read-only; adapters may ignore). */
+  headers?: Headers;
 };
 
 /** Adapter-normalized page: shape is identical for every provider. */

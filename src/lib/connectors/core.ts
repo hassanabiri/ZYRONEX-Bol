@@ -106,7 +106,7 @@ async function performCall(options: {
   credentials: Record<string, string>;
   timeoutMs: number;
   fetchImpl: typeof fetch;
-}): Promise<{ payload: unknown; status: number; rateLimit: RateLimitInfo | undefined }> {
+}): Promise<{ payload: unknown; status: number; rateLimit: RateLimitInfo | undefined; headers: Headers }> {
   const { adapter, call, credentials, fetchImpl, timeoutMs } = options;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -146,7 +146,7 @@ async function performCall(options: {
     throw error;
   }
 
-  return { payload, status: response.status, rateLimit };
+  return { payload, status: response.status, rateLimit, headers: response.headers };
 }
 
 function sanitize(text: string, credentials: Record<string, string>): string {
@@ -246,7 +246,7 @@ export async function runConnectorOperation(options: ConnectorRunOptions): Promi
 
       lastStatus = outcome!.status;
       lastRateLimit = outcome!.rateLimit ?? lastRateLimit;
-      const page = normalizeSafely(adapter, input.operation, outcome!.payload, outcome!.status, { call, cursor });
+      const page = normalizeSafely(adapter, input.operation, outcome!.payload, outcome!.status, { call, cursor, headers: outcome!.headers });
       items.push(...page.items);
       pages += 1;
       cursor = page.cursor ?? null;
