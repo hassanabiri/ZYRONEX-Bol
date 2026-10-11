@@ -202,3 +202,17 @@ describe("contract guarantees", () => {
     expect(JSON.stringify(redact({ access_token: "abc123", nested: { password: "p" } }))).not.toContain("abc123");
   });
 });
+
+describe("optional response headers in normalize context", () => {
+  it("passes headers to adapters without changing existing results", async () => {
+    let seen: Headers | undefined;
+    const adapter = { ...httpConnector, normalize: (op: string, payload: unknown, status: number, ctx?: { headers?: Headers }) => {
+      seen = ctx?.headers;
+      return httpConnector.normalize(op, payload, status);
+    } };
+    const fetchImpl = vi.fn(async () => jsonResponse({ data: [{ id: 1 }] }, { headers: { "x-test": "1" } })) as unknown as typeof fetch;
+    const result = await runConnectorOperation({ adapter, credentials: {}, traceId: trace, input: { operation: "request", params: { url: "https://api.example.com" } }, fetchImpl });
+    expect(seen?.get("x-test")).toBe("1");
+    expect(result.ok && result.items).toEqual([{ id: 1 }]);
+  });
+});

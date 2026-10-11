@@ -474,3 +474,42 @@ describe("teams: official v1.0 compatibility fixes", () => {
     expect(url("list_channel_message_replies", { ...TC2, message_id: "1", limit: 99 }).searchParams.get("$top")).toBe("50"));
   it("chat softDelete path unchanged", () => expect(path("soft_delete_chat_message", { chat_id: CHAT, message_id: "1" })).toBe(`/me/chats/${CHAT}/messages/1/softDelete`));
 });
+
+// ---------------------------------------------------------------------------
+describe("teams: HTTP 202 operation_url", () => {
+  const accepted = (headers: Record<string, string>) => {
+    const fetchImpl = vi.fn(async () => new Response(null, { status: 202, headers })) as unknown as typeof fetch;
+    return run({ operation: "create_team", params: { display_name: "Ops" } }, fetchImpl);
+  };
+  it("resolves a relative Location", async () => {
+    const r = await accepted({ location: "/teams('t1')/operations('op1')" });
+    expect(r.ok && r.items[0]?.["operation_url"]).toBe(`${G}/teams('t1')/operations('op1')`);
+  });
+  it("falls back to Content-Location", async () => {
+    const r = await accepted({ "content-location": "/teams('t1')" });
+    expect(r.ok && r.items[0]?.["operation_url"]).toBe(`${G}/teams('t1')`);
+  });
+  it("accepts an absolute Graph v1.0 URL", async () => {
+    const r = await accepted({ location: `${G}/teams('t1')/operations('op1')` });
+    expect(r.ok && r.items[0]?.["operation_url"]).toBe(`${G}/teams('t1')/operations('op1')`);
+  });
+  it("omits operation_url when no header is present", async () => {
+    const r = await accepted({});
+    expect(r.ok && r.items[0]).toEqual({ ok: true, accepted: true, operation: "create_team" });
+  });
+  for (const bad of ["https://evil.com/op", "https://graph.microsoft.com/beta/teams('t')", "http://graph.microsoft.com/v1.0/x"])
+    it(`omits operation_url for ${bad}`, async () => {
+      const r = await accepted({ location: bad });
+      expect(r.ok && "operation_url" in r.items[0]!).toBe(false);
+    });
+  it("archive_team also returns operation_url", async () => {
+    const fetchImpl = vi.fn(async () => new Response(null, { status: 202, headers: { location: "/teams('t1')/operations('a')" } })) as unknown as typeof fetch;
+    const r = await run({ operation: "archive_team", params: { team_id: TEAM } }, fetchImpl);
+    expect(r.ok && r.items[0]?.["operation_url"]).toBe(`${G}/teams('t1')/operations('a')`);
+  });
+  it("204 responses never carry operation_url", async () => {
+    const fetchImpl = vi.fn(async () => new Response(null, { status: 204, headers: { location: "/teams('t1')" } })) as unknown as typeof fetch;
+    const r = await run({ operation: "update_team", params: { team_id: TEAM, fields: { description: "x" } } }, fetchImpl);
+    expect(r.ok && r.items[0]).toEqual({ ok: true, accepted: false, operation: "update_team" });
+  });
+});
