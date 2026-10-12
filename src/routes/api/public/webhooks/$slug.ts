@@ -32,7 +32,14 @@ export const Route = createFileRoute("/api/public/webhooks/$slug")({
 
         try {
           const { receiveWebhook } = await import("@/lib/webhooks/ingress.server");
-          const result = await receiveWebhook({ slug: params.slug, rawBody: raw, headers });
+          const query = Object.fromEntries(new URL(request.url).searchParams);
+          const result = await receiveWebhook({ slug: params.slug, rawBody: raw, headers, query });
+          // Provider-mandated replies (Graph validationToken, Slack challenge, Discord PING/204).
+          if (result.raw)
+            return new Response(result.status === 204 ? null : (result.raw.body ?? null), {
+              status: result.status,
+              headers: { "content-type": result.raw.contentType ?? "text/plain; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" },
+            });
           return json(result.status, result.body);
         } catch {
           // Uniform failure: never surface stack traces or provider internals.

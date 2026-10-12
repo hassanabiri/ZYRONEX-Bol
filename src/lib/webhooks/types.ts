@@ -32,6 +32,13 @@ export type WebhookVerification = {
   eventId?: string | undefined;
   eventType?: string | undefined;
   timestampMs?: number | undefined;
+  /**
+   * Optional provider-mandated HTTP reply (verified requests only).
+   * `handshake: true` answers immediately and nothing is persisted (Graph
+   * validationToken, Slack url_verification, Discord PING). Otherwise the
+   * event is processed normally and only the HTTP reply is replaced.
+   */
+  respond?: { status: number; contentType?: string; body?: string; handshake?: boolean } | undefined;
 };
 
 export type WebhookVerifierInput = {
@@ -41,6 +48,8 @@ export type WebhookVerifierInput = {
   secret: string | null;
   nowMs: number;
   replayWindowMs: number;
+  /** Decoded query-string parameters of the delivery (optional). */
+  query?: Record<string, string>;
 };
 
 export type WebhookVerifier = (input: WebhookVerifierInput) => WebhookVerification;
@@ -133,4 +142,6 @@ export type WebhookResponse = {
     error?: WebhookFailureReason | "execution_failed";
     message?: string;
   };
+  /** Provider-mandated raw reply; when set the route sends this instead of `body`. */
+  raw?: { contentType?: string; body?: string };
 };

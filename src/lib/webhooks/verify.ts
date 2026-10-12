@@ -126,6 +126,9 @@ const slackVerifier: WebhookVerifier = (input) => {
 
   if (!safeEqual(signature, `v0=${hmacHex(input.secret, `v0:${timestamp}:${input.raw}`)}`))
     return { ok: false, reason: "invalid_signature", message: "Slack signature does not match", ...meta };
+  // Official url_verification: reply 200 with the challenge (signed request only).
+  if (body["type"] === "url_verification" && typeof body["challenge"] === "string")
+    return { ok: true, timestampMs, ...meta, respond: { status: 200, contentType: "application/json", body: JSON.stringify({ challenge: body["challenge"] }), handshake: true } };
   return { ok: true, timestampMs, ...meta };
 };
 
@@ -607,6 +610,12 @@ const discordVerifier: WebhookVerifier = (input) => {
   if (replayed(timestampMs, input)) return { ok: false, reason: "replay", message: "Discord request is outside the replay window", ...meta };
   if (!meta.eventType) return { ok: false, reason: "unsupported_event", message: "Discord event type is not recognised", ...meta };
 
+  // Interactions PING → 200 {"type":1} (PONG). Webhook Events PING (type 0) → 204, empty body.
+  if (meta.eventType === "interaction.ping")
+    return { ok: true, timestampMs, ...meta, respond: { status: 200, contentType: "application/json", body: JSON.stringify({ type: 1 }), handshake: true } };
+  if (meta.eventType === "webhook.ping") return { ok: true, timestampMs, ...meta, respond: { status: 204, handshake: true } };
+  // Webhook Events must be acknowledged with 204 and no body; the event is still processed.
+  if (meta.eventType.startsWith("event.")) return { ok: true, timestampMs, ...meta, respond: { status: 204 } };
   return { ok: true, timestampMs, ...meta };
 };
 
@@ -620,6 +629,12 @@ const discordVerifier: WebhookVerifier = (input) => {
  * shared ingress cannot return — tracked as technical debt.
  */
 const microsoftGraphVerifier: WebhookVerifier = (input) => {
+  // Subscription validation: POST ?validationToken=… → 200 text/plain with the decoded token, within 10 s.
+  const token = input.query?.["validationToken"];
+  if (token !== undefined) {
+    if (!token || token.length > 2048) return { ok: false, reason: "malformed_payload", message: "validationToken is empty or too long", eventType: "subscription.validation" };
+    return { ok: true, eventType: "subscription.validation", respond: { status: 200, contentType: "text/plain; charset=utf-8", body: token, handshake: true } };
+  }
   const list = parseGraphNotifications(input.payload);
   const meta = { eventId: graphNotificationEventId(list), eventType: graphNotificationEventType(list) };
   if (!input.secret) return { ok: false, reason: "missing_secret", message: "No Graph clientState is configured", ...meta };
@@ -804,5 +819,79 @@ export function registerWebhookVerifier(connectorId: string, verifier: WebhookVe
 export function verifyWebhook(connectorId: string, input: WebhookVerifierInput): WebhookVerification {
   return getWebhookVerifier(connectorId)(input);
 }
+
+// ---------------------------------------------------------------------------
+// Gmail Pub/Sub: full OIDC signature verification (async, Google JWKS).
+// Runs after the synchronous claim checks; a notification is trusted only when
+// the RS256 signature verifies against Google's published keys.
+
+const GOOGLE_CERTS_URL = "https://www.googleapis.com/oauth2/v3/certs";
+const CERTS_TTL_MS = 60 * 60 * 1000;
+type Jwk = { kid?: string; kty?: string; alg?: string; n?: string; e?: string };
+let certsFetcher: () => Promise<Jwk[]> = async () => {
+  const response = await fetch(GOOGLE_CERTS_URL);
+  if (!response.ok) throw new Error(`Google certs request failed: ${response.status}`);
+  const body = record(await response.json());
+  return Array.isArray(body["keys"]) ? (body["keys"] as Jwk[]) : [];
+};
+let certsCache: { keys: Jwk[]; at: number } | null = null;
+
+async function googleKeys(nowMs: number, forceRefresh = false): Promise<Jwk[]> {
+  if (!forceRefresh && certsCache && nowMs - certsCache.at < CERTS_TTL_MS) return certsCache.keys;
+  const keys = await certsFetcher();
+  certsCache = { keys, at: nowMs };
+  return keys;
+}
+
+export async function verifyGoogleOidcSignature(authorization: string, nowMs: number): Promise<{ ok: boolean; message?: string }> {
+  const jwt = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+  const [h, p, s] = jwt.split(".");
+  if (!h || !p || !s) return { ok: false, message: "Push token is not a JWT" };
+  let header: Record<string, unknown>;
+  let claims: Record<string, unknown>;
+  try {
+    header = record(JSON.parse(Buffer.from(h, "base64url").toString("utf8")));
+    claims = record(JSON.parse(Buffer.from(p, "base64url").toString("utf8")));
+  } catch {
+    return { ok: false, message: "Push token is not a JWT" };
+  }
+  if (header["alg"] !== "RS256" || typeof header["kid"] !== "string") return { ok: false, message: "Push token must be RS256 with a key id" };
+  if ("email_verified" in claims && claims["email_verified"] !== true) return { ok: false, message: "Push token email is not verified" };
+  let keys: Jwk[];
+  try {
+    keys = await googleKeys(nowMs);
+    if (!keys.some((k) => k.kid === header["kid"])) keys = await googleKeys(nowMs, true);
+  } catch {
+    return { ok: false, message: "Google signing keys are unavailable" };
+  }
+  const jwk = keys.find((k) => k.kid === header["kid"] && k.kty === "RSA");
+  if (!jwk?.n || !jwk.e) return { ok: false, message: "Push token key id is not a Google key" };
+  try {
+    const key = createPublicKey({ key: { kty: "RSA", n: jwk.n, e: jwk.e }, format: "jwk" });
+    const valid = cryptoVerify("RSA-SHA256", Buffer.from(`${h}.${p}`), key, Buffer.from(s, "base64url"));
+    return valid ? { ok: true } : { ok: false, message: "Push token signature does not verify" };
+  } catch {
+    return { ok: false, message: "Push token signature does not verify" };
+  }
+}
+
+/** Sync verification plus, where required, an async signature step. */
+export async function verifyWebhookAsync(connectorId: string, input: WebhookVerifierInput): Promise<WebhookVerification> {
+  const result = verifyWebhook(connectorId, input);
+  if (!result.ok) return result;
+  const resolved = getConnector(connectorId)?.id ?? connectorId;
+  if (resolved === "google_mail") {
+    const signature = await verifyGoogleOidcSignature(input.headers["authorization"] ?? "", input.nowMs);
+    if (!signature.ok) return { ok: false, reason: "invalid_signature", message: signature.message, eventId: result.eventId, eventType: result.eventType };
+  }
+  return result;
+}
+
+export const __gmailOidcTesting = {
+  setCertsFetcher(fetcher: () => Promise<Jwk[]>) {
+    certsFetcher = fetcher;
+    certsCache = null;
+  },
+};
 
 export const __testing = { hmacHex };
