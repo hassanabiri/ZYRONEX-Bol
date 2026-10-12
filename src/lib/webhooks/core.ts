@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 
 import { redactString } from "@/lib/connectors/errors";
-import { verifyWebhook } from "@/lib/webhooks/verify";
+import { verifyWebhookAsync } from "@/lib/webhooks/verify";
 import type {
   WebhookEndpointRecord,
   WebhookEventRecord,
@@ -47,6 +47,7 @@ export type IngressInput = {
   slug: string;
   rawBody: string;
   headers: Record<string, string>;
+  query?: Record<string, string>;
   store: WebhookStore;
   nowMs?: number;
   traceId?: string;
@@ -70,13 +71,14 @@ export async function handleWebhook(input: IngressInput): Promise<WebhookRespons
     malformed = true;
   }
 
-  const verification = verifyWebhook(endpoint.connector, {
+  const verification = await verifyWebhookAsync(endpoint.connector, {
     raw: input.rawBody,
     headers: input.headers,
     payload,
     secret: endpoint.secret,
     nowMs,
     replayWindowMs: Math.max(1, endpoint.replayWindowSeconds) * 1000,
+    ...(input.query ? { query: input.query } : {}),
   });
 
   if (!verification.ok) {
@@ -95,15 +97,22 @@ export async function handleWebhook(input: IngressInput): Promise<WebhookRespons
     return reject(status, verification.reason ?? "invalid_signature", traceId, verification.message ?? "Rejected");
   }
 
+  const reply = verification.respond;
+  const withReply = (response: WebhookResponse): WebhookResponse =>
+    reply ? { ...response, status: reply.status, raw: { ...(reply.contentType ? { contentType: reply.contentType } : {}), ...(reply.body !== undefined ? { body: reply.body } : {}) } } : response;
+  // Provider handshake: answered as mandated, never persisted or executed.
+  if (reply?.handshake)
+    return withReply({ status: reply.status, body: { ok: true, status: "processed", trace_id: traceId, message: "Handshake acknowledged" } });
+
   // Verified callers only: never disclose parse details to an unsigned caller.
   if (malformed) return reject(400, "malformed_payload", traceId, "Request body is not valid JSON");
 
   const eventType = verification.eventType ?? "unknown";
   if (endpoint.events.length > 0 && !endpoint.events.includes(eventType) && !endpoint.events.includes("*"))
-    return {
+    return withReply({
       status: 202,
       body: { ok: true, status: "discarded", trace_id: traceId, error: "unsupported_event", message: "Event is not subscribed" },
-    };
+    });
 
   const eventId = verification.eventId ?? fingerprintEvent(endpoint.id, input.rawBody);
   const inserted = await input.store.insertEvent({
@@ -122,7 +131,7 @@ export async function handleWebhook(input: IngressInput): Promise<WebhookRespons
 
   // Idempotency: a redelivered event is acknowledged but never processed twice.
   if (inserted.duplicate)
-    return { status: 200, body: { ok: true, status: "duplicate", trace_id: traceId, event_id: eventId } };
+    return withReply({ status: 200, body: { ok: true, status: "duplicate", trace_id: traceId, event_id: eventId } });
 
   const event: WebhookEventRecord = {
     id: inserted.id,
@@ -138,7 +147,7 @@ export async function handleWebhook(input: IngressInput): Promise<WebhookRespons
   };
 
   const outcome = await deliverEvent(input.store, endpoint, event, startedAt);
-  return outcome;
+  return withReply(outcome);
 }
 
 /** Hands one stored event to the Execution Runtime, applying retry rules. */

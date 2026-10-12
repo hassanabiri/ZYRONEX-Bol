@@ -138,11 +138,14 @@ async function performCall(options: {
     throw new ConnectorError(mapped.kind, sanitize(mapped.message, credentials), {
       status: response.status,
       ...(mapped.retryable === undefined ? {} : { retryable: mapped.retryable }),
+      ...(rateLimit?.retryAfterMs !== undefined ? { retryAfterMs: rateLimit.retryAfterMs } : {}),
     });
   }
 
   if (!response.ok) {
     const error = mapHttpStatus(response.status, sanitize(text.slice(0, 300), credentials));
+    if (rateLimit?.retryAfterMs !== undefined)
+      throw new ConnectorError(error.kind, error.message, { status: response.status, retryable: error.retryable, retryAfterMs: rateLimit.retryAfterMs });
     throw error;
   }
 
@@ -233,7 +236,7 @@ export async function runConnectorOperation(options: ConnectorRunOptions): Promi
               ? error
               : new ConnectorError("provider", sanitize(String(error), credentials));
           if (!failure.retryable || attempt >= maxAttempts) throw failure;
-          const delay = backoffMs(attempt, failure.kind === "rate_limit" ? lastRateLimit?.retryAfterMs : undefined);
+          const delay = backoffMs(attempt, failure.kind === "rate_limit" ? (failure.retryAfterMs ?? lastRateLimit?.retryAfterMs) : undefined);
           emit({
             level: "warn",
             message: `Attempt ${attempt} failed (${failure.kind}); retrying in ${delay}ms`,

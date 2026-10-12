@@ -5,17 +5,20 @@ export class ConnectorError extends Error {
   readonly kind: ConnectorErrorKind;
   readonly status: number | undefined;
   readonly retryable: boolean;
+  /** Provider-requested wait (Retry-After / retry_after) carried by the failed response. */
+  readonly retryAfterMs: number | undefined;
 
   constructor(
     kind: ConnectorErrorKind,
     message: string,
-    options: { status?: number; retryable?: boolean } = {},
+    options: { status?: number; retryable?: boolean; retryAfterMs?: number } = {},
   ) {
     super(message);
     this.name = "ConnectorError";
     this.kind = kind;
     this.status = options.status;
     this.retryable = options.retryable ?? DEFAULT_RETRYABLE.has(kind);
+    this.retryAfterMs = options.retryAfterMs;
   }
 }
 

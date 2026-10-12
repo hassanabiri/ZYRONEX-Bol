@@ -71,3 +71,7 @@
 - Technical debt: change-notification subscriptions blocked by the shared validationToken echo; resource-data notifications need certificate decryption.
 - Technical debt: create/archive team return 202 with the async operation in the Location header, which the normalized result does not surface.
 - Technical debt: admin-consent permissions (channel messages read, members, settings) are requested per connection, not in the default consent.
+
+## Shared defects closure (done — awaiting approval)
+- [x] Graph/Teams validationToken echo, Slack url_verification, Discord PING/204, Gmail OIDC signature, Retry-After from failed 429.
+- Open (needs approval): Slack slash commands/interactivity (form-encoded bodies), Discord interaction deferred ACK, Gmail service-account email check, waits longer than the 8s runtime ceiling.

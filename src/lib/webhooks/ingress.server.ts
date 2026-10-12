@@ -245,8 +245,10 @@ export async function receiveWebhook(options: {
   slug: string;
   rawBody: string;
   headers: Record<string, string>;
+  query?: Record<string, string>;
 }): Promise<WebhookResponse> {
   return handleWebhook({
+    ...(options.query ? { query: options.query } : {}),
     slug: options.slug,
     rawBody: options.rawBody,
     headers: options.headers,
