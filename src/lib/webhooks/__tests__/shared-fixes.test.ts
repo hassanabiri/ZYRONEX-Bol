@@ -230,7 +230,7 @@ describe("runtime honours Retry-After from the failed 429 response", () => {
     const fetchImpl = vi.fn(async () =>
       n++ === 0 ? json({ ok: false, error_code: 429, description: "Too Many Requests: retry after 2", parameters: { retry_after: 2 } }, 429) : json({ ok: true, result: { id: 1, is_bot: true, first_name: "b", username: "b" } }),
     ) as unknown as typeof fetch;
-    const r = await runConnectorOperation({ adapter: telegramConnector, credentials: { access_token: "123:abc" }, traceId: "t", input: { operation: "get_me" }, fetchImpl, sleep: async (ms) => void sleeps.push(ms) });
+    const r = await runConnectorOperation({ adapter: telegramConnector, credentials: { access_token: "123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw0" }, traceId: "t", input: { operation: "get_me" }, fetchImpl, sleep: async (ms) => void sleeps.push(ms) });
     expect(r.ok ? "ok" : r.error.message).toBe("ok");
     expect(sleeps).toEqual([2000]);
   });
