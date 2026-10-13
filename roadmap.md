@@ -74,4 +74,6 @@
 
 ## Shared defects closure (done — awaiting approval)
 - [x] Graph/Teams validationToken echo, Slack url_verification, Discord PING/204, Gmail OIDC signature, Retry-After from failed 429.
-- Open (needs approval): Slack slash commands/interactivity (form-encoded bodies), Discord interaction deferred ACK, Gmail service-account email check, waits longer than the 8s runtime ceiling.
+- [x] Discord deferred ACK (types 5/6, 2.5s deadline), Gmail expected service-account email check, Retry-After never retried early (connector + engine).
+- Blocked: `webhook_endpoints.expected_sender_email` column — Lovable Cloud database is paused; Gmail pushes are rejected until it is added and set.
+- Open (design awaiting approval): Slack slash commands/interactivity.
