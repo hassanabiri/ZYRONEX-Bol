@@ -52,6 +52,7 @@ registerNodeHandler("http_request", async ({ node, variables, workspaceId, trace
     const error = new Error(result.error.message);
     // Non-retryable provider answers must not consume the runtime's retry budget.
     (error as Error & { retryable?: boolean }).retryable = result.error.retryable;
+    if (result.error.retryAfterMs !== undefined) (error as Error & { retryAfterMs?: number }).retryAfterMs = result.error.retryAfterMs;
     throw error;
   }
 
@@ -86,6 +87,7 @@ registerNodeHandler("integration", async ({ node, variables, workspaceId, traceI
       return { warning: `"${node.label}" skipped: ${result.error.message}` };
     const error = new Error(result.error.message);
     (error as Error & { retryable?: boolean }).retryable = result.error.retryable;
+    if (result.error.retryAfterMs !== undefined) (error as Error & { retryAfterMs?: number }).retryAfterMs = result.error.retryAfterMs;
     throw error;
   }
 

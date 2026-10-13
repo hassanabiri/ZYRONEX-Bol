@@ -108,7 +108,7 @@ export type ConnectorResult =
       ok: false;
       connector: string;
       operation: string;
-      error: { kind: ConnectorErrorKind; message: string; status?: number; retryable: boolean };
+      error: { kind: ConnectorErrorKind; message: string; status?: number; retryable: boolean; retryAfterMs?: number };
       attempts: number;
       durationMs: number;
       traceId: string;

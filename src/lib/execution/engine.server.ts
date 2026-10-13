@@ -64,6 +64,24 @@ function backoffMs(attempt: number) {
   return Math.round(base * (0.75 + Math.random() * 0.5));
 }
 
+/** Longest provider wait a step may sleep in place (well under the 120 s lease). */
+export const MAX_STEP_RETRY_AFTER_MS = 60_000;
+
+/**
+ * Delay before retrying a failed step. A provider-requested wait (retryAfterMs)
+ * is never shortened; if it exceeds what a step may wait while holding its
+ * lease, the step stops instead of retrying early.
+ */
+export function stepRetryDelay(attempt: number, error: unknown): { waitMs: number } | { stop: string } {
+  const retryAfterMs = (error as { retryAfterMs?: unknown } | null)?.retryAfterMs;
+  if (typeof retryAfterMs === "number" && Number.isFinite(retryAfterMs) && retryAfterMs > 0) {
+    if (retryAfterMs > MAX_STEP_RETRY_AFTER_MS)
+      return { stop: `Provider asked to wait ${Math.ceil(retryAfterMs / 1000)}s before retrying (retry_after_ms=${retryAfterMs})` };
+    return { waitMs: Math.max(retryAfterMs, backoffMs(attempt)) };
+  }
+  return { waitMs: backoffMs(attempt) };
+}
+
 /** Deterministic orchestration step used until real handlers are registered. */
 const defaultHandler: NodeHandler = async ({ node, signal }) => {
   if (node.kind === "delay") {
@@ -361,7 +379,8 @@ async function runExecution(
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
           if (controller.signal.aborted) throw new Error(timedOut ? "timeout" : "cancelled");
-          if (attempt >= maxAttempts) {
+          const retryPlan = stepRetryDelay(attempt, error);
+          if (attempt >= maxAttempts || "stop" in retryPlan) {
             if (step)
               await supabaseAdmin
                 .from("execution_steps")
@@ -370,7 +389,7 @@ async function runExecution(
                   attempt,
                   finished_at: new Date().toISOString(),
                   duration_ms: Date.now() - stepStart,
-                  error: message,
+                  error: "stop" in retryPlan ? `${message} — ${retryPlan.stop}` : message,
                 } as never)
                 .eq("id", step.id);
             throw error;
@@ -385,7 +404,7 @@ async function runExecution(
               .from("execution_steps")
               .update({ status: "retrying", attempt } as never)
               .eq("id", step.id);
-          await wait(backoffMs(attempt - 1), controller.signal);
+          await wait("waitMs" in retryPlan ? retryPlan.waitMs : 0, controller.signal);
           await renewLease(execution.id, leaseOwner);
           await supabaseAdmin
             .from("executions")

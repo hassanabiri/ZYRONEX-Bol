@@ -38,7 +38,7 @@ export type WebhookVerification = {
    * validationToken, Slack url_verification, Discord PING). Otherwise the
    * event is processed normally and only the HTTP reply is replaced.
    */
-  respond?: { status: number; contentType?: string; body?: string; handshake?: boolean } | undefined;
+  respond?: { status: number; contentType?: string; body?: string; handshake?: boolean; deadlineMs?: number } | undefined;
 };
 
 export type WebhookVerifierInput = {
@@ -50,6 +50,8 @@ export type WebhookVerifierInput = {
   replayWindowMs: number;
   /** Decoded query-string parameters of the delivery (optional). */
   query?: Record<string, string>;
+  /** Expected signer identity configured on the endpoint (non-secret, optional). */
+  expectedSender?: string | null;
 };
 
 export type WebhookVerifier = (input: WebhookVerifierInput) => WebhookVerification;
@@ -66,6 +68,8 @@ export type WebhookEndpointRecord = {
   secret: string | null;
   replayWindowSeconds: number;
   maxAttempts: number;
+  /** Expected signer identity, e.g. the Pub/Sub push service-account email. */
+  expectedSenderEmail?: string | null;
 };
 
 export type WebhookEventRecord = {
