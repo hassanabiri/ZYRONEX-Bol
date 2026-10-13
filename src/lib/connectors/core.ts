@@ -236,7 +236,11 @@ export async function runConnectorOperation(options: ConnectorRunOptions): Promi
               ? error
               : new ConnectorError("provider", sanitize(String(error), credentials));
           if (!failure.retryable || attempt >= maxAttempts) throw failure;
+          // Never retry before the provider's requested wait: a wait above the
+          // in-request ceiling ends this run and surfaces retryAfterMs instead.
+          if (failure.kind === "rate_limit" && failure.retryAfterMs !== undefined && failure.retryAfterMs > MAX_BACKOFF_MS) throw failure;
           const delay = backoffMs(attempt, failure.kind === "rate_limit" ? (failure.retryAfterMs ?? lastRateLimit?.retryAfterMs) : undefined);
+          // backoffMs returns the provider wait unchanged here (≤ ceiling).
           emit({
             level: "warn",
             message: `Attempt ${attempt} failed (${failure.kind}); retrying in ${delay}ms`,
@@ -294,6 +298,7 @@ export async function runConnectorOperation(options: ConnectorRunOptions): Promi
         message: failure.message,
         ...(failure.status === undefined ? {} : { status: failure.status }),
         retryable: failure.retryable,
+        ...(failure.retryAfterMs === undefined ? {} : { retryAfterMs: failure.retryAfterMs }),
       },
       attempts,
       durationMs,

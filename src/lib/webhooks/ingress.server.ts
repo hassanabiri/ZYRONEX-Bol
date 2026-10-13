@@ -70,6 +70,7 @@ function toEndpoint(row: EndpointRow): WebhookEndpointRecord {
     secret: decodeSecret(row.secret_ciphertext ?? null),
     replayWindowSeconds: row.replay_window_seconds ?? 300,
     maxAttempts: Math.max(1, row.retry_limit ?? 5),
+    expectedSenderEmail: ((row as Record<string, unknown>)["expected_sender_email"] as string | null | undefined) ?? null,
   };
 }
 

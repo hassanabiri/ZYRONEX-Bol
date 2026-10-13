@@ -596,6 +596,9 @@ function ed25519Valid(publicKeyHex: string, message: string, signatureHex: strin
  * Replay protection = signed timestamp inside the endpoint replay window +
  * dedupe on the official interaction id / Webhook Event identity.
  */
+/** Leaves headroom inside Discord's 3-second initial-response window. */
+export const DISCORD_ACK_DEADLINE_MS = 2500;
+
 const discordVerifier: WebhookVerifier = (input) => {
   const meta = { eventId: discordEventId(input.payload), eventType: discordEventType(input.payload) };
   if (!input.secret) return { ok: false, reason: "missing_secret", message: "No Discord application public key is configured", ...meta };
@@ -616,6 +619,14 @@ const discordVerifier: WebhookVerifier = (input) => {
   if (meta.eventType === "webhook.ping") return { ok: true, timestampMs, ...meta, respond: { status: 204, handshake: true } };
   // Webhook Events must be acknowledged with 204 and no body; the event is still processed.
   if (meta.eventType.startsWith("event.")) return { ok: true, timestampMs, ...meta, respond: { status: 204 } };
+  // Deferred initial response (must arrive within 3 s; token then valid 15 min for follow-ups):
+  // commands and modal submits → 5 DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE; components → 6 DEFERRED_UPDATE_MESSAGE.
+  const deferred: Record<string, number> = { "interaction.application_command": 5, "interaction.modal_submit": 5, "interaction.message_component": 6 };
+  const callback = deferred[meta.eventType];
+  if (callback) return { ok: true, timestampMs, ...meta, respond: { status: 200, contentType: "application/json", body: JSON.stringify({ type: callback }), deadlineMs: DISCORD_ACK_DEADLINE_MS } };
+  // Autocomplete only accepts type 8 with concrete choices — it cannot be deferred.
+  if (meta.eventType === "interaction.application_command_autocomplete")
+    return { ok: false, reason: "unsupported_event", message: "Autocomplete needs an immediate choices reply (type 8); not supported", ...meta };
   return { ok: true, timestampMs, ...meta };
 };
 
@@ -843,7 +854,7 @@ async function googleKeys(nowMs: number, forceRefresh = false): Promise<Jwk[]> {
   return keys;
 }
 
-export async function verifyGoogleOidcSignature(authorization: string, nowMs: number): Promise<{ ok: boolean; message?: string }> {
+export async function verifyGoogleOidcSignature(authorization: string, nowMs: number, expectedEmail?: string): Promise<{ ok: boolean; message?: string }> {
   const jwt = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
   const [h, p, s] = jwt.split(".");
   if (!h || !p || !s) return { ok: false, message: "Push token is not a JWT" };
@@ -857,6 +868,11 @@ export async function verifyGoogleOidcSignature(authorization: string, nowMs: nu
   }
   if (header["alg"] !== "RS256" || typeof header["kid"] !== "string") return { ok: false, message: "Push token must be RS256 with a key id" };
   if ("email_verified" in claims && claims["email_verified"] !== true) return { ok: false, message: "Push token email is not verified" };
+  if (expectedEmail !== undefined) {
+    const email = typeof claims["email"] === "string" ? claims["email"].toLowerCase() : "";
+    if (!email || email !== expectedEmail.trim().toLowerCase()) return { ok: false, message: "Push token email does not match the configured service account" };
+    if (claims["email_verified"] !== true) return { ok: false, message: "Push token email is not verified" };
+  }
   let keys: Jwk[];
   try {
     keys = await googleKeys(nowMs);
@@ -881,7 +897,10 @@ export async function verifyWebhookAsync(connectorId: string, input: WebhookVeri
   if (!result.ok) return result;
   const resolved = getConnector(connectorId)?.id ?? connectorId;
   if (resolved === "google_mail") {
-    const signature = await verifyGoogleOidcSignature(input.headers["authorization"] ?? "", input.nowMs);
+    // The push service-account email is required configuration; never assumed.
+    if (!input.expectedSender)
+      return { ok: false, reason: "missing_secret", message: "No expected push service-account email is configured", eventId: result.eventId, eventType: result.eventType };
+    const signature = await verifyGoogleOidcSignature(input.headers["authorization"] ?? "", input.nowMs, input.expectedSender);
     if (!signature.ok) return { ok: false, reason: "invalid_signature", message: signature.message, eventId: result.eventId, eventType: result.eventType };
   }
   return result;

@@ -79,6 +79,7 @@ export async function handleWebhook(input: IngressInput): Promise<WebhookRespons
     nowMs,
     replayWindowMs: Math.max(1, endpoint.replayWindowSeconds) * 1000,
     ...(input.query ? { query: input.query } : {}),
+    expectedSender: endpoint.expectedSenderEmail ?? null,
   });
 
   if (!verification.ok) {
@@ -146,8 +147,23 @@ export async function handleWebhook(input: IngressInput): Promise<WebhookRespons
     status: "received",
   };
 
-  const outcome = await deliverEvent(input.store, endpoint, event, startedAt);
-  return withReply(outcome);
+  const delivery = deliverEvent(input.store, endpoint, event, startedAt);
+  // Provider deadline (Discord: 3 s): the event is already persisted, so the
+  // mandated ACK is sent on time even if starting the execution is slower.
+  if (reply?.deadlineMs) {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timedOut = new Promise<WebhookResponse>((resolve) => {
+      timer = setTimeout(
+        () => resolve({ status: 202, body: { ok: true, status: "received", trace_id: traceId, event_id: eventId } }),
+        reply.deadlineMs,
+      );
+    });
+    const first = await Promise.race([delivery, timedOut]);
+    clearTimeout(timer);
+    delivery.catch(() => undefined);
+    return withReply(first);
+  }
+  return withReply(await delivery);
 }
 
 /** Hands one stored event to the Execution Runtime, applying retry rules. */
