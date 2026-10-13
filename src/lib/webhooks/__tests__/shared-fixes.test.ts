@@ -1,11 +1,15 @@
 import { createHmac, generateKeyPairSync, sign, createSign } from "node:crypto";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
+vi.mock("@/integrations/supabase/client.server", () => ({ supabaseAdmin: {} }));
+
+import { MAX_STEP_RETRY_AFTER_MS, stepRetryDelay } from "@/lib/execution/engine.server";
+
 import { slackConnector } from "@/lib/connectors/adapters/slack";
 import { telegramConnector } from "@/lib/connectors/adapters/telegram";
 import { runConnectorOperation } from "@/lib/connectors/core";
 import { handleWebhook } from "@/lib/webhooks/core";
-import { __gmailOidcTesting, verifyGoogleOidcSignature, verifyWebhook, verifyWebhookAsync } from "@/lib/webhooks/verify";
+import { DISCORD_ACK_DEADLINE_MS, __gmailOidcTesting, verifyGoogleOidcSignature, verifyWebhook, verifyWebhookAsync } from "@/lib/webhooks/verify";
 import type { WebhookEndpointRecord, WebhookStore } from "@/lib/webhooks/types";
 
 /** Simulation only — no real Microsoft, Slack, Discord or Google service is contacted. */
@@ -149,7 +153,8 @@ describe("Gmail Pub/Sub OIDC signature", () => {
   };
   const claims = { aud: AUD, iss: "https://accounts.google.com", exp: NOW / 1000 + 600, email: "push@proj.iam.gserviceaccount.com", email_verified: true };
   const envelope = { message: { data: Buffer.from(JSON.stringify({ emailAddress: "a@b.com", historyId: "9" })).toString("base64"), messageId: "m1", publishTime: new Date(NOW - 1000).toISOString() }, subscription: "projects/p/subscriptions/s" };
-  const input = (auth: string) => ({ raw: JSON.stringify(envelope), headers: { authorization: auth }, payload: envelope, secret: AUD, nowMs: NOW, replayWindowMs: 300_000 });
+  const SA = "push@proj.iam.gserviceaccount.com";
+  const input = (auth: string, expectedSender: string | null = SA) => ({ raw: JSON.stringify(envelope), headers: { authorization: auth }, payload: envelope, secret: AUD, nowMs: NOW, replayWindowMs: 300_000, expectedSender });
   const fetcher = vi.fn(async () => [jwk]);
   beforeEach(() => {
     fetcher.mockClear();
@@ -190,7 +195,7 @@ describe("Gmail Pub/Sub OIDC signature", () => {
   });
   it("ingress rejects a forged Gmail push", async () => {
     const forger = generateKeyPairSync("rsa", { modulusLength: 2048 }).privateKey;
-    const { store, inserted } = makeStore(endpoint("google_mail", AUD));
+    const { store, inserted } = makeStore({ ...endpoint("google_mail", AUD), expectedSenderEmail: SA });
     const res = await handleWebhook({ slug: "s", rawBody: JSON.stringify(envelope), headers: { authorization: jwt(claims, { key: forger }) }, store, nowMs: NOW });
     expect(res.status).toBe(401);
     expect(inserted).toHaveLength(0);
@@ -217,10 +222,19 @@ describe("runtime honours Retry-After from the failed 429 response", () => {
     expect(r.ok).toBe(true);
     expect(sleeps).toEqual([3000]);
   });
-  it("caps the wait at the runtime ceiling (8s)", async () => {
+  it("never retries early when Retry-After exceeds the 8s ceiling", async () => {
     const sleeps: number[] = [];
     let n = 0;
     const fetchImpl = vi.fn(async () => (n++ === 0 ? json({ ok: false, error: "ratelimited" }, 429, { "retry-after": "120" }) : json({ ok: true }))) as unknown as typeof fetch;
+    const r = await runConnectorOperation({ adapter: slackConnector, credentials: { access_token: "xoxb" }, traceId: "t", input: { operation: "post_message", params: { channel: "C1", text: "hi" } }, fetchImpl, sleep: async (ms) => void sleeps.push(ms) });
+    expect(n).toBe(1);
+    expect(sleeps).toEqual([]);
+    expect(!r.ok && r.error).toMatchObject({ kind: "rate_limit", retryable: true, retryAfterMs: 120_000 });
+  });
+  it("exactly 8s is still waited in place", async () => {
+    const sleeps: number[] = [];
+    let n = 0;
+    const fetchImpl = vi.fn(async () => (n++ === 0 ? json({ ok: false, error: "ratelimited" }, 429, { "retry-after": "8" }) : json({ ok: true, ts: "1" }))) as unknown as typeof fetch;
     await runConnectorOperation({ adapter: slackConnector, credentials: { access_token: "xoxb" }, traceId: "t", input: { operation: "post_message", params: { channel: "C1", text: "hi" } }, fetchImpl, sleep: async (ms) => void sleeps.push(ms) });
     expect(sleeps).toEqual([8000]);
   });
@@ -247,5 +261,107 @@ describe("runtime honours Retry-After from the failed 429 response", () => {
     const fetchImpl = vi.fn(async () => (n++ === 0 ? json({}, 503, { "retry-after": "5" }) : json({ ok: true, ts: "1" }))) as unknown as typeof fetch;
     await runConnectorOperation({ adapter: slackConnector, credentials: { access_token: "xoxb" }, traceId: "t", input: { operation: "post_message", params: { channel: "C1", text: "hi" } }, fetchImpl, sleep: async (ms) => void sleeps.push(ms) });
     expect(sleeps[0]).toBeLessThan(1000);
+  });
+});
+
+// ---------------------------------------------------------------------------
+describe("engine step retry honours retryAfterMs", () => {
+  it("waits at least the provider's wait", () => {
+    const plan = stepRetryDelay(1, Object.assign(new Error("429"), { retryAfterMs: 20_000 }));
+    expect("waitMs" in plan && plan.waitMs).toBeGreaterThanOrEqual(20_000);
+  });
+  it("stops instead of retrying early above the lease-safe limit", () => {
+    const plan = stepRetryDelay(1, Object.assign(new Error("429"), { retryAfterMs: MAX_STEP_RETRY_AFTER_MS + 1 }));
+    expect("stop" in plan && plan.stop).toMatch(/retry_after_ms=60001/);
+  });
+  it("keeps exponential backoff without a provider wait", () => {
+    const plan = stepRetryDelay(1, new Error("boom"));
+    expect("waitMs" in plan && plan.waitMs).toBeLessThan(1000);
+  });
+  it("ignores invalid retryAfterMs values", () => {
+    for (const v of [0, -5, Number.NaN, "10"]) expect("waitMs" in stepRetryDelay(1, { retryAfterMs: v })).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+describe("Discord deferred interaction responses", () => {
+  const { publicKey, privateKey } = generateKeyPairSync("ed25519");
+  const KEY = (publicKey.export({ format: "der", type: "spki" }) as Buffer).subarray(12).toString("hex");
+  const NOW_S = 1_790_000_000;
+  const base = { id: "11", application_id: "22", token: "tok", version: 1 };
+  const send = async (payload: unknown, opts: { key?: typeof privateKey; slow?: number } = {}) => {
+    const ctx = makeStore(endpoint("discord", KEY));
+    if (opts.slow) ctx.store.startExecution = () => new Promise((res) => setTimeout(() => res({ executionId: "late" }), opts.slow));
+    const raw = JSON.stringify(payload);
+    const headers = { "x-signature-ed25519": sign(null, Buffer.from(String(NOW_S) + raw), opts.key ?? privateKey).toString("hex"), "x-signature-timestamp": String(NOW_S) };
+    const started = Date.now();
+    const res = await handleWebhook({ slug: "s", rawBody: raw, headers, store: ctx.store, nowMs: NOW_S * 1000 });
+    return { res, elapsed: Date.now() - started, ...ctx };
+  };
+  it("slash command → 200 {type:5}, persisted", async () => {
+    const { res, inserted } = await send({ ...base, type: 2, data: { name: "x" } });
+    expect(res.status).toBe(200);
+    expect(JSON.parse(res.raw!.body!)).toEqual({ type: 5 });
+    expect(inserted).toHaveLength(1);
+  });
+  it("modal submit → {type:5}", async () => expect(JSON.parse((await send({ ...base, type: 5, data: {} })).res.raw!.body!)).toEqual({ type: 5 }));
+  it("component → {type:6}", async () => expect(JSON.parse((await send({ ...base, type: 3, data: {} })).res.raw!.body!)).toEqual({ type: 6 }));
+  it("autocomplete is rejected as unsupported, not deferred", async () => {
+    const { res, inserted } = await send({ ...base, type: 4, data: {} });
+    expect(res.status).not.toBe(200);
+    expect(res.raw).toBeUndefined();
+    expect(inserted).toHaveLength(0);
+  });
+  it("bad signature → 401, no ACK", async () => {
+    const other = generateKeyPairSync("ed25519").privateKey;
+    const { res, inserted } = await send({ ...base, type: 2, data: {} }, { key: other });
+    expect(res.status).toBe(401);
+    expect(res.raw).toBeUndefined();
+    expect(inserted).toHaveLength(0);
+  });
+  it("ACK is sent within the 3s window even when execution start is slow", async () => {
+    const { res, elapsed, inserted } = await send({ ...base, type: 2, data: {} }, { slow: 4000 });
+    expect(res.status).toBe(200);
+    expect(JSON.parse(res.raw!.body!)).toEqual({ type: 5 });
+    expect(elapsed).toBeLessThan(3000);
+    expect(elapsed).toBeGreaterThanOrEqual(DISCORD_ACK_DEADLINE_MS - 50);
+    expect(inserted).toHaveLength(1);
+  }, 10_000);
+});
+
+// ---------------------------------------------------------------------------
+describe("Gmail expected service-account email", () => {
+  const { publicKey, privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+  const jwk = { ...(publicKey.export({ format: "jwk" }) as Record<string, string>), kid: "k2" };
+  const NOW = Date.parse("2026-10-01T10:00:00Z");
+  const AUD = "aud-x";
+  const SA = "push@proj.iam.gserviceaccount.com";
+  const token = (claims: Record<string, unknown>) => {
+    const h = Buffer.from(JSON.stringify({ alg: "RS256", kid: "k2" })).toString("base64url");
+    const p = Buffer.from(JSON.stringify(claims)).toString("base64url");
+    return `Bearer ${h}.${p}.${createSign("RSA-SHA256").update(`${h}.${p}`).sign(privateKey).toString("base64url")}`;
+  };
+  const claims = { aud: AUD, iss: "https://accounts.google.com", exp: NOW / 1000 + 600, email: SA, email_verified: true };
+  const env = { message: { data: Buffer.from(JSON.stringify({ emailAddress: "a@b.com", historyId: "9" })).toString("base64"), messageId: "m2", publishTime: new Date(NOW - 1000).toISOString() } };
+  const check = (auth: string, expectedSender: string | null) =>
+    verifyWebhookAsync("google_mail", { raw: JSON.stringify(env), headers: { authorization: auth }, payload: env, secret: AUD, nowMs: NOW, replayWindowMs: 300_000, expectedSender });
+  beforeEach(() => __gmailOidcTesting.setCertsFetcher(async () => [jwk]));
+  it("accepts the configured service account", async () => expect((await check(token(claims), SA)).ok).toBe(true));
+  it("matches case-insensitively", async () => expect((await check(token(claims), SA.toUpperCase())).ok).toBe(true));
+  it("rejects when no expected email is configured", async () => expect(await check(token(claims), null)).toMatchObject({ ok: false, reason: "missing_secret" }));
+  it("rejects a different service account", async () => expect((await check(token(claims), "other@x.iam.gserviceaccount.com")).message).toMatch(/does not match/));
+  it("rejects a token without an email claim", async () => {
+    const { email: _e, ...noEmail } = claims;
+    expect((await check(token(noEmail), SA)).ok).toBe(false);
+  });
+  it("rejects email_verified missing", async () => {
+    const { email_verified: _v, ...noVerified } = claims;
+    expect((await check(token(noVerified), SA)).ok).toBe(false);
+  });
+  it("rejects expired tokens", async () => expect((await check(token({ ...claims, exp: NOW / 1000 - 10 }), SA)).ok).toBe(false));
+  it("rejects wrong issuer", async () => expect((await check(token({ ...claims, iss: "https://evil.example" }), SA)).ok).toBe(false));
+  it("failure messages never contain the JWT", async () => {
+    const auth = token({ ...claims, email: "x@y.z" });
+    expect(JSON.stringify(await check(auth, SA))).not.toContain(auth.slice(7, 40));
   });
 });
