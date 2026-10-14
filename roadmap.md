@@ -76,4 +76,7 @@
 - [x] Graph/Teams validationToken echo, Slack url_verification, Discord PING/204, Gmail OIDC signature, Retry-After from failed 429.
 - [x] Discord deferred ACK (types 5/6, 2.5s deadline), Gmail expected service-account email check, Retry-After never retried early (connector + engine).
 - Blocked: `webhook_endpoints.expected_sender_email` column — Lovable Cloud database is paused; Gmail pushes are rejected until it is added and set.
-- Open (design awaiting approval): Slack slash commands/interactivity.
+- [x] Slack slash commands/interactivity: raw-body signature first, form/`payload` parsing (Slack only), persist-then-empty-200 within 2.5s, dedupe by team+trigger_id, sealed `response_url` + delayed reply helper.
+- Blocked (Gmail not ready): hosted database paused — add `expected_sender_email` column + per-connection setting, then test migration/verification.
+- Later (separate work): long Retry-After scheduling (> current cap) via deferred re-queue; limits/timeouts/leases unchanged.
+- Pre-production: Discord interactions on a real Cloudflare deployment (deadline/ACK timing).
