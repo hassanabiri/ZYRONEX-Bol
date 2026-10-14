@@ -3,10 +3,11 @@ import { timingSafeEqual } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/integrations/supabase/types";
-import { decryptCredentials } from "@/lib/integrations/crypto.server";
+import { decryptCredentials, encryptCredentials } from "@/lib/integrations/crypto.server";
 import { enqueueExecution } from "@/lib/execution/engine.server";
 import type { WorkflowGraph } from "@/lib/execution/graph";
 import { handleWebhook, processWebhookRetries } from "@/lib/webhooks/core";
+import { isSlackResponseUrl, postSlackResponse, sealSlackResponseUrls, type SlackResponseMessage } from "@/lib/webhooks/slack-response";
 import type {
   WebhookEndpointRecord,
   WebhookEventRecord,
@@ -137,7 +138,9 @@ export function createSupabaseWebhookStore(): WebhookStore {
           trace_id: row.traceId,
           signature_valid: row.signatureValid,
           max_attempts: row.maxAttempts,
-          payload: row.payload as never,
+          payload: (row.connector === "slack"
+            ? sealSlackResponseUrls(row.payload, (url) => encryptCredentials({ response_url: url }))
+            : row.payload) as never,
           headers: safeHeaders(row.headers) as never,
           status: "received",
         } as never)
@@ -280,4 +283,16 @@ export async function verifyWebhookChallenge(options: {
 
 export function runWebhookRetrySweep(limit = 25) {
   return processWebhookRetries(createSupabaseWebhookStore(), limit);
+}
+
+/** Sends a delayed Slack reply using a sealed `response_url` from a stored event. */
+export async function sendSlackDelayedResponse(sealed: string, message: SlackResponseMessage) {
+  let url: string | undefined;
+  try {
+    url = decryptCredentials(sealed)["response_url"];
+  } catch {
+    return { ok: false, status: 0, error: "response_url could not be unsealed" };
+  }
+  if (!isSlackResponseUrl(url)) return { ok: false, status: 0, error: "response_url is invalid" };
+  return postSlackResponse({ responseUrl: url, message });
 }

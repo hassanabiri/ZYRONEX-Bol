@@ -60,7 +60,7 @@ export function readStandardRateLimit(headers: Headers): RateLimitInfo | undefin
 }
 
 const SECRET_KEY_PATTERN =
-  /(authorization|api[-_]?key|apikey|token|secret|password|passwd|credential|signature|bearer|client[-_]?secret|refresh[-_]?token)/i;
+  /(authorization|api[-_]?key|apikey|token|secret|password|passwd|credential|signature|bearer|client[-_]?secret|refresh[-_]?token|response[-_]?url)/i;
 
 /**
  * Removes anything that could carry a secret before a value is logged.
@@ -84,8 +84,10 @@ export function redact(value: unknown, depth = 0): unknown {
 const INLINE_SECRET = /\b(?:Bearer|Basic)\s+[\w\-._~+/=]+/gi;
 const LONG_TOKEN = /\b(?:sk|xox[abporsu]|ya29|ghp|glpat|zx)[-_][A-Za-z0-9\-._~+/=]{8,}\b/g;
 
+const SLACK_HOOK_URL = /https:\/\/hooks\.slack\.com\/[^\s"'<>]+/gi;
+
 export function redactString(input: string): string {
-  return input.replace(INLINE_SECRET, "[redacted]").replace(LONG_TOKEN, "[redacted]").slice(0, 2000);
+  return input.replace(SLACK_HOOK_URL, "[redacted]").replace(INLINE_SECRET, "[redacted]").replace(LONG_TOKEN, "[redacted]").slice(0, 2000);
 }
 
 /** Strips any credential values that happen to appear verbatim in a string. */

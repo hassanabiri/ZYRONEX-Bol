@@ -43,6 +43,24 @@ function reject(
   return { status, body: { ok: false, status: "rejected", trace_id: traceId, error: error!, message } };
 }
 
+function isFormEncoded(headers: Record<string, string>): boolean {
+  return (headers["content-type"] ?? "").toLowerCase().includes("application/x-www-form-urlencoded");
+}
+
+/**
+ * Parses a Slack form body. Slash commands are flat fields; interactivity
+ * sends one `payload` field holding JSON. Throws on an invalid `payload`.
+ */
+export function parseSlackForm(raw: string): Record<string, unknown> {
+  const fields = Object.fromEntries(new URLSearchParams(raw));
+  if (typeof fields["payload"] === "string") {
+    const parsed = JSON.parse(fields["payload"]) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Invalid interaction payload");
+    return { ...(parsed as Record<string, unknown>), __slack_form: "interaction" };
+  }
+  return { ...fields, __slack_form: "command" };
+}
+
 export type IngressInput = {
   slug: string;
   rawBody: string;
@@ -66,7 +84,14 @@ export async function handleWebhook(input: IngressInput): Promise<WebhookRespons
   let payload: unknown = {};
   let malformed = false;
   try {
-    payload = input.rawBody.length > 0 ? JSON.parse(input.rawBody) : {};
+    // Slack slash commands / interactivity post form bodies; every other
+    // connector (and Slack Events API JSON) keeps the JSON path unchanged.
+    payload =
+      endpoint.connector === "slack" && isFormEncoded(input.headers)
+        ? parseSlackForm(input.rawBody)
+        : input.rawBody.length > 0
+          ? JSON.parse(input.rawBody)
+          : {};
   } catch {
     malformed = true;
   }
