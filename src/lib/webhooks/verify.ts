@@ -126,6 +126,24 @@ const slackVerifier: WebhookVerifier = (input) => {
 
   if (!safeEqual(signature, `v0=${hmacHex(input.secret, `v0:${timestamp}:${input.raw}`)}`))
     return { ok: false, reason: "invalid_signature", message: "Slack signature does not match", ...meta };
+  // Slash commands / interactivity (form body): verified above on the raw
+  // bytes. Ack with an empty 200 inside Slack's 3 s window once persisted;
+  // follow-ups go to `response_url` from the execution, never from here.
+  const form = body["__slack_form"];
+  if (form === "command" || form === "interaction") {
+    const team = typeof body["team_id"] === "string" ? body["team_id"] : record(body["team"])["id"];
+    const trigger = firstString(body["trigger_id"] as string | undefined, body["action_ts"] as string | undefined, (record((body["actions"] as unknown[] | undefined)?.[0])["action_ts"]) as string | undefined);
+    const kind = form === "command" ? body["command"] : body["type"];
+    if (typeof team !== "string" || typeof kind !== "string" || !trigger || typeof body["response_url"] !== "string" && form === "command")
+      return { ok: false, reason: "malformed_payload", message: "Slack request is missing required fields", eventType: "unknown" };
+    return {
+      ok: true,
+      timestampMs,
+      eventId: `${form}:${team}:${trigger}`,
+      eventType: form === "command" ? `slash_command` : `interaction.${kind}`,
+      respond: { status: 200, contentType: "text/plain; charset=utf-8", body: "", deadlineMs: 2500 },
+    };
+  }
   // Official url_verification: reply 200 with the challenge (signed request only).
   if (body["type"] === "url_verification" && typeof body["challenge"] === "string")
     return { ok: true, timestampMs, ...meta, respond: { status: 200, contentType: "application/json", body: JSON.stringify({ challenge: body["challenge"] }), handshake: true } };
